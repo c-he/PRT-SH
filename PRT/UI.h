@@ -6,7 +6,7 @@
 #include "GL/freeglut.h"
 
 #include "Object.h"
-#include "UiFunction.h"
+#include "UIFunction.h"
 #include "GlutFunction.h"
 
 extern float g_Rotation[4];
