@@ -2,52 +2,39 @@
 #define CUBEMAP_H_
 
 #include <string>
-#include <iostream>
+#include <vector>
 
-#include "CImg/CImg.h"
 #include "GL/glew.h"
-#include "GL/freeglut.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-#include "ShaderFunc.h"
-#include "toolFunction.h"
-
-
-using std::string;
-using glm::vec3;
-using glm::vec2;
-using glm::mat4;
-
+#include "shader.h"
 
 class Cubemap
 {
 public:
-	Cubemap(){}
-	void setup();
-	void render(mat4 &in);
-	void init(string path);
+	Cubemap() = default;
+	virtual ~Cubemap();
 
+	void init(std::string path);
+	void render(glm::mat4& pvm);
 
 	GLuint _textureID;
 
-
 private:
-	string _path;
+	// int _vs,_fs;
+	// int _program;
+	Shader _shader;
 
-	int _vs,_fs;
-	int _program;
-	int _cubeLength;
-	int _width,_height;
+	GLuint _VAO;
+	GLuint _VBO;
 
-	GLuint _vbo_vertexes;
-	GLuint _ibo_indices;
+	// GLint _uniform_PVM, _attrib_vertex, _uniform_cubemap;
+	// GLuint _texture2D;
 
-	GLint _uniform_PVM,_attrib_vertex,_uniform_cubemap;
-	GLuint _texture2D;
-
+	void setup();
+	GLuint loadCubeMap(std::vector<std::string> faces, std::string& path);
 };
-
 
 
 #endif

@@ -149,7 +149,7 @@ inline void barycentric(vec3 pc,vec3 p[3],float &u,float &v,float &w)
 
 	if(fabs(delta) <= M_ZERO)
 	{
-		std::cout << "Three vertexes are colinear" << std::endl;
+		std::cout << "Three vertices are colinear" << std::endl;
 
 		for(int i = 0;i < 3; ++i)
 			std::cout << i << ' ' << p[i].x << ' ' << p[i].y << ' ' << p[i].z <<std::endl;

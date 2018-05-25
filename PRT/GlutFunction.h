@@ -268,9 +268,6 @@ void Reshape(int width, int height)
 //	glGetFloatv(GL_PROJECTION_MATRIX,test);
 
 	proMatrix = glm::perspective(45.0f, (float)width/(float)height, 0.1f, 10000.0f);
-
-	TwWindowSize(width,height);
-
 }
 
 
