@@ -3,24 +3,29 @@
 
 #include <vector>
 
-#include "GL\glew.h"
+#include <GL/glew.h>
 #include "GL\freeglut.h"
-#include "glm\glm.hpp"
+#include <glm/glm.hpp>
 
+#include "hdrTextureCube.h"
 #include "Scene.h"
 #include "Object.h"
 #include "Lighting.h"
 #include "DiffuseObject.h"
 #include "GeneralObject.h"
 
-using std::vector;
-using glm::vec3;
+// Camera intrinsic parameters definetion.
+#define ZOOM 45.0f
+#define NEAR_PLANE 0.1f
+#define FAR_PLANE 10000.0f
 
+using glm::vec3;
 
 class Renderer
 {
 public:
-	Renderer(){}
+    Renderer() = default;
+    virtual ~Renderer();
 	void init(Scene *scene,Lighting *light)
 	{
 		_scene = scene;
@@ -47,7 +52,8 @@ public:
 	void initDiffuseBuffer(int type);
 	void initGeneralBuffer(int type,vec3 viewDir);
 
-	
+    void init();
+    void render();
 
 private:
 	Scene *_scene;
@@ -59,11 +65,10 @@ private:
 	unsigned _vao;
 	unsigned _vboVertex,_vboNormal,_vboColor;
 
-	vector<float> _colorBuffer;
+	std::vector<float> _colorBuffer;
+
+    HDRTextureCube* hdrTextures;
+    glm::mat4 projection;
 };
-
-
-
-
 
 #endif

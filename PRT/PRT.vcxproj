@@ -74,8 +74,8 @@
     <LibraryPath>C:\Users\Kuroko\Documents\CG\PRT\PRT\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>E:\CG\PRT-SH\PRT\include;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\CG\PRT-SH\PRT\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Kuroko\Documents\CG\PRT\PRT\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Kuroko\Documents\CG\PRT\PRT\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>C:\Users\Kuroko\Documents\CG\PRT\PRT\include;$(IncludePath)</IncludePath>
@@ -140,6 +140,7 @@
     <ClCompile Include="DiffuseObject.cpp" />
     <ClCompile Include="GeneralObject.cpp" />
     <ClCompile Include="HDRLoader.cpp" />
+    <ClCompile Include="hdrTextureCube.cpp" />
     <ClCompile Include="Lighting.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mesh.cpp" />
@@ -147,6 +148,7 @@
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="resource_manager.cpp" />
+    <ClCompile Include="rgbe.c" />
     <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="shader.cpp" />
@@ -163,12 +165,14 @@
     <ClInclude Include="GeneralObject.h" />
     <ClInclude Include="GlutFunction.h" />
     <ClInclude Include="HDRLoader.h" />
+    <ClInclude Include="hdrTextureCube.h" />
     <ClInclude Include="Lighting.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource_manager.h" />
+    <ClInclude Include="rgbe.h" />
     <ClInclude Include="Sampler.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="shader.h" />

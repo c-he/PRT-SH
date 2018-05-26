@@ -33,7 +33,7 @@
 
 // Window size.
 int WIDTH, HEIGHT;
-GLuint width = 1280, height = 720;
+GLuint width = 1920, height = 1080;
 
 // Keyboard.
 bool keys[1024];
@@ -240,11 +240,8 @@ int main(int argc, char** argv)
 
 		// Do some initialization (including loading data, shaders, models, etc.)
 		dataLoading();
-		// shaderLoading();
-		for (size_t i = 0; i < lightNumber; ++i)
-		{
-			cubeMap[i].init("LightingCube/" + lightings[i]);
-		}
+		shaderLoading();
+        renderer.init();
 		UIInit();
 		lastTime = glfwGetTime();
 
@@ -259,11 +256,11 @@ int main(int argc, char** argv)
 			// do_movement();
 
 			// Clear the color buffer.
-			glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			// Render.
-			// game.Render(WIDTH, HEIGHT, deltaTime);
+            renderer.render();
 			// Render AntTweakBar UI.
 			TwDraw();
 
@@ -298,7 +295,7 @@ void dataLoading()
 	genObject = new GeneralObject[GeneralNumber];
 
 	lighting = new Lighting[lightNumber];
-	cubeMap = new Cubemap[lightNumber];
+	// cubeMap = new Cubemap[lightNumber];
 
 	for (size_t i = 0; i < ObjectNumber; i++)
 	{
@@ -483,19 +480,19 @@ void Display()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	if (drawCubemap)
-	{
-		glm::mat4 pvm = proMatrix *
-			glm::lookAt(
-				vec3(camera_dis * camera_pos[0],
-				     camera_dis * camera_pos[1],
-				     camera_dis * camera_pos[2]),
-				vec3(camera_dir[0], camera_dir[1], camera_dir[2]),
-				vec3(camera_up[0], camera_up[1], camera_up[2])
-			);
-
-		cubeMap[lightingIndex].render(pvm);
-	}
+	// if (drawCubemap)
+	// {
+	// 	glm::mat4 pvm = proMatrix *
+	// 		glm::lookAt(
+	// 			vec3(camera_dis * camera_pos[0],
+	// 			     camera_dis * camera_pos[1],
+	// 			     camera_dis * camera_pos[2]),
+	// 			vec3(camera_dir[0], camera_dir[1], camera_dir[2]),
+	// 			vec3(camera_up[0], camera_up[1], camera_up[2])
+	// 		);
+ //
+	// 	cubeMap[lightingIndex].render(pvm);
+	// }
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();

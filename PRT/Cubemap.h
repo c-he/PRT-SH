@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "GL/glew.h"
-#include "glm/glm.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "shader.h"
 
@@ -17,24 +17,17 @@ public:
 	virtual ~Cubemap();
 
 	void init(std::string path);
-	void render(glm::mat4& pvm);
-
-	GLuint _textureID;
+	void render();
 
 private:
-	// int _vs,_fs;
-	// int _program;
 	Shader _shader;
 
 	GLuint _VAO;
 	GLuint _VBO;
-
-	// GLint _uniform_PVM, _attrib_vertex, _uniform_cubemap;
-	// GLuint _texture2D;
+    GLuint _textureID;
 
 	void setup();
 	GLuint loadCubeMap(std::vector<std::string> faces, std::string& path);
 };
-
 
 #endif
