@@ -34,39 +34,20 @@ extern Lighting* lighting;
 
 using glm::mat3;
 
-void Renderer::toGPUObject()
+Renderer::~Renderer()
 {
-    // glGenVertexArrays(1, &_vao);
-    // glBindVertexArray(_vao);
-    //
-    // glGenBuffers(1, &_vboVertex);
-    // glBindBuffer(GL_ARRAY_BUFFER, _vboVertex);
-    // glBufferData(
-    //     GL_ARRAY_BUFFER,
-    //     sizeof(float) * _scene->_vertexes.size(),
-    //     _scene->_vertexes.data(),
-    //     GL_STATIC_DRAW
-    // );
-    // glEnableClientState(GL_VERTEX_ARRAY);
-    // glVertexPointer(3,GL_FLOAT, 0, 0);
-    //
-    // glGenBuffers(1, &_vboNormal);
-    // glBindBuffer(GL_ARRAY_BUFFER, _vboNormal);
-    // glBufferData(
-    //     GL_ARRAY_BUFFER,
-    //     sizeof(float) * _scene->_normals.size(),
-    //     _scene->_normals.data(),
-    //     GL_STATIC_DRAW
-    // );
-    //
-    // glGenBuffers(1, &_vboColor);
-    // glBindBuffer(GL_ARRAY_BUFFER, _vboColor);
-    /*glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * _scene->co*/
+    delete[]hdrTextures;
 }
 
-void Renderer::initDiffuseBuffer(int type)
+void Renderer::SetupColorBuffer(int type, glm::vec3 viewDir, bool diffuse)
+{
+    if (diffuse)
+        setupDiffuseBuffer(type);
+    else
+        setupGeneralBuffer(type, viewDir);
+}
+
+void Renderer::setupDiffuseBuffer(int type)
 {
     if (_diffObject->band() != _lighting->band())
     {
@@ -135,10 +116,12 @@ void Renderer::initDiffuseBuffer(int type)
 
     // Set the objects we need in the rendering process (namely, VAO, VBO and EBO).
     // Prevent redundant VAO & VBO generation.
-    if (!_VAO) {
+    if (!_VAO)
+    {
         glGenVertexArrays(1, &_VAO);
     }
-    if (!_VBO) {
+    if (!_VBO)
+    {
         glGenBuffers(1, &_VBO);
     }
     glBindVertexArray(_VAO);
@@ -157,15 +140,7 @@ void Renderer::initDiffuseBuffer(int type)
     glBindVertexArray(0);
 }
 
-void Renderer::initColorBuffer(int type, vec3 viewDir, bool diffornot = true)
-{
-    if (diffornot)
-        initDiffuseBuffer(type);
-    else
-        initGeneralBuffer(type, viewDir);
-}
-
-void Renderer::initGeneralBuffer(int type, vec3 viewDir)
+void Renderer::setupGeneralBuffer(int type, vec3 viewDir)
 {
     std::cout << "type" << type << std::endl;
     std::cout << "name" << _genObject->_modelname << std::endl;
@@ -384,10 +359,12 @@ void Renderer::initGeneralBuffer(int type, vec3 viewDir)
     }
 
     // Set the objects we need in the rendering process (namely, VAO, VBO and EBO).
-    if (!_VAO) {
+    if (!_VAO)
+    {
         glGenVertexArrays(1, &_VAO);
     }
-    if (!_VBO) {
+    if (!_VBO)
+    {
         glGenBuffers(1, &_VBO);
     }
     glBindVertexArray(_VAO);
@@ -409,15 +386,15 @@ void Renderer::initGeneralBuffer(int type, vec3 viewDir)
     std::cout << "Color buffer done." << std::endl;
 }
 
-void Renderer::naiveObjRender()
+void Renderer::objDraw()
 {
     glBindVertexArray(_VAO);
-    if (_genObject == NULL)
+    if (_genObject == nullptr)
     {
         vertices = _diffObject->_vertexes.size() / 3;
         faces = _diffObject->_renderIndex.size() / 3;
     }
-    else if (_diffObject == NULL)
+    else if (_diffObject == nullptr)
     {
         vertices = _genObject->_vertexes.size() / 3;
         faces = _genObject->_renderIndex.size() / 3;
@@ -429,12 +406,7 @@ void Renderer::naiveObjRender()
     glBindVertexArray(0);
 }
 
-Renderer::~Renderer()
-{
-    delete[]hdrTextures;
-}
-
-void Renderer::init()
+void Renderer::Init()
 {
     // Initialize cubemap.
     hdrTextures = new HDRTextureCube[lightNumber];
@@ -447,7 +419,7 @@ void Renderer::init()
     projection = glm::perspective(ZOOM, (float)WIDTH / (float)HEIGHT, NEAR_PLANE, FAR_PLANE);
 }
 
-void Renderer::render()
+void Renderer::Render()
 {
     // Render objects.
     glm::mat4 view = glm::lookAt(
@@ -531,14 +503,14 @@ void Renderer::render()
         }
         if (materialIndex == 0)
         {
-            init(&diffObject[objectIndex], &lighting[lightingIndex]);
-            initColorBuffer(transferFIndex, vec3(0.0f, 0.0f, 0.0f), true);
+            Setup(&diffObject[objectIndex], &lighting[lightingIndex]);
+            SetupColorBuffer(transferFIndex, vec3(0.0f, 0.0f, 0.0f), true);
         }
         else
         {
-            init(&genObject[objectIndex], &lighting[lightingIndex]);
-            initColorBuffer(transferFIndex, camera_dis * vec3(camera_pos[0], camera_pos[1], camera_pos[2]),
-                            false);
+            Setup(&genObject[objectIndex], &lighting[lightingIndex]);
+            SetupColorBuffer(transferFIndex, camera_dis * vec3(camera_pos[0], camera_pos[1], camera_pos[2]),
+                             false);
         }
     }
 
@@ -547,16 +519,16 @@ void Renderer::render()
         if ((last_camera_pos[0] != camera_pos[0]) || (last_camera_pos[1] != camera_pos[1]) || (last_camera_pos[2] !=
             camera_pos[2]))
         {
-            init(&genObject[objectIndex], &lighting[lightingIndex]);
-            initColorBuffer(transferFIndex, camera_dis * vec3(camera_pos[0], camera_pos[1], camera_pos[2]),
-                            false);
+            Setup(&genObject[objectIndex], &lighting[lightingIndex]);
+            SetupColorBuffer(transferFIndex, camera_dis * vec3(camera_pos[0], camera_pos[1], camera_pos[2]),
+                             false);
             last_camera_pos[0] = camera_pos[0];
             last_camera_pos[1] = camera_pos[1];
             last_camera_pos[2] = camera_pos[2];
         }
     }
 
-    naiveObjRender();
+    objDraw();
 
     if (drawCubemap)
     {

@@ -241,7 +241,7 @@ int main(int argc, char** argv)
         // Do some initialization (including loading data, shaders, models, etc.)
         dataLoading();
         shaderLoading();
-        renderer.init();
+        renderer.Init();
         UIInit();
         lastTime = glfwGetTime();
 
@@ -261,7 +261,7 @@ int main(int argc, char** argv)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             // Render.
-            renderer.render();
+            renderer.Render();
             // Render AntTweakBar UI.
             TwDraw();
 
@@ -337,14 +337,14 @@ void dataLoading()
     if (materialIndex == 0)
     {
         // Diffuse Rendering
-        renderer.init(&diffObject[0], &lighting[0]);
-        renderer.initColorBuffer(0, glm::vec3(0.0f, 0.0f, 1.0f), true);
+        renderer.Setup(&diffObject[0], &lighting[0]);
+        renderer.SetupColorBuffer(0, glm::vec3(0.0f, 0.0f, 1.0f), true);
     }
     else
     {
         // General Rendering
-        renderer.init(&genObject[0], &lighting[0]);
-        renderer.initColorBuffer(0, camera_dis * glm::vec3(camera_pos[0], camera_pos[1], camera_pos[2]), false);
+        renderer.Setup(&genObject[0], &lighting[0]);
+        renderer.SetupColorBuffer(0, camera_dis * glm::vec3(camera_pos[0], camera_pos[1], camera_pos[2]), false);
     }
 
     // Data initialization.
@@ -516,7 +516,7 @@ void checkUIStatus()
     }
     if (lastSimple != simpleLight)
     {
-        renderer.initColorBuffer(transferFIndex, vec3(0.0f, 0.0f, 0.0f), true);
+        renderer.SetupColorBuffer(transferFIndex, vec3(0.0f, 0.0f, 0.0f), true);
         std::cout << "Simple Light" << std::endl;
         lastSimple = simpleLight;
         if (simpleLight)
@@ -543,13 +543,13 @@ void changeLight(int index)
     //	lighting.init(lightString);
     if (materialIndex == 1)
     {
-        renderer.init(&genObject[objectIndex], &lighting[index]);
-        renderer.initColorBuffer(transferFIndex, camera_dis *vec3(camera_pos[0], camera_pos[1], camera_pos[2]), false);
+        renderer.Setup(&genObject[objectIndex], &lighting[index]);
+        renderer.SetupColorBuffer(transferFIndex, camera_dis *vec3(camera_pos[0], camera_pos[1], camera_pos[2]), false);
     }
     else
     {
-        renderer.init(&diffObject[objectIndex], &lighting[index]);
-        renderer.initColorBuffer(transferFIndex, vec3(0.0f, 0.0f, 0.0f), true);
+        renderer.Setup(&diffObject[objectIndex], &lighting[index]);
+        renderer.SetupColorBuffer(transferFIndex, vec3(0.0f, 0.0f, 0.0f), true);
     }
 }
 
@@ -558,13 +558,13 @@ void changeObject(int index)
 
     if (materialIndex == 0)
     {
-        renderer.init(&diffObject[index], &lighting[lightingIndex]);
-        renderer.initColorBuffer(transferFIndex, vec3(0.0f, 0.0f, 0.0f), true);
+        renderer.Setup(&diffObject[index], &lighting[lightingIndex]);
+        renderer.SetupColorBuffer(transferFIndex, vec3(0.0f, 0.0f, 0.0f), true);
     }
     else
     {
-        renderer.init(&genObject[index], &lighting[lightingIndex]);
-        renderer.initColorBuffer(transferFIndex, camera_dis *vec3(camera_pos[0], camera_pos[1], camera_pos[2]), false);
+        renderer.Setup(&genObject[index], &lighting[lightingIndex]);
+        renderer.SetupColorBuffer(transferFIndex, camera_dis *vec3(camera_pos[0], camera_pos[1], camera_pos[2]), false);
     }
 }
 
@@ -572,12 +572,12 @@ void changeTransfer(int index)
 {
     if (materialIndex == 0)
     {
-        renderer.init(&diffObject[objectIndex], &lighting[lightingIndex]);
-        renderer.initColorBuffer(index, vec3(0.0f, 0.0f, 0.0f), true);
+        renderer.Setup(&diffObject[objectIndex], &lighting[lightingIndex]);
+        renderer.SetupColorBuffer(index, vec3(0.0f, 0.0f, 0.0f), true);
     }
     else
     {
-        renderer.init(&genObject[objectIndex], &lighting[lightingIndex]);
-        renderer.initColorBuffer(transferFIndex, camera_dis *vec3(camera_pos[0], camera_pos[1], camera_pos[2]), false);
+        renderer.Setup(&genObject[objectIndex], &lighting[lightingIndex]);
+        renderer.SetupColorBuffer(transferFIndex, camera_dis *vec3(camera_pos[0], camera_pos[1], camera_pos[2]), false);
     }
 }
