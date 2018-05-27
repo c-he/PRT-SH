@@ -173,7 +173,7 @@ inline void UIInit()
     }
 
     {
-        TwEnumVal LightingEV[3] = {{LIGHT1, "Light1"}, {LIGHT2, "Light2"}, {LIGHT3, "Light3"}};
+        TwEnumVal LightingEV[3] = {{LIGHT1, "grace"}, {LIGHT2, "stpeters"}, {LIGHT3, "campus"}};
         TwType LightType = TwDefineEnum("Lighting", LightingEV, 3);
         TwAddVarRW(bar, "Lighting", LightType, &lightingIndex, " keyIncr='<' keyDecr='>' help='Change object.' ");
     }
