@@ -54,11 +54,14 @@
 
 ### Dependencies
 
-1. GLEW 1.9.0.1
-2. GLFW 3.2.1.5
-3. glm 0.9.8.5
-4. Eigen 3.3.3
-5. AntTweakBar 1.16.3
+| Package name | Version |
+| :----------: | :-----: |
+| AntTweakBar  | 1.16.3  |
+|    Assimp    |  3.0.0  |
+|    Eigen     |  3.3.3  |
+|     GLEW     | 1.9.0.1 |
+|     GLFW     | 3.2.1.5 |
+|     glm      | 0.9.8.5 |
 
 
 
