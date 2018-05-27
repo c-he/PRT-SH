@@ -62,6 +62,12 @@
 
 
 
+### Results
+
+![](https://github.com/Fairyland0902/PRT-SH/raw/master/screenshots/1.png)
+
+
+
 ### Notes
 
 1. It is highly recommended to compile this project in **Release** mode. BTW, you can choose either x86 or x64, but personally I prefer **x64**.

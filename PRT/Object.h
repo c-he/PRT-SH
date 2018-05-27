@@ -7,8 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include "glm\glm.hpp"
-
+#include <glm/glm.hpp>
 
 #include "Sampler.h"
 #include "BVHTree.h"
@@ -74,7 +73,7 @@ public:
 	vector<float> _normals;
 	vector<float> _texcoords;
 
-	vector<unsigned> _renderIndex;
+	vector<GLuint> _renderIndex;
 
 	string _modelname;
 

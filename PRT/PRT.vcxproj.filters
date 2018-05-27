@@ -86,9 +86,6 @@
     <ClInclude Include="GeneralObject.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="GlutFunction.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Lighting.h">
       <Filter>Source Files</Filter>
     </ClInclude>

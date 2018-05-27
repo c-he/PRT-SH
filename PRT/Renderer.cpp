@@ -1,6 +1,9 @@
 #include "Renderer.h"
+#include "UI.h"
 #include "resource_manager.h"
-#include <glm/gtc/matrix_transform.inl>
+#include <GLFW/glfw3.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 extern bool simpleLight;
 extern int objectIndex;
@@ -17,35 +20,47 @@ extern float camera_pos[];
 extern float camera_dir[];
 extern float camera_up[];
 
+extern int g_AutoRotate;
+extern float rotateMatrix[4 * 4]; // Rotation matrix.
+
+extern int vertices;
+extern int faces;
+
+extern bool drawCubemap;
+
+extern DiffuseObject* diffObject;
+extern GeneralObject* genObject;
+extern Lighting* lighting;
+
 using glm::mat3;
 
 void Renderer::toGPUObject()
 {
-    glGenVertexArrays(1, &_vao);
-    glBindVertexArray(_vao);
-
-    glGenBuffers(1, &_vboVertex);
-    glBindBuffer(GL_ARRAY_BUFFER, _vboVertex);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * _scene->_vertexes.size(),
-        _scene->_vertexes.data(),
-        GL_STATIC_DRAW
-    );
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3,GL_FLOAT, 0, 0);
-
-    glGenBuffers(1, &_vboNormal);
-    glBindBuffer(GL_ARRAY_BUFFER, _vboNormal);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(float) * _scene->_normals.size(),
-        _scene->_normals.data(),
-        GL_STATIC_DRAW
-    );
-
-    glGenBuffers(1, &_vboColor);
-    glBindBuffer(GL_ARRAY_BUFFER, _vboColor);
+    // glGenVertexArrays(1, &_vao);
+    // glBindVertexArray(_vao);
+    //
+    // glGenBuffers(1, &_vboVertex);
+    // glBindBuffer(GL_ARRAY_BUFFER, _vboVertex);
+    // glBufferData(
+    //     GL_ARRAY_BUFFER,
+    //     sizeof(float) * _scene->_vertexes.size(),
+    //     _scene->_vertexes.data(),
+    //     GL_STATIC_DRAW
+    // );
+    // glEnableClientState(GL_VERTEX_ARRAY);
+    // glVertexPointer(3,GL_FLOAT, 0, 0);
+    //
+    // glGenBuffers(1, &_vboNormal);
+    // glBindBuffer(GL_ARRAY_BUFFER, _vboNormal);
+    // glBufferData(
+    //     GL_ARRAY_BUFFER,
+    //     sizeof(float) * _scene->_normals.size(),
+    //     _scene->_normals.data(),
+    //     GL_STATIC_DRAW
+    // );
+    //
+    // glGenBuffers(1, &_vboColor);
+    // glBindBuffer(GL_ARRAY_BUFFER, _vboColor);
     /*glBufferData(
         GL_ARRAY_BUFFER,
         sizeof(float) * _scene->co*/
@@ -60,6 +75,7 @@ void Renderer::initDiffuseBuffer(int type)
     int vertexnumber = _diffObject->_vertexes.size() / 3;
     int band2 = _diffObject->band() * _diffObject->band();
 
+    // Generate color buffer.
     _colorBuffer.clear();
     for (int i = 0; i < vertexnumber; ++i)
     {
@@ -86,11 +102,54 @@ void Renderer::initDiffuseBuffer(int type)
         cg *= _lighting->HDRaffect().y;
         cb *= _lighting->HDRaffect().z;
 
-
         _colorBuffer.push_back(cr);
         _colorBuffer.push_back(cg);
         _colorBuffer.push_back(cb);
     }
+    // Generate mesh buffer.
+    _meshBuffer.clear();
+    int facenumber = _diffObject->_renderIndex.size() / 3;
+    for (int i = 0; i < facenumber; ++i)
+    {
+        int offset = 3 * i;
+        int index[3] = {
+            _diffObject->_renderIndex[offset + 0],
+            _diffObject->_renderIndex[offset + 1],
+            _diffObject->_renderIndex[offset + 2]
+        };
+
+        for (int j = 0; j < 3; ++j)
+        {
+            int Vindex = 3 * index[j];
+            MeshVertex vertex = {
+                _diffObject->_vertexes[Vindex + 0],
+                _diffObject->_vertexes[Vindex + 1],
+                _diffObject->_vertexes[Vindex + 2],
+                _colorBuffer[Vindex + 0],
+                _colorBuffer[Vindex + 1],
+                _colorBuffer[Vindex + 2]
+            };
+            _meshBuffer.push_back(vertex);
+        }
+    }
+
+    // Set the objects we need in the rendering process (namely, VAO, VBO and EBO).
+    glGenVertexArrays(1, &_VAO);
+    glGenBuffers(1, &_VBO);
+    glBindVertexArray(_VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glBufferData(GL_ARRAY_BUFFER, _meshBuffer.size() * sizeof(MeshVertex), &(_meshBuffer[0]), GL_STATIC_DRAW);
+
+    // Position attribute.
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (GLvoid*)0);
+    // Color attribute.
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (GLvoid*)(3 * sizeof(float)));
+
+    // Unbind.
+    glBindVertexArray(0);
 }
 
 void Renderer::initColorBuffer(int type, vec3 viewDir, bool diffornot = true)
@@ -125,6 +184,7 @@ void Renderer::initGeneralBuffer(int type, vec3 viewDir)
     int band = _genObject->band();
     int band2 = band * band;
 
+    // Generate color buffer.
     _colorBuffer.clear();
     _colorBuffer.resize(_genObject->_vertexes.size());
 
@@ -291,6 +351,50 @@ void Renderer::initGeneralBuffer(int type, vec3 viewDir)
             _colorBuffer[3 * i + s] = color[s];
         }
     }
+    // Generate mesh buffer.
+    _meshBuffer.clear();
+    int facenumber = _genObject->_renderIndex.size() / 3;
+    for (int i = 0; i < facenumber; ++i)
+    {
+        int offset = 3 * i;
+        int index[3] = {
+            _genObject->_renderIndex[offset + 0],
+            _genObject->_renderIndex[offset + 1],
+            _genObject->_renderIndex[offset + 2]
+        };
+
+        for (int j = 0; j < 3; ++j)
+        {
+            int Vindex = 3 * index[j];
+            MeshVertex vertex = {
+                _genObject->_vertexes[Vindex + 0],
+                _genObject->_vertexes[Vindex + 1],
+                _genObject->_vertexes[Vindex + 2],
+                _colorBuffer[Vindex + 0],
+                _colorBuffer[Vindex + 1],
+                _colorBuffer[Vindex + 2]
+            };
+            _meshBuffer.push_back(vertex);
+        }
+    }
+
+    // Set the objects we need in the rendering process (namely, VAO, VBO and EBO).
+    glGenVertexArrays(1, &_VAO);
+    glGenBuffers(1, &_VBO);
+    glBindVertexArray(_VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glBufferData(GL_ARRAY_BUFFER, _meshBuffer.size() * sizeof(MeshVertex), &(_meshBuffer[0]), GL_STATIC_DRAW);
+
+    // Position attribute.
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (GLvoid*)0);
+    // Color attribute.
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (GLvoid*)(3 * sizeof(float)));
+
+    // Unbind.
+    glBindVertexArray(0);
 
     std::cout << validNumber << std::endl;
     std::cout << "Color buffer done." << std::endl;
@@ -298,46 +402,22 @@ void Renderer::initGeneralBuffer(int type, vec3 viewDir)
 
 void Renderer::naiveObjRender()
 {
-    int facenumber;
+    glBindVertexArray(_VAO);
     if (_genObject == NULL)
-        facenumber = _diffObject->_renderIndex.size() / 3;
-    else
-        facenumber = _genObject->_renderIndex.size() / 3;
-
-    glBegin(GL_TRIANGLES);
-
-    for (int i = 0; i < facenumber; ++i)
     {
-        int offset = 3 * i;
-        int index[3];
-        if (_genObject == NULL)
-        {
-            index[0] = _diffObject->_renderIndex[offset];
-            index[1] = _diffObject->_renderIndex[offset + 1];
-            index[2] = _diffObject->_renderIndex[offset + 2];
-        }
-        else
-        {
-            index[0] = _genObject->_renderIndex[offset];
-            index[1] = _genObject->_renderIndex[offset + 1];
-            index[2] = _genObject->_renderIndex[offset + 2];
-        }
-
-        for (int j = 0; j < 3; ++j)
-        {
-            int Vindex = 3 * index[j];
-
-            glColor3f(_colorBuffer[Vindex], _colorBuffer[Vindex + 1], _colorBuffer[Vindex + 2]);
-            if (_genObject == NULL)
-                glVertex3f(_diffObject->_vertexes[Vindex], _diffObject->_vertexes[Vindex + 1],
-                           _diffObject->_vertexes[Vindex + 2]);
-            else
-                glVertex3f(_genObject->_vertexes[Vindex], _genObject->_vertexes[Vindex + 1],
-                           _genObject->_vertexes[Vindex + 2]);
-        }
+        vertices = _diffObject->_vertexes.size() / 3;
+        faces = _diffObject->_renderIndex.size() / 3;
+    }
+    else if (_diffObject == NULL)
+    {
+        vertices = _genObject->_vertexes.size() / 3;
+        faces = _genObject->_renderIndex.size() / 3;
     }
 
-    glEnd();
+    glDrawArrays(GL_TRIANGLES, 0, _meshBuffer.size());
+
+    // Unbind.
+    glBindVertexArray(0);
 }
 
 Renderer::~Renderer()
@@ -352,7 +432,6 @@ void Renderer::init()
     for (size_t i = 0; i < lightNumber; ++i)
     {
         hdrTextures[i].Init("LightingCube/hdr/" + lightings[i] + ".hdr");
-        // cubemap[i].init("LightingCube/" + lightings[i]);
     }
 
     // Initialize projection matrix.
@@ -361,17 +440,127 @@ void Renderer::init()
 
 void Renderer::render()
 {
-    // Render cubemap.
-    Shader shader = ResourceManager::GetShader("cubemap");
-    shader.Use();
+    // Render objects.
     glm::mat4 view = glm::lookAt(
         glm::vec3(camera_dis * camera_pos[0], camera_dis * camera_pos[1], camera_dis * camera_pos[2]),
         glm::vec3(camera_dir[0], camera_dir[1], camera_dir[2]), glm::vec3(camera_up[0], camera_up[1], camera_up[2]));
-    // Remove translation from the view matrix.
-    view = glm::mat4(glm::mat3(view));
+    glm::mat4 model;
+    bool b_rotate = false;
+    if (g_AutoRotate)
+    {
+        float axis[3] = {0, 1, 0};
+        float angle = glfwGetTime() - g_RotateTime;
+        float quat[4];
+        AxisAngletoQuat(quat, axis, angle);
+        Multi(g_RotateStart, quat, g_Rotation);
+        b_rotate = true;
+    }
+    QuattoMatrix(g_Rotation, rotateMatrix);
+    model = glm::make_mat4(rotateMatrix) * model;
+    Shader shader = ResourceManager::GetShader("prt");
+    shader.Use();
+    shader.SetMatrix4("model", model);
     shader.SetMatrix4("view", view);
     shader.SetMatrix4("projection", projection);
-    // cubemap[lightingIndex].render();
-    // std::cout << "lighting index: " << lightingIndex << std::endl;
-    hdrTextures[lightingIndex].Draw();
+
+    // @TODO: Rotation will cause memory leak!!
+    vec3 rotateVector;
+    bool b_rotateLight = false;
+    float thetatemp;
+    //float phitemp;
+    if (b_rotate)
+    {
+        mat4 rM = glm::make_mat4(rotateMatrix);
+        vec4 dir = rM * vec4(0.0f, 0.0f, 1.0f, 0.0f);
+        rotateVector = vec3(dir.x, dir.y, dir.z);
+        rotateVector = glm::clamp(rotateVector, -1.0f, 1.0f);
+        thetatemp = acos(rotateVector.z);
+        if (dir.x < 0)
+            thetatemp = 2 * (float)M_PI - thetatemp;
+
+        b_rotateLight = true;
+    }
+    if (simpleLight)
+    {
+        //rotateVector = vec3(light_dir[0],light_dir[1],light_dir[2]);
+        rotateVector = vec3(light_dir[2], light_dir[0], light_dir[1]);
+
+        b_rotateLight = true;
+    }
+
+    if (b_rotateLight)
+    {
+        rotateVector = glm::normalize(rotateVector);
+        float theta, phi;
+
+        rotateVector[2] = glm::clamp(rotateVector[2], -1.0f, 1.0f);
+
+        theta = acos(rotateVector[2]);
+        float sintheta = sin(theta);
+        if (fabs(sintheta) < M_ZERO)
+        {
+            phi = 0.0f;
+        }
+        else
+        {
+            float cosphi = rotateVector[0] / sintheta;
+            float sinphi = rotateVector[1] / sintheta;
+            phi = inverseSC(sinphi, cosphi);
+        }
+        vector<vec2> rotatePara;
+        rotatePara.clear();
+
+        if (simpleLight)
+        {
+            rotatePara.push_back(vec2(theta, phi));
+            simpleL.rotateZYZ(rotatePara);
+        }
+        if (b_rotate)
+        {
+            rotatePara.push_back(vec2(0.0f, 2.0f * M_PI - thetatemp));
+            //rotatePara.push_back(vec2(3.0f*M_PI/2.0f,M_PI/2.0f));
+            lighting[lightingIndex].rotateZYZ(rotatePara);
+        }
+        if (materialIndex == 0)
+        {
+            init(&diffObject[objectIndex], &lighting[lightingIndex]);
+            initColorBuffer(transferFIndex, vec3(0.0f, 0.0f, 0.0f), true);
+        }
+        else
+        {
+            init(&genObject[objectIndex], &lighting[lightingIndex]);
+            initColorBuffer(transferFIndex, camera_dis * vec3(camera_pos[0], camera_pos[1], camera_pos[2]),
+                            false);
+        }
+    }
+
+    if (materialIndex == 1)
+    {
+        if ((last_camera_pos[0] != camera_pos[0]) || (last_camera_pos[1] != camera_pos[1]) || (last_camera_pos[2] !=
+            camera_pos[2]))
+        {
+            init(&genObject[objectIndex], &lighting[lightingIndex]);
+            initColorBuffer(transferFIndex, camera_dis * vec3(camera_pos[0], camera_pos[1], camera_pos[2]),
+                            false);
+            last_camera_pos[0] = camera_pos[0];
+            last_camera_pos[1] = camera_pos[1];
+            last_camera_pos[2] = camera_pos[2];
+        }
+    }
+
+    naiveObjRender();
+
+    if (drawCubemap)
+    {
+        // Render cubemap.
+        shader = ResourceManager::GetShader("cubemap");
+        shader.Use();
+        // Remove translation from the view matrix.
+        view = glm::mat4(glm::mat3(view));
+        shader.SetMatrix4("view", view);
+        shader.SetMatrix4("projection", projection);
+        // cubemap[lightingIndex].render();
+        // std::cout << "lighting index: " << lightingIndex << std::endl;
+        hdrTextures[lightingIndex].Draw();
+    }
 }

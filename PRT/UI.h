@@ -4,7 +4,6 @@
 #include <AntTweakBar.h>
 
 #include "Object.h"
-#include "GlutFunction.h"
 #include <GLFW/glfw3.h>
 
 extern float g_Rotation[4];
@@ -111,10 +110,10 @@ inline void TW_CALL SetAutoRotateCB(const void* value, void* clientData)
         g_RotateStart[2] = g_Rotation[2];
         g_RotateStart[3] = g_Rotation[3];
 
-        TwDefine(" TweakBar/ObjRotation readonly ");
+        TwDefine(" Console/ObjRotation readonly ");
     }
     else
-        TwDefine(" TweakBar/ObjRotation readwrite ");
+        TwDefine(" Console/ObjRotation readwrite ");
 }
 
 inline void TW_CALL GetAutoRotateCB(void* value, void* clientData)
@@ -145,19 +144,19 @@ inline void UIInit()
     }
 
     TwAddVarRW(bar, "ObjRotation", TW_TYPE_QUAT4F, &g_Rotation,
-               " label='Object rotation' opened=false help='Change the object orientation.' ");
+               " label='Object Rotation' opened=false help='Change the object orientation.' ");
 
     TwAddVarCB(bar, "AutoRotate", TW_TYPE_BOOL32, SetAutoRotateCB, GetAutoRotateCB, NULL,
-               " label='Auto-rotate' key=space help='Toggle auto-rotate mode.' ");
+               " label='Auto-Rotate' key=space help='Toggle auto-rotate mode.' ");
 
     TwAddVarRW(bar, "CameraRotation", TW_TYPE_DIR3F, &camera_pos,
-               " label='Camera rotation' opened=true help='Change the camera direction.'");
+               " label='Camera Rotation' opened=true help='Change the camera direction.'");
 
     TwAddVarRW(bar, "Simple Light", TW_TYPE_BOOLCPP, &simpleLight,
                " label='Simple Light' help='Change the simple light'");
 
     TwAddVarRW(bar, "LightRotation", TW_TYPE_DIR3F, &light_dir,
-               " label='Light rotation' opened=true help='Change the camera direction.'");
+               " label='Light Rotation' opened=true help='Change the camera direction.'");
 
     {
         TwEnumVal ObjectEV[2] = {{BUDDHA, "buddha"}, {MAXPLANCK, "maxplanck"}};
@@ -177,7 +176,7 @@ inline void UIInit()
         TwType LightType = TwDefineEnum("Lighting", LightingEV, 3);
         TwAddVarRW(bar, "Lighting", LightType, &lightingIndex, " keyIncr='<' keyDecr='>' help='Change object.' ");
     }
-    TwAddVarRW(bar, "Multi Sampling", TW_TYPE_BOOL32, &b_multiSampling, NULL);
+    // TwAddVarRW(bar, "Multi Sampling", TW_TYPE_BOOL32, &b_multiSampling, NULL);
 
     info = TwNewBar("Mesh");
     TwDefine("Mesh size='250 320' text=light  color='40 40 40' position='3 450' valueswidth=100");

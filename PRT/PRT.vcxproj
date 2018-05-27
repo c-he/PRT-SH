@@ -158,7 +158,6 @@
     <ClInclude Include="BVHTree.h" />
     <ClInclude Include="DiffuseObject.h" />
     <ClInclude Include="GeneralObject.h" />
-    <ClInclude Include="GlutFunction.h" />
     <ClInclude Include="hdrTextureCube.h" />
     <ClInclude Include="Lighting.h" />
     <ClInclude Include="mesh.h" />

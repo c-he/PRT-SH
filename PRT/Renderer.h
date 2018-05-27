@@ -4,7 +4,6 @@
 #include <vector>
 
 #include <GL/glew.h>
-#include "GL\freeglut.h"
 #include <glm/glm.hpp>
 
 #include "hdrTextureCube.h"
@@ -20,6 +19,16 @@
 #define FAR_PLANE 10000.0f
 
 using glm::vec3;
+
+struct MeshVertex
+{
+    float x;
+    float y;
+    float z;
+    float r;
+    float g;
+    float b;
+};
 
 class Renderer
 {
@@ -62,13 +71,14 @@ private:
 
 	
 	Lighting *_lighting;
-	unsigned _vao;
-	unsigned _vboVertex,_vboNormal,_vboColor;
-
-	std::vector<float> _colorBuffer;
+    std::vector<float> _colorBuffer;
+    std::vector<MeshVertex> _meshBuffer;
 
     HDRTextureCube* hdrTextures;
     glm::mat4 projection;
+
+    GLuint _VAO;
+    GLuint _VBO;
 };
 
 #endif
