@@ -1,7 +1,6 @@
 #include "Lighting.h"
 #include <fstream>
 #include <iostream>
-#include <CImg/CImg.h>
 #include "rgbe.h"
 
 Lighting::Lighting(string path, LightType type, int band) //construction function for process

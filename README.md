@@ -24,7 +24,7 @@
  address = {New York, NY, USA},
  keywords = {Monte Carlo techniques, graphics hardware, illumination, rendering, shadow algorithms},
 } 
-[download]
+
 @inproceedings{Sloan:2002:PRT:566570.566612,
  author = {Sloan, Peter-Pike and Kautz, Jan and Snyder, John},
  title = {Precomputed Radiance Transfer for Real-time Rendering in Dynamic, Low-frequency Lighting Environments},
@@ -48,18 +48,17 @@
 
 ### Platform
 
-Visual Studio 2017 15.7.2
+- IDE: Visual Studio 2017 15.7.2
 
 
 
 ### Dependencies
 
-1. GLEW
-2. GLFW / freeglut
-3. glm
-4. Eigen
-5. AntTweakBar
-6. CImg
+1. GLEW 1.9.0.1
+2. GLFW 3.2.1.5
+3. glm 0.9.8.5
+4. Eigen 3.3.3
+5. AntTweakBar 1.16.3
 
 
 

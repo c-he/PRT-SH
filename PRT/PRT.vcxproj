@@ -135,7 +135,6 @@
   <ItemGroup>
     <ClCompile Include="BBox.cpp" />
     <ClCompile Include="BVHTree.cpp" />
-    <ClCompile Include="CutCross.cpp" />
     <ClCompile Include="DiffuseObject.cpp" />
     <ClCompile Include="GeneralObject.cpp" />
     <ClCompile Include="hdrTextureCube.cpp" />

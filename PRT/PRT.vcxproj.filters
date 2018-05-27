@@ -21,9 +21,6 @@
     <ClCompile Include="BVHTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CutCross.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DiffuseObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
