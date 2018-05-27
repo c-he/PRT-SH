@@ -134,8 +134,13 @@ void Renderer::initDiffuseBuffer(int type)
     }
 
     // Set the objects we need in the rendering process (namely, VAO, VBO and EBO).
-    glGenVertexArrays(1, &_VAO);
-    glGenBuffers(1, &_VBO);
+    // Prevent redundant VAO & VBO generation.
+    if (!_VAO) {
+        glGenVertexArrays(1, &_VAO);
+    }
+    if (!_VBO) {
+        glGenBuffers(1, &_VBO);
+    }
     glBindVertexArray(_VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
@@ -379,8 +384,12 @@ void Renderer::initGeneralBuffer(int type, vec3 viewDir)
     }
 
     // Set the objects we need in the rendering process (namely, VAO, VBO and EBO).
-    glGenVertexArrays(1, &_VAO);
-    glGenBuffers(1, &_VBO);
+    if (!_VAO) {
+        glGenVertexArrays(1, &_VAO);
+    }
+    if (!_VBO) {
+        glGenBuffers(1, &_VBO);
+    }
     glBindVertexArray(_VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
@@ -463,7 +472,6 @@ void Renderer::render()
     shader.SetMatrix4("view", view);
     shader.SetMatrix4("projection", projection);
 
-    // @TODO: Rotation will cause memory leak!!
     vec3 rotateVector;
     bool b_rotateLight = false;
     float thetatemp;
