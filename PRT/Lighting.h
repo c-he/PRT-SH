@@ -2,18 +2,12 @@
 #define LIGHT_H_
 
 #include <string>
-#include <fstream>
-#include <iostream>
-
-
-#include "CImg/CImg.h"
-
-#include "Eigen\Dense"
-#include "glm\glm.hpp"
+#include <Eigen/Dense>
+#include <GL/glew.h>
+#include <glm/glm.hpp>
 
 
 #include "Sampler.h"
-#include "HDRLoader.h"
 #include "SHrotation.h"
 #include "toolFunction.h"
 #include "SimpleLighting.h"
@@ -23,12 +17,11 @@ using glm::mat4;
 using Eigen::VectorXf;
 using Eigen::MatrixXf;
 
-
 enum LightType{PROBE,CUBEMAP};
 class Lighting
 {
 public:
-	Lighting(){}
+    Lighting() = default;
 	Lighting(string path,LightType type,int band);//construction function for process
 	
 	Lighting(int band,VectorXf coeffs[3])
@@ -47,6 +40,8 @@ public:
 			_coeffs.push_back(vec3(coeffs[0](i),coeffs[1](i),coeffs[2](i)));
 
 	}
+
+    ~Lighting();
 	
 	void init(string CoeffPath,vec3 HDRaffect,vec3 Glossyaffect);
 
@@ -70,16 +65,16 @@ private:
 
 	vec3 _HDRaffect;
 	vec3 _Glossyaffect;
-	HDRLoaderResult _HDRresult;
-
 
 	vec3 *_pixels;
 	int _width;
 	int _height;
+    float *_data;
+    GLuint _Format;
+    GLuint _Type;
+    GLuint _InternalFormat;
 
 	int _band;// means the band of SH function
 };
-
-
 
 #endif

@@ -21,9 +21,6 @@
     <ClCompile Include="BVHTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Cubemap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CutCross.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -31,9 +28,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneralObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="HDRLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Lighting.cpp">
@@ -52,9 +46,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ShaderFunc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SphericalHarmonic.cpp">
@@ -92,9 +83,6 @@
     <ClInclude Include="BVHTree.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Cubemap.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="DiffuseObject.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -102,9 +90,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="GlutFunction.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HDRLoader.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Lighting.h">
@@ -117,9 +102,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Sampler.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ShaderFunc.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="SHrotation.h">

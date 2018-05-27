@@ -135,11 +135,9 @@
   <ItemGroup>
     <ClCompile Include="BBox.cpp" />
     <ClCompile Include="BVHTree.cpp" />
-    <ClCompile Include="Cubemap.cpp" />
     <ClCompile Include="CutCross.cpp" />
     <ClCompile Include="DiffuseObject.cpp" />
     <ClCompile Include="GeneralObject.cpp" />
-    <ClCompile Include="HDRLoader.cpp" />
     <ClCompile Include="hdrTextureCube.cpp" />
     <ClCompile Include="Lighting.cpp" />
     <ClCompile Include="main.cpp" />
@@ -152,7 +150,6 @@
     <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="shader.cpp" />
-    <ClCompile Include="ShaderFunc.cpp" />
     <ClCompile Include="SphericalHarmonic.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="texture.cpp" />
@@ -160,11 +157,9 @@
   <ItemGroup>
     <ClInclude Include="BBox.h" />
     <ClInclude Include="BVHTree.h" />
-    <ClInclude Include="Cubemap.h" />
     <ClInclude Include="DiffuseObject.h" />
     <ClInclude Include="GeneralObject.h" />
     <ClInclude Include="GlutFunction.h" />
-    <ClInclude Include="HDRLoader.h" />
     <ClInclude Include="hdrTextureCube.h" />
     <ClInclude Include="Lighting.h" />
     <ClInclude Include="mesh.h" />
@@ -176,7 +171,6 @@
     <ClInclude Include="Sampler.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="shader.h" />
-    <ClInclude Include="ShaderFunc.h" />
     <ClInclude Include="SHrotation.h" />
     <ClInclude Include="SimpleLighting.h" />
     <ClInclude Include="SphericalHarmonic.h" />

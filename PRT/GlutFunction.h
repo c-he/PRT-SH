@@ -10,7 +10,6 @@
 #include "glm/gtx/transform.hpp"
 
 #include "Object.h"
-#include "Cubemap.h"
 #include "Lighting.h"
 #include "Renderer.h"
 #include "DiffuseObject.h"
@@ -48,7 +47,6 @@ extern int GeneralNumber;
 
 extern DiffuseObject *diffObject;
 extern GeneralObject *genObject;
-extern Cubemap cubemap;
 extern Lighting *lighting;
 extern Renderer renderer;
 

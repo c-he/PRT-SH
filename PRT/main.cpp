@@ -21,7 +21,6 @@
 #include "UI.h"
 #include "Scene.h"
 #include "Object.h"
-#include "Cubemap.h"
 #include "Lighting.h"
 #include "Renderer.h"
 #include "GlutFunction.h"
@@ -86,7 +85,6 @@ int lastTransfer = -1;
 
 DiffuseObject* diffObject;
 GeneralObject* genObject;
-Cubemap* cubeMap;
 Lighting* lighting;
 Lighting simpleL;
 Renderer renderer;
