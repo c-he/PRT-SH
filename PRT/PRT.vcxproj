@@ -143,7 +143,7 @@
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="Object.cpp" />
-    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="renderer.cpp" />
     <ClCompile Include="resource_manager.cpp" />
     <ClCompile Include="rgbe.c" />
     <ClCompile Include="Sampler.cpp" />
@@ -163,7 +163,7 @@
     <ClInclude Include="mesh.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="Object.h" />
-    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="renderer.h" />
     <ClInclude Include="resource_manager.h" />
     <ClInclude Include="rgbe.h" />
     <ClInclude Include="Sampler.h" />

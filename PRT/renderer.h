@@ -31,7 +31,7 @@ public:
     Renderer() = default;
     virtual ~Renderer();
 
-    void Init();
+    void Init(const int lightNumber);
     void Render();
 
     void Setup(Scene* scene, Lighting* light)

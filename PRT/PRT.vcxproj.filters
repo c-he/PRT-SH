@@ -36,9 +36,6 @@
     <ClCompile Include="Object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Sampler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -72,6 +69,9 @@
     <ClCompile Include="rgbe.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BBox.h">
@@ -90,9 +90,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Object.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Sampler.h">
@@ -138,6 +135,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="rgbe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

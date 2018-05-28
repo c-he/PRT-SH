@@ -19,15 +19,27 @@
 #include <AntTweakBar.h>
 
 #include "UI.h"
-#include "Scene.h"
-#include "Object.h"
 #include "Lighting.h"
-#include "Renderer.h"
+#include "renderer.h"
 #include "DiffuseObject.h"
 #include "GeneralObject.h"
 #include "resource_manager.h"
 
-#define FULL_SCREEN
+// #define FULL_SCREEN
+
+using namespace std;
+using glm::vec3;
+using glm::vec4;
+using glm::mat4;
+
+/*some process commends
+
+prt -l xxxx.hdr output.dat bandnumber samplenumber(4096)
+prt -o -d 1 xxxx.obj output.dat bandnumber samplenumber
+prt -o -g 1 xxxx.obj output.dat bandnumber samplenumber
+
+@Todo: binary IO
+*/
 
 // Window size.
 int WIDTH, HEIGHT;
@@ -40,47 +52,30 @@ bool keys[1024];
 GLfloat lastX = WIDTH / 2.0f, lastY = HEIGHT / 2.0f;
 bool firstMouse = true;
 
-GLfloat deltaTime = 0.0f;
-GLfloat lastFrame = 0.0f;
+const int lightNumber = 3;
+const int ObjectNumber = 2;
+const int GeneralNumber = 2;
 
-/*some process commends
-
-prt -l xxxx.jpg output.txt bandnumber samplenumber(4096)
-prt -o -d 1 xxxx.obj output.txt bandnumber samplenumber
-prt -o -g 1 xxxx.obj output.txt bandnumber samplenumber
-
-@Todo: binary IO
-
-*/
-
-using namespace std;
-using glm::vec3;
-using glm::vec4;
-using glm::mat4;
-
-int lightNumber = 3;
-int ObjectNumber = 2;
-int GeneralNumber = 2;
-
-std::string objects[] = {"buddha", "maxplanck", "Gargoyle2"};
-std::string gobjects[] = {"buddha", "maxplanck", "Gargoyle2"};
+std::string objects[] = {"buddha", "maxplanck"};
+std::string gobjects[] = {"buddha", "maxplanck"};
 std::string lightings[] = {"grace", "stpeters", "campus"};
 std::string transferF[] = {"D", "DS", "DSI"};
 std::string albedos[] = {"01", "03", "05"};
 
-glm::vec3 HDRaffect[] = {glm::vec3(2.2f, 2.2f, 2.2f), glm::vec3(1.8f, 1.8f, 1.8f), glm::vec3(0.5f, 0.55f, 0.5f)};
-glm::vec3 Glossyaffect[] = {glm::vec3(1.2f, 1.2f, 1.2f), glm::vec3(1.5f, 1.5f, 1.5f), glm::vec3(0.3f, 0.32f, 0.3f)};
+glm::vec3 hdrEffect[] = {glm::vec3(2.2f, 2.2f, 2.2f), glm::vec3(1.8f, 1.8f, 1.8f), glm::vec3(0.5f, 0.55f, 0.5f)};
+glm::vec3 glossyEffect[] = {glm::vec3(1.2f, 1.2f, 1.2f), glm::vec3(1.5f, 1.5f, 1.5f), glm::vec3(0.3f, 0.32f, 0.3f)};
+glm::vec3 albedo(0.15f, 0.15f, 0.15f);
 
 int objectIndex = -1;
 int lightingIndex = -1;
 int transferFIndex = -1;
-int materialIndex = 0;
 int albedosIndex = -1;
+int materialIndex = 0;
 
-int lastMaterial = 0;
 int lastObject = -1;
 int lastLighting = -1;
 int lastTransfer = -1;
+int lastMaterial = 0;   // Diffuse
 
 DiffuseObject* diffObject;
 GeneralObject* genObject;
@@ -88,48 +83,37 @@ Lighting* lighting;
 Lighting simpleL;
 Renderer renderer;
 
-glm::vec3 albedo(0.15f, 0.15f, 0.15f);
-////////////////////////
-bool b_multiSampling = false;
-bool b_lastmulti = false;
-//////////////////cubemap
+// Cubemap.
 bool drawCubemap = true;
 bool simpleLight = false;
 bool lastSimple = false;
 
-/////////////////camera 
-float camera_dis = 3;
-float last_camera_pos[] = {0, 0, 1};
-float camera_pos[] = {0, 0, 1};
-float camera_dir[] = {0, 0, 0};
-float camera_up[] = {0, 1, 0};
-/////////////////simple lighting
-float light_dir[] = {0, 0, 1};
+// Camera.
+float camera_dis = 3.0f;
+glm::vec3 camera_pos(0.0f, 0.0f, 1.0f);
+glm::vec3 last_camera_pos(0.0f, 0.0f, 1.0f);
+glm::vec3 camera_dir(0.0f, 0.0f, 0.0f);
+glm::vec3 camera_up(0.0f, 1.0f, 0.0f);
+
+//Simple lighting.
+glm::vec3 light_dir(0.0f, 0.0f, 1.0f);
 float simpleLightTheta = 43.3f;
 float simpleLightPhi = 225.0f;
-////////////////mouse
-int mouseX, mouseY;
-int lastMouseX, lastMouseY;
-////////////////rotation
+
+// Rotation.
 float g_Rotation[] = {0.0f, 0.0f, 0.0f, 1.0f};
 int g_AutoRotate = 0;
 int g_RotateTime = 0;
 float g_RotateStart[] = {0.0f, 0.0f, 0.0f, 1.0f};
+float rotateMatrix[4 * 4]; // Rotation matrix
 
-float g_MatDiffuse[] = {1.0f, 1.0f, 0.0f, 1.0f};
-float lastQuat[4];
+// FPS.
+double currTime;
+double lastTime;
+int frames;
+int fps;
 
-float rotateMatrix[4 * 4]; // rotation matrix
-
-bool b_rotate = false;
-//////////////////info
-/////fps
-double currTime, lastTime;
-int frames, fps;
-/////mesh
-int vertices;
-int faces;
-
+// GLFW
 GLFWwindow* window;
 
 /*
@@ -195,14 +179,14 @@ int main(int argc, char** argv)
         glfwWindowHint(GLFW_SAMPLES, 4);
 
 #ifdef FULL_SCREEN
-		// Create a "Windowed full screen" window in the primary monitor.
-		GLFWmonitor *monitor = glfwGetPrimaryMonitor();
-		const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-		glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-		glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-		window = glfwCreateWindow(mode->width, mode->height, "prt-SH", monitor, nullptr);
+        // Create a "Windowed full screen" window in the primary monitor.
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+        glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+        glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+        glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+        window = glfwCreateWindow(mode->width, mode->height, "prt-SH", monitor, nullptr);
 #else
         window = glfwCreateWindow(width, height, "prt-SH", nullptr, nullptr);
 #endif
@@ -236,12 +220,12 @@ int main(int argc, char** argv)
         glDepthFunc(GL_LESS);
         // Anti-aliasing.
         glEnable(GL_MULTISAMPLE);
-        // glfwSwapInterval(1);
+        glfwSwapInterval(0);
 
         // Do some initialization (including loading data, shaders, models, etc.)
         dataLoading();
         shaderLoading();
-        renderer.Init();
+        renderer.Init(lightNumber);
         UIInit();
         lastTime = glfwGetTime();
 
@@ -296,9 +280,7 @@ void dataLoading()
 
     diffObject = new DiffuseObject[ObjectNumber];
     genObject = new GeneralObject[GeneralNumber];
-
     lighting = new Lighting[lightNumber];
-    // cubeMap = new Cubemap[lightNumber];
 
     for (size_t i = 0; i < ObjectNumber; i++)
     {
@@ -319,7 +301,7 @@ void dataLoading()
     for (size_t i = 0; i < lightNumber; i++)
     {
         std::string lightPattern = "ProcessedData/" + lightings[i] + "_probe.dat";
-        lighting[i].init(lightPattern, HDRaffect[i], Glossyaffect[i]);
+        lighting[i].init(lightPattern, hdrEffect[i], glossyEffect[i]);
     }
 
     std::cout << "Done" << std::endl;
@@ -336,26 +318,21 @@ void dataLoading()
 
     if (materialIndex == 0)
     {
-        // Diffuse Rendering
+        // Diffuse Rendering.
         renderer.Setup(&diffObject[0], &lighting[0]);
         renderer.SetupColorBuffer(0, glm::vec3(0.0f, 0.0f, 1.0f), true);
     }
     else
     {
-        // General Rendering
+        // General Rendering.
         renderer.Setup(&genObject[0], &lighting[0]);
-        renderer.SetupColorBuffer(0, camera_dis * glm::vec3(camera_pos[0], camera_pos[1], camera_pos[2]), false);
+        renderer.SetupColorBuffer(0, camera_dis * camera_pos, false);
     }
 
     // Data initialization.
-    lastLighting = lightingIndex;
     lastObject = objectIndex;
+    lastLighting = lightingIndex;
     lastTransfer = transferFIndex;
-
-    b_lastmulti = b_multiSampling;
-
-    lastMouseX = mouseX;
-    lastMouseY = mouseY;
 }
 
 void shaderLoading()
@@ -448,9 +425,6 @@ int mouse_callback(GLFWwindow* window, double xpos, double ypos)
     // currentcamera->ProcessMouseMovement(xoffset, yoffset, xpos, ypos);
     if (simpleLight)
     {
-        mouseX = xpos;
-        mouseY = ypos;
-
         simpleLightTheta += 0.1f * (yoffset);
         if (simpleLightTheta < 0.0f)
             simpleLightTheta = 0.0f;
@@ -466,25 +440,17 @@ int mouse_callback(GLFWwindow* window, double xpos, double ypos)
 // Is called whenever MOUSE_LEFT or MOUSE_RIGHT is pressed/released via GLFW.
 int button_calback(GLFWwindow* window, int button, int action, int mods)
 {
-    if (button == 3)
-    {
-        camera_dis -= 0.2f;
-    }
-    else if (button == 4)
-    {
-        camera_dis += 0.2f;
-    }
-
     return TwEventMouseButtonGLFW(button, action);
 }
 
 
 int scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    if(yoffset > 0)
+    if (yoffset > 0)
     {
         camera_dis -= 0.2f;
-    } else
+    }
+    else
     {
         camera_dis += 0.2f;
     }
@@ -523,11 +489,11 @@ void checkUIStatus()
             drawCubemap = false;
         else
             drawCubemap = true;
-
     }
     if (lastMaterial != materialIndex)
     {
-        if (((materialIndex == 0) && (objectIndex < ObjectNumber)) || ((materialIndex == 1) && (objectIndex < GeneralNumber)))
+        if (((materialIndex == 0) && (objectIndex < ObjectNumber)) || ((materialIndex == 1) && (objectIndex <
+            GeneralNumber)))
         {
             changeLight(lightingIndex);
         }
@@ -544,7 +510,7 @@ void changeLight(int index)
     if (materialIndex == 1)
     {
         renderer.Setup(&genObject[objectIndex], &lighting[index]);
-        renderer.SetupColorBuffer(transferFIndex, camera_dis *vec3(camera_pos[0], camera_pos[1], camera_pos[2]), false);
+        renderer.SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
     }
     else
     {
@@ -555,7 +521,6 @@ void changeLight(int index)
 
 void changeObject(int index)
 {
-
     if (materialIndex == 0)
     {
         renderer.Setup(&diffObject[index], &lighting[lightingIndex]);
@@ -564,7 +529,7 @@ void changeObject(int index)
     else
     {
         renderer.Setup(&genObject[index], &lighting[lightingIndex]);
-        renderer.SetupColorBuffer(transferFIndex, camera_dis *vec3(camera_pos[0], camera_pos[1], camera_pos[2]), false);
+        renderer.SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
     }
 }
 
@@ -578,6 +543,6 @@ void changeTransfer(int index)
     else
     {
         renderer.Setup(&genObject[objectIndex], &lighting[lightingIndex]);
-        renderer.SetupColorBuffer(transferFIndex, camera_dis *vec3(camera_pos[0], camera_pos[1], camera_pos[2]), false);
+        renderer.SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
     }
 }

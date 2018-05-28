@@ -1,42 +1,59 @@
-#include "Renderer.h"
+#include "renderer.h"
 #include "UI.h"
 #include "resource_manager.h"
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+extern bool drawCubemap;
 extern bool simpleLight;
-extern int objectIndex;
-extern Lighting simpleL;
-extern int lightNumber;
-extern int lightingIndex;
+
 extern std::string lightings[];
+extern int lightingIndex;
+extern int objectIndex;
+
+// Window.
 extern int WIDTH;
 extern int HEIGHT;
 
+// Camera.
 extern float camera_dis;
-extern float last_camera_pos[];
-extern float camera_pos[];
-extern float camera_dir[];
-extern float camera_up[];
+extern glm::vec3 camera_pos;
+extern glm::vec3 last_camera_pos;
+extern glm::vec3 camera_dir;
+extern glm::vec3 camera_up;
 
+// Rotation.
 extern int g_AutoRotate;
 extern float rotateMatrix[4 * 4]; // Rotation matrix.
-
-extern int vertices;
-extern int faces;
-
-extern bool drawCubemap;
 
 extern DiffuseObject* diffObject;
 extern GeneralObject* genObject;
 extern Lighting* lighting;
+extern Lighting simpleL;
+
+// Mesh information.
+int vertices;
+int faces;
 
 using glm::mat3;
 
 Renderer::~Renderer()
 {
     delete[]hdrTextures;
+}
+
+void Renderer::Init(const int lightNumber)
+{
+    // Initialize cubemap.
+    hdrTextures = new HDRTextureCube[lightNumber];
+    for (size_t i = 0; i < lightNumber; ++i)
+    {
+        hdrTextures[i].Init("LightingCube/hdr/" + lightings[i] + ".hdr");
+    }
+
+    // Initialize projection matrix.
+    projection = glm::perspective(ZOOM, (float)WIDTH / (float)HEIGHT, NEAR_PLANE, FAR_PLANE);
 }
 
 void Renderer::SetupColorBuffer(int type, glm::vec3 viewDir, bool diffuse)
@@ -406,25 +423,10 @@ void Renderer::objDraw()
     glBindVertexArray(0);
 }
 
-void Renderer::Init()
-{
-    // Initialize cubemap.
-    hdrTextures = new HDRTextureCube[lightNumber];
-    for (size_t i = 0; i < lightNumber; ++i)
-    {
-        hdrTextures[i].Init("LightingCube/hdr/" + lightings[i] + ".hdr");
-    }
-
-    // Initialize projection matrix.
-    projection = glm::perspective(ZOOM, (float)WIDTH / (float)HEIGHT, NEAR_PLANE, FAR_PLANE);
-}
-
 void Renderer::Render()
 {
     // Render objects.
-    glm::mat4 view = glm::lookAt(
-        glm::vec3(camera_dis * camera_pos[0], camera_dis * camera_pos[1], camera_dis * camera_pos[2]),
-        glm::vec3(camera_dir[0], camera_dir[1], camera_dir[2]), glm::vec3(camera_up[0], camera_up[1], camera_up[2]));
+    glm::mat4 view = glm::lookAt(camera_dis * camera_pos, camera_dir, camera_up);
     glm::mat4 model;
     bool b_rotate = false;
     if (g_AutoRotate)
@@ -509,22 +511,17 @@ void Renderer::Render()
         else
         {
             Setup(&genObject[objectIndex], &lighting[lightingIndex]);
-            SetupColorBuffer(transferFIndex, camera_dis * vec3(camera_pos[0], camera_pos[1], camera_pos[2]),
-                             false);
+            SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
         }
     }
 
     if (materialIndex == 1)
     {
-        if ((last_camera_pos[0] != camera_pos[0]) || (last_camera_pos[1] != camera_pos[1]) || (last_camera_pos[2] !=
-            camera_pos[2]))
+        if (glm::any(glm::notEqual(camera_pos, last_camera_pos)))
         {
             Setup(&genObject[objectIndex], &lighting[lightingIndex]);
-            SetupColorBuffer(transferFIndex, camera_dis * vec3(camera_pos[0], camera_pos[1], camera_pos[2]),
-                             false);
-            last_camera_pos[0] = camera_pos[0];
-            last_camera_pos[1] = camera_pos[1];
-            last_camera_pos[2] = camera_pos[2];
+            SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
+            last_camera_pos = camera_pos;
         }
     }
 

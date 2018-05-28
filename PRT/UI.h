@@ -2,20 +2,24 @@
 #define UI_H_
 
 #include <AntTweakBar.h>
-
-#include "Object.h"
 #include <GLFW/glfw3.h>
 
+extern glm::vec3 camera_pos;
+extern glm::vec3 light_dir;
+
+extern bool simpleLight;
+
+// Rotation.
 extern float g_Rotation[4];
-extern float camera_pos[];
-extern float light_dir[];
 extern int g_AutoRotate;
 extern int g_RotateTime;
 extern float g_RotateStart[4];
 
+// Mesh Information.
 extern int fps;
 extern int vertices;
 extern int faces;
+
 extern std::string objects[];
 extern std::string lightings[];
 extern int objectIndex;
@@ -23,12 +27,11 @@ extern int lightingIndex;
 extern int transferFIndex;
 extern int materialIndex;
 
-extern bool simpleLight;
-extern bool b_multiSampling;
-//extern bool b_objectMode;
-
+// Window.
 extern int WIDTH;
 extern int HEIGHT;
+
+// GLFW
 extern GLFWwindow* window;
 extern int key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 extern int button_calback(GLFWwindow* window, int button, int action, int mods);
@@ -43,7 +46,7 @@ typedef enum { LIGHT1, LIGHT2, LIGHT3 } LightingEUM;
 
 typedef enum { DIFFUSE, GLOSSY } MaterialEUM;
 
-// axis,angle convert to quat
+// Axis,angle convert to quat.
 inline void AxisAngletoQuat(float* q, const float* axis, float angle)
 {
     float sinxita, length;
@@ -82,7 +85,7 @@ inline void QuattoMatrix(const float* q, float* mat)
     mat[15] = 1;
 }
 
-// multiply quaternion
+// Multiply quaternion.
 inline void Multi(const float* q1, const float* q2, float* result)
 {
     result[0] = q1[3] * q2[0] + q1[0] * q2[3] + q1[1] * q2[2] - q1[2] * q2[1];
@@ -165,7 +168,7 @@ inline void UIInit()
     }
 
     {
-        TwEnumVal tranFEV[3] = {{UNSHADOW, "Unshadowed"}, {SHADOW, "Shadowed"}, {INTERREFLECT, "Interreflect"}};
+        TwEnumVal tranFEV[3] = {{UNSHADOW, "unshadowed"}, {SHADOW, "shadowed"}, {INTERREFLECT, "interreflected"}};
         TwType tranFType = TwDefineEnum("tranFType", tranFEV, 3);
         TwAddVarRW(bar, "Transfer Type", tranFType, &transferFIndex,
                    " keyIncr='<' keyDecr='>' help='Change transfer function.' ");
@@ -174,7 +177,8 @@ inline void UIInit()
     {
         TwEnumVal LightingEV[3] = {{LIGHT1, "grace"}, {LIGHT2, "stpeters"}, {LIGHT3, "campus"}};
         TwType LightType = TwDefineEnum("Lighting", LightingEV, 3);
-        TwAddVarRW(bar, "Lighting", LightType, &lightingIndex, " keyIncr='<' keyDecr='>' help='Change object.' ");
+        TwAddVarRW(bar, "Environment Lighting", LightType, &lightingIndex,
+                   " keyIncr='<' keyDecr='>' help='Change object.' ");
     }
     // TwAddVarRW(bar, "Multi Sampling", TW_TYPE_BOOL32, &b_multiSampling, NULL);
 
@@ -183,12 +187,12 @@ inline void UIInit()
 
     TwAddVarRO(info, "FPS", TW_TYPE_UINT32, &fps, " label='FPS: ' ");
 
-     // std::string mesh = objects[objectIndex];
-     // std::string lighting = lightings[lightingIndex];
-     //
-     // std::cout << "Mesh: " << mesh << std::endl;
-     // std::cout << "Lighting: " << lighting << std::endl;
-    
+    // std::string mesh = objects[objectIndex];
+    // std::string lighting = lightings[lightingIndex];
+    //
+    // std::cout << "Mesh: " << mesh << std::endl;
+    // std::cout << "Lighting: " << lighting << std::endl;
+
     // @FIXME: String will cause memory leak.
     // TwAddVarRO(info, "Mesh", TW_TYPE_STDSTRING, &mesh, " label='Mesh: ' ");
     // TwAddVarRO(info, "Lighting", TW_TYPE_STDSTRING, &lighting, " label='Lighting: ' ");
