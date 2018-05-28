@@ -1,15 +1,14 @@
-#ifndef BBOX_H_
-#define BBOX_H_
+#ifndef BOUNDINGBOX_H_
+#define BOUNDINGBOX_H_
 
 #include <vector>
 #include <algorithm>
-#include "glm\glm.hpp"
+#include <glm/glm.hpp>
 
-#include "toolFunction.h"
+#include "utils.h"
 
 using glm::vec3;
 using std::vector;
-
 
 class BBox
 {
@@ -43,7 +42,6 @@ public:
 	vec3 _center;
 };
 
-
 inline BBox merge(BBox b1, BBox b2)
 {
 	BBox result;
@@ -60,8 +58,4 @@ inline BBox merge(BBox b1, BBox b2)
 	return result;
 };
 
-
-
-
-
-#endif 
+#endif

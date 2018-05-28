@@ -1,12 +1,11 @@
 #ifndef BVHTREE_H_
 #define BVHTREE_H_
 
-
 #include <vector>
 using std::vector;
 
-#include "BBox.h"
-#include "Object.h"
+#include "boundingBox.h"
+#include "object.h"
 
 const int XAXIS = 0;
 const int YAXIS = 1;
@@ -87,12 +86,10 @@ struct BVHNode
 	}
 };
 
-
-
 class BVHTree
 {
 public:
-	BVHTree(){}
+    BVHTree() = default;
 	void build( Object &obj);
 	BVHNode * buildBranch(int start,int size, int axis,int &faceNumber);
 	int split(int start,int size, float pivot, int axis);
@@ -102,13 +99,7 @@ private:
 	vector<Triangle> _triangles;
 	BVHNode *_root;
 
-
 	vector<Triangle> _nodeTri;
-
-
 };
-
-
-
 
 #endif

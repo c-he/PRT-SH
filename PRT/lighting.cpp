@@ -1,4 +1,4 @@
-#include "Lighting.h"
+#include "lighting.h"
 #include <fstream>
 #include <iostream>
 #include "rgbe.h"

@@ -5,10 +5,10 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include "hdrTextureCube.h"
-#include "Scene.h"
-#include "Lighting.h"
-#include "DiffuseObject.h"
-#include "GeneralObject.h"
+#include "scene.h"
+#include "lighting.h"
+#include "diffuseObject.h"
+#include "generalObject.h"
 
 // Camera intrinsic parameters definetion.
 #define ZOOM 45.0f

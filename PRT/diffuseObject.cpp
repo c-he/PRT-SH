@@ -1,5 +1,4 @@
-#include "DiffuseObject.h"
-
+#include "diffuseObject.h"
 
 void DiffuseObject::write2Disk(string filename)
 {

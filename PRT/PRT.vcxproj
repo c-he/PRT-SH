@@ -130,55 +130,56 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BBox.cpp" />
-    <ClCompile Include="BVHTree.cpp" />
-    <ClCompile Include="DiffuseObject.cpp" />
-    <ClCompile Include="GeneralObject.cpp" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="boundingBox.cpp" />
+    <ClCompile Include="bvhTree.cpp" />
+    <ClCompile Include="diffuseObject.cpp" />
+    <ClCompile Include="generalObject.cpp" />
     <ClCompile Include="hdrTextureCube.cpp" />
-    <ClCompile Include="Lighting.cpp" />
+    <ClCompile Include="lighting.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="model.cpp" />
-    <ClCompile Include="Object.cpp" />
+    <ClCompile Include="object.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="resource_manager.cpp" />
     <ClCompile Include="rgbe.c" />
-    <ClCompile Include="Sampler.cpp" />
-    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="sampler.cpp" />
+    <ClCompile Include="scene.cpp" />
     <ClCompile Include="shader.cpp" />
-    <ClCompile Include="SphericalHarmonic.cpp" />
+    <ClCompile Include="sphericalHarmonics.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="texture.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BBox.h" />
-    <ClInclude Include="BVHTree.h" />
-    <ClInclude Include="DiffuseObject.h" />
-    <ClInclude Include="GeneralObject.h" />
+    <ClInclude Include="boundingBox.h" />
+    <ClInclude Include="bvhTree.h" />
+    <ClInclude Include="diffuseObject.h" />
+    <ClInclude Include="generalObject.h" />
     <ClInclude Include="hdrTextureCube.h" />
-    <ClInclude Include="Lighting.h" />
+    <ClInclude Include="lighting.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="model.h" />
-    <ClInclude Include="Object.h" />
+    <ClInclude Include="object.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="resource_manager.h" />
     <ClInclude Include="rgbe.h" />
-    <ClInclude Include="Sampler.h" />
-    <ClInclude Include="Scene.h" />
+    <ClInclude Include="sampler.h" />
+    <ClInclude Include="scene.h" />
     <ClInclude Include="shader.h" />
-    <ClInclude Include="SHrotation.h" />
-    <ClInclude Include="SimpleLighting.h" />
-    <ClInclude Include="SphericalHarmonic.h" />
+    <ClInclude Include="shRotation.h" />
+    <ClInclude Include="simpleLighting.h" />
+    <ClInclude Include="sphericalHarmonics.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="texture.h" />
-    <ClInclude Include="toolFunction.h" />
     <ClInclude Include="UI.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

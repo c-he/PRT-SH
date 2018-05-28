@@ -1,4 +1,4 @@
-#include "Object.h"
+#include "object.h"
 
 void Object::normVertexes()
 {

@@ -1,10 +1,8 @@
 #ifndef DIFFUSEOBJECT_H_
 #define DIFFUSEOBJECT_H_
 
-
-#include "Object.h"
-#include "toolFunction.h"
-
+#include "object.h"
+#include "utils.h"
 
 class DiffuseObject : public Object
 {
@@ -30,8 +28,5 @@ private:
 	
 
 };
-
-
-
 
 #endif

@@ -1,4 +1,4 @@
-#include "BVHTree.h"
+#include "bvhTree.h"
 
 int BVHTree::split(int start, int size, float pivot, int axis)
 {

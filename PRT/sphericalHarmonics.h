@@ -7,8 +7,8 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "Sampler.h"
-#include "toolFunction.h"
+#include "sampler.h"
+#include "utils.h"
 
 namespace SphericalH
 {

@@ -9,9 +9,9 @@
 #include <iostream>
 #include <glm/glm.hpp>
 
-#include "Sampler.h"
-#include "BVHTree.h"
-#include "toolFunction.h"
+#include "sampler.h"
+#include "bvhTree.h"
+#include "utils.h"
 
 using std::stringstream;
 using std::ifstream;

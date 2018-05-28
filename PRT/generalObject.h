@@ -1,15 +1,12 @@
 #ifndef GENERALOBJECT_H_
 #define GENERALOBJECT_H_
 
-
 #include <vector>
 #include <fstream>
-#include "Eigen\Dense"
-
-#include "glm/glm.hpp"
-
-#include "Object.h"
-#include "Sampler.h"
+#include <Eigen/Dense>
+#include <glm/glm.hpp>
+#include "object.h"
+#include "sampler.h"
 
 using glm::vec3;
 using glm::vec4;
@@ -30,9 +27,6 @@ public:
 	void computeKernel();
 	void setGlossiness();
 
-
-
-
 private:
 
 	void unshadowed(int size, int band2,Sampler *sampler,int type);
@@ -51,8 +45,5 @@ public:
 	float _glossiness;
 
 };
-
-
-
 
 #endif

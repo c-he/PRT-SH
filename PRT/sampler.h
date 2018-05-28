@@ -8,9 +8,8 @@
 
 #include "glm\glm.hpp"
 
-#include "toolFunction.h"
-#include "SphericalHarmonic.h"
-
+#include "utils.h"
+#include "sphericalHarmonics.h"
 
 using glm::vec3;
 using glm::vec2;

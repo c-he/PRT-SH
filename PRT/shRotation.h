@@ -3,8 +3,7 @@
 
 #include <cmath>
 #include <vector>
-#include "Eigen\Dense"
-
+#include <Eigen/Dense>
 
 using std::vector;
 using Eigen::MatrixXf;

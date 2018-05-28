@@ -1,5 +1,4 @@
-#include "BBox.h"
-
+#include "boundingBox.h"
 
 inline BBox::BBox(Triangle &in)
 {

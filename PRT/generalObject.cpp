@@ -1,4 +1,4 @@
-#include "GeneralObject.h"
+#include "generalObject.h"
 
 void GeneralObject::computeKernel()
 {

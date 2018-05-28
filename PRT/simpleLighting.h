@@ -3,7 +3,7 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
 using glm::vec3;
 
 inline	vec3 Simplelight(float theta, float phi)

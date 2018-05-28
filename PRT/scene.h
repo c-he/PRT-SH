@@ -1,14 +1,8 @@
 #ifndef SCENE_H_
 #define SCENE_H_
 
-#include <iostream>
 #include <vector>
-
-#include "toolFunction.h"
-
-using std::string;
-using std::vector;
-
+#include <string>
 
 class Scene
 {
@@ -19,14 +13,11 @@ private:
 	float vmaxX,vmaxY,vmaxZ;
 	float vminX,vminY,vminZ;
 
-	string _fileName;
+	std::string _fileName;
 public:
-	vector<float> _vertexes;
-	vector<float> _normals;
-	vector<float> _texcoords;
-
+	std::vector<float> _vertexes;
+	std::vector<float> _normals;
+	std::vector<float> _texcoords;
 };
-
-
 
 #endif

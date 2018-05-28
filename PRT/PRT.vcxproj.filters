@@ -15,37 +15,28 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BBox.cpp">
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="boundingBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BVHTree.cpp">
+    <ClCompile Include="bvhTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DiffuseObject.cpp">
+    <ClCompile Include="diffuseObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneralObject.cpp">
+    <ClCompile Include="generalObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Lighting.cpp">
+    <ClCompile Include="hdrTextureCube.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lighting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sampler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SphericalHarmonic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="resource_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mesh.cpp">
@@ -54,7 +45,28 @@
     <ClCompile Include="model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="resource_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rgbe.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sampler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sphericalHarmonics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="stb_image.cpp">
@@ -63,57 +75,24 @@
     <ClCompile Include="texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="hdrTextureCube.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rgbe.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BBox.h">
+    <ClInclude Include="boundingBox.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="BVHTree.h">
+    <ClInclude Include="bvhTree.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="DiffuseObject.h">
+    <ClInclude Include="diffuseObject.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneralObject.h">
+    <ClInclude Include="generalObject.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Lighting.h">
+    <ClInclude Include="hdrTextureCube.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Sampler.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SHrotation.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SimpleLighting.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SphericalHarmonic.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="toolFunction.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UI.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource_manager.h">
+    <ClInclude Include="lighting.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="mesh.h">
@@ -122,7 +101,34 @@
     <ClInclude Include="model.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="object.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource_manager.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rgbe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sampler.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
     <ClInclude Include="shader.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="shRotation.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simpleLighting.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sphericalHarmonics.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="stb_image.h">
@@ -131,17 +137,11 @@
     <ClInclude Include="texture.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="hdrTextureCube.h">
+    <ClInclude Include="UI.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="rgbe.h">
+    <ClInclude Include="utils.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="renderer.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
 </Project>

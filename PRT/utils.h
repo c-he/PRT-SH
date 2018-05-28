@@ -1,19 +1,19 @@
 #ifndef TOOLFUNCTION_H_
 #define TOOLFUNCTION_H_
 
-
 const double MY_PI = 3.14159265358979323846;
 const double M_INFINITE = 1e10f;
-const double M_ZERO = 0.000000001;
-const float M_DELTA = 0.000001f;
+const double M_ZERO = 1e-9;
+const float M_DELTA = 1e-6f;
 
 #include <ctime>
 #include <cstdlib>
 #include <iostream>
 #include <algorithm>
 
-#include "GL/freeglut.h"
-#include "glm\glm.hpp"
+#include <GL/glew.h>
+#include <glm/glm.hpp>
+
 using glm::vec3;
 using std::cout;
 using std::endl;
@@ -31,7 +31,6 @@ struct Triangle
 		:_v0(v0),_v1(v1),_v2(v2),_index(index){}
 
 };
-
 
 struct Ray
 {
@@ -408,7 +407,5 @@ inline void rotateMatrixtoXYX(float mat[3][3],float &alpha,float &beta,float &ga
 	}
 
 }
-
-
 
 #endif

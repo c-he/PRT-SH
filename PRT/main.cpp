@@ -11,7 +11,6 @@
 #include <GL/glew.h>
 // GLFW
 #include <GLFW/glfw3.h>
-#include "GL/freeglut.h"
 // GLM
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
