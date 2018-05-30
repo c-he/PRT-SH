@@ -1,6 +1,8 @@
+#include <cmath>
 #include "renderer.h"
 #include "UI.h"
 #include "resource_manager.h"
+#include "sphericalHarmonics.h"
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -88,7 +90,9 @@ void Renderer::setupDiffuseBuffer(int type)
             if (simpleLight)
             {
                 for (int k = 0; k < 3; ++k)
+                {
                     lightcoeff[k] = simpleL._Vcoeffs[k](j);
+                }
             }
 
             cr += lightcoeff[0] * _diffObject->_DTransferFunc[type][i][j][0];
@@ -288,9 +292,9 @@ void Renderer::setupGeneralBuffer(int type, vec3 viewDir)
 
         rotateMatrixtoYZY(rotateMatrix, alpha, beta, gamma);
 
-        vector<vec2> paraResult;
-        paraResult.push_back(vec2(gamma, beta));
-        paraResult.push_back(vec2(alpha, 0.0f));
+        std::vector<glm::vec2> paraResult;
+        paraResult.push_back(glm::vec2(gamma, beta));
+        paraResult.push_back(glm::vec2(alpha, 0.0f));
 
 
         lightingtemp.rotateZYZ(paraResult);
@@ -298,7 +302,7 @@ void Renderer::setupGeneralBuffer(int type, vec3 viewDir)
         //CONVOLUTION wih BRDF
         for (int l = 0; l < band; ++l)
         {
-            float alpha_l_0 = sqrt((4.0f * (float)M_PI) / (2 * l + 1));
+            float alpha_l_0 = sqrt((4.0f * M_PI) / (2 * l + 1));
 
             int BRDFindex = l * (l + 1);
             for (int m = -l; m <= l; ++m)
@@ -489,17 +493,17 @@ void Renderer::Render()
             float sinphi = rotateVector[1] / sintheta;
             phi = inverseSC(sinphi, cosphi);
         }
-        vector<vec2> rotatePara;
+        std::vector<glm::vec2> rotatePara;
         rotatePara.clear();
 
         if (simpleLight)
         {
-            rotatePara.push_back(vec2(theta, phi));
+            rotatePara.push_back(glm::vec2(theta, phi));
             simpleL.rotateZYZ(rotatePara);
         }
         if (b_rotate)
         {
-            rotatePara.push_back(vec2(0.0f, 2.0f * M_PI - thetatemp));
+            rotatePara.push_back(glm::vec2(0.0f, 2.0f * M_PI - thetatemp));
             //rotatePara.push_back(vec2(3.0f*M_PI/2.0f,M_PI/2.0f));
             lighting[lightingIndex].rotateZYZ(rotatePara);
         }

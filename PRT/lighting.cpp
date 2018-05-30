@@ -6,6 +6,7 @@
 #include "sampler.h"
 #include "shRotation.h"
 #include "simpleLighting.h"
+#include "utils.h"
 
 // Constructor for preprocessing.
 Lighting::Lighting(std::string path, LightType type, int band)
@@ -49,7 +50,7 @@ Lighting::~Lighting()
     delete[] _data;
 }
 
-void Lighting::init(std::string coeffPath, vec3 hdrEffect, vec3 glossyEffect)
+void Lighting::init(std::string coeffPath, glm::vec3 hdrEffect, glm::vec3 glossyEffect)
 {
     _hdrEffect = hdrEffect;
     _glossyEffect = glossyEffect;

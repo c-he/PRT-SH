@@ -4,6 +4,7 @@
 #include <iostream>
 #include <random>
 #include "sampler.h"
+#include "sphericalHarmonics.h"
 #include "utils.h"
 
 Sampler::Sampler(unsigned n)

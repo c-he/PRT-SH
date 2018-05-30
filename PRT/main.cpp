@@ -281,7 +281,7 @@ void dataLoading()
     for (size_t i = 0; i < ObjectNumber; i++)
     {
         std::string objFile = "Scene/" + objects[i] + ".obj";
-        std::string dataFile = "ProcessedData/" + objects[i];
+        std::string dataFile = "processedData/objects/" + objects[i];
         diffObject[i].init(objFile, albedo);
         diffObject[i].readFDiskbin(dataFile);
     }
@@ -296,7 +296,7 @@ void dataLoading()
 
     for (size_t i = 0; i < lightNumber; i++)
     {
-        std::string lightPattern = "ProcessedData/" + lightings[i] + "_probe.dat";
+        std::string lightPattern = "processedData/lightings/" + lightings[i] + "_probe.dat";
         lighting[i].init(lightPattern, hdrEffect[i], glossyEffect[i]);
     }
 
@@ -310,7 +310,7 @@ void dataLoading()
     // changeLight(0);
     // changeObject(1);
 
-    simpleL.init("ProcessedData/simple_probe.dat", glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+    simpleL.init("processedData/lightings/simple_probe.dat", glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
     if (materialIndex == 0)
     {
@@ -345,44 +345,56 @@ void dataProcessing(int argc, char** argv)
     std::string diffGeneal(argv[2]);
 
     int sampleNumber = 4096;
-    int band = 4;
+    int band = 5;
 
-    int type = atoi(argv[3]);
-
-    if (argc > 6)
-    {
-        band = atoi(argv[6]);
-    }
-    if (argc > 7)
-    {
-        sampleNumber = atoi(argv[7]);
-    }
     if (ptype == "-l")
     {
+        // .\PRT.exe -l xxx_probe.hdr xxx_probe.dat [band] [sample number]
+        if (argc > 4)
+        {
+            band = atoi(argv[4]);
+        }
+        if (argc > 5)
+        {
+            sampleNumber = atoi(argv[5]);
+        }
+
         Lighting pattern(argv[2], PROBE, band);
         pattern.process(sampleNumber, true);
         pattern.write2Diskbin(argv[3]);
     }
     else if (ptype == "-o")
     {
+        // .\PRT.exe -o -d 1 xxx.obj xxx.dat [band] [sample number]
+        // .\PRT.exe -o -g 1 xxx.obj xxx.dat [band] [sample number]
+        int transferType = atoi(argv[3]);
+        if (argc > 6)
+        {
+            band = atoi(argv[6]);
+        }
+        if (argc > 7)
+        {
+            sampleNumber = atoi(argv[7]);
+        }
+
         const DWORD start = GetTickCount();
         if (diffGeneal == "-d")
         {
             DiffuseObject diffObj;
             diffObj.init(argv[4], albedo);
-            diffObj.project2SH(type, band, sampleNumber, 2);
+            diffObj.project2SH(transferType, band, sampleNumber, 2);
             diffObj.write2Diskbin(argv[5]);
         }
         else if (diffGeneal == "-g")
         {
             GeneralObject genObj;
             genObj.init(argv[4], albedo);
-            genObj.project2SH(type, band, sampleNumber, 1);
+            genObj.project2SH(transferType, band, sampleNumber, 1);
             genObj.write2Disk(argv[5]);
         }
         const DWORD end = GetTickCount();
 
-        std::cout << "Processing time:" << (end - start) / 1000.0 << "seconds" << std::endl;
+        std::cout << "Processing time:" << (end - start) / 1000.0 << " seconds" << std::endl;
     }
 }
 
@@ -456,14 +468,14 @@ void checkUIStatus()
 {
     if (lastLighting != lightingIndex)
     {
-        std::cout << "Light change" << std::endl;
+        std::cout << "Console UI: Light change" << std::endl;
 
         changeLight(lightingIndex);
         lastLighting = lightingIndex;
     }
     if (lastObject != objectIndex)
     {
-        std::cout << "Object change" << std::endl;
+        std::cout << "Console UI: Object change" << std::endl;
         changeObject(objectIndex);
         lastObject = objectIndex;
     }
@@ -477,8 +489,8 @@ void checkUIStatus()
     }
     if (lastSimple != simpleLight)
     {
-        renderer.SetupColorBuffer(transferFIndex, vec3(0.0f, 0.0f, 0.0f), true);
-        std::cout << "Simple Light" << std::endl;
+        renderer.SetupColorBuffer(transferFIndex, glm::vec3(0.0f, 0.0f, 0.0f), true);
+        std::cout << "UI: Simple Light" << std::endl;
         lastSimple = simpleLight;
         if (simpleLight)
             drawCubemap = false;

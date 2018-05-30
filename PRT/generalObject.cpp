@@ -155,15 +155,15 @@ void GeneralObject::computeTBN()
         int renderIndexoffset = 3 * i;
         int vindex[3];
         int tindex[3];
-        vec3 p[3];
-        vec2 w[3];
+        glm::vec3 p[3];
+        glm::vec2 w[3];
 
         for (int j = 0; j < 3; ++j)
         {
             vindex[j] = 3 * _renderIndex[renderIndexoffset + j];
             tindex[j] = 2 * _renderIndex[renderIndexoffset + j];
             p[j] = vec3(_vertexes[vindex[j]], _vertexes[vindex[j] + 1], _vertexes[vindex[j] + 2]);
-            w[j] = vec2(_texcoords[tindex[j]], _texcoords[tindex[j] + 1]);
+            w[j] = glm::vec2(_texcoords[tindex[j]], _texcoords[tindex[j] + 1]);
 
             tindex[j] /= 2;
         }

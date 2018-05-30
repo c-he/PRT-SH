@@ -4,13 +4,6 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "utils.h"
-#include "sphericalHarmonics.h"
-
-using glm::vec3;
-using glm::vec2;
-using std::vector;
-
 class Sample
 {
 public:
