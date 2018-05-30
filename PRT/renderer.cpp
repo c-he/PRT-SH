@@ -49,7 +49,7 @@ void Renderer::Init(const int lightNumber)
     hdrTextures = new HDRTextureCube[lightNumber];
     for (size_t i = 0; i < lightNumber; ++i)
     {
-        hdrTextures[i].Init("LightingCube/hdr/" + lightings[i] + ".hdr");
+        hdrTextures[i].Init("lightings/cross/" + lightings[i] + "_cross" + ".hdr");
     }
 
     // Initialize projection matrix.
@@ -96,9 +96,9 @@ void Renderer::setupDiffuseBuffer(int type)
             cb += lightcoeff[2] * _diffObject->_DTransferFunc[type][i][j][2];
         }
 
-        cr *= _lighting->HDRaffect().x;
-        cg *= _lighting->HDRaffect().y;
-        cb *= _lighting->HDRaffect().z;
+        cr *= _lighting->hdrEffect().x;
+        cg *= _lighting->hdrEffect().y;
+        cb *= _lighting->hdrEffect().z;
 
         _colorBuffer.push_back(cr);
         _colorBuffer.push_back(cg);
@@ -344,7 +344,7 @@ void Renderer::setupGeneralBuffer(int type, vec3 viewDir)
                 }
             }
 
-            color[s] *= _lighting->Glossyaffect()[s];
+            color[s] *= _lighting->glossyEffect()[s];
             _colorBuffer[3 * i + s] = color[s];
         }
     }
@@ -452,7 +452,7 @@ void Renderer::Render()
     //float phitemp;
     if (b_rotate)
     {
-        mat4 rM = glm::make_mat4(rotateMatrix);
+        glm::mat4 rM = glm::make_mat4(rotateMatrix);
         vec4 dir = rM * vec4(0.0f, 0.0f, 1.0f, 0.0f);
         rotateVector = vec3(dir.x, dir.y, dir.z);
         rotateVector = glm::clamp(rotateVector, -1.0f, 1.0f);
@@ -536,7 +536,6 @@ void Renderer::Render()
         view = glm::mat4(glm::mat3(view));
         shader.SetMatrix4("view", view);
         shader.SetMatrix4("projection", projection);
-        // cubemap[lightingIndex].render();
         // std::cout << "lighting index: " << lightingIndex << std::endl;
         hdrTextures[lightingIndex].Draw();
     }

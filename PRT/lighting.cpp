@@ -1,37 +1,21 @@
-#include "lighting.h"
-#include <fstream>
+#include <cmath>
 #include <iostream>
+#include <fstream>
+#include "lighting.h"
 #include "rgbe.h"
+#include "sampler.h"
+#include "shRotation.h"
+#include "simpleLighting.h"
 
-Lighting::Lighting(string path, LightType type, int band) //construction function for process
+// Constructor for preprocessing.
+Lighting::Lighting(std::string path, LightType type, int band)
 {
-    std::cout << "processs init." << std::endl;
+    std::cout << "Lighting probe: " << path << std::endl;
     _path = path;
     _ltype = type;
     _band = band;
 
-    /*cimg_library::CImg<unsigned char> src(_path.c_str());
-    _width = src.width();
-    _height = src.height();
-
-    _pixels = new vec3[_width * _height];
-
-    for(int i = 0;i < _height;++i)
-        for(int j = 0;j < _width;++j)
-        {
-            _pixels[i * _width + j] = 
-            vec3(
-                    src(j,i,0,0),
-                    src(j,i,0,1),
-                    src(j,i,0,2)
-                );
-            
-        }*/
     // Loading hdr textures.
-    _Format = GL_RGB;
-    _Type = GL_FLOAT;
-    _InternalFormat = GL_RGB16F_ARB;
-
     std::cout << "Loading HDR texture: " << path << std::endl;
 
     FILE* file = fopen(path.c_str(), "rb");
@@ -40,14 +24,24 @@ Lighting::Lighting(string path, LightType type, int band) //construction functio
     RGBE_ReadPixels_RLE(file, _data, _width, _height);
 
     fclose(file);
+}
 
-    std::cout << " - WIDTH                    : " << _width << std::endl;
-    std::cout << " - HEIGHT                   : " << _height << std::endl;
-    std::cout << " - MEMORY SIZE              : " << (3 * _width * _height * sizeof(float)) / 8 << " bytes" << std::
-        endl;
-    std::cout << " - FORMAT                   : " << ((_Format == GL_RGB) ? "RGB" : "") << std::endl;
-    std::cout << " - TYPE                     : " << ((_Type == GL_FLOAT) ? "Float" : "") << std::endl;
-    std::cout << " - INTERNAL FORMAT          : " << ((_InternalFormat == GL_RGB8) ? "RGB8" : "RGB16F") << std::endl;
+Lighting::Lighting(int band, Eigen::VectorXf coeffs[3])
+{
+    _band = band;
+    int band2 = band * band;
+
+    // RGB channel.
+    for (size_t i = 0; i < 3; i++)
+    {
+        _Vcoeffs[i].resize(band2);
+        // SH coefficients.
+        for (size_t j = 0; j < band2; j++)
+            _Vcoeffs[i](j) = coeffs[i](j);
+    }
+
+    for (size_t i = 0; i < band2; i++)
+        _coeffs.push_back(glm::vec3(coeffs[0](i), coeffs[1](i), coeffs[2](i)));
 }
 
 Lighting::~Lighting()
@@ -55,33 +49,27 @@ Lighting::~Lighting()
     delete[] _data;
 }
 
-
-void Lighting::init(string CoeffPath, vec3 HDRaffect, vec3 Glossyaffect)
+void Lighting::init(std::string coeffPath, vec3 hdrEffect, vec3 glossyEffect)
 {
-    _HDRaffect = HDRaffect;
-    _Glossyaffect = Glossyaffect;
-    std::cout << "runtime init." << std::endl;
-    std::ifstream in(CoeffPath, std::ifstream::binary);
-    //std::ifstream in(CoeffPath);
-    vec3 temp;
+    _hdrEffect = hdrEffect;
+    _glossyEffect = glossyEffect;
+    std::cout << "Lighting probe: " << coeffPath << std::endl;
+    std::ifstream in(coeffPath, std::ifstream::binary);
+    glm::vec3 temp;
 
     in.read((char *)&_band, sizeof(int));
-    //in >> _band ;
+    std::cout << "band = " << _band << std::endl;
     int band2 = _band * _band;
     _coeffs.clear();
 
-    for (int i = 0; i < 3; ++i)
+    for (size_t i = 0; i < 3; i++)
     {
         _Vcoeffs[i].resize(band2);
         _Vcoeffs[i].setZero();
     }
 
-    for (int i = 0; i < band2; ++i)
+    for (size_t i = 0; i < band2; i++)
     {
-        /*in	>> temp.x 
-            >> temp.y 
-            >> temp.z ;*/
-
         in.read((char *)&temp.x, sizeof(float));
         in.read((char *)&temp.y, sizeof(float));
         in.read((char *)&temp.z, sizeof(float));
@@ -91,14 +79,18 @@ void Lighting::init(string CoeffPath, vec3 HDRaffect, vec3 Glossyaffect)
         _Vcoeffs[2](i) = temp.z;
 
         _coeffs.push_back(temp);
+        // std::cout << temp.x << " " << temp.y << " " << temp.z << std::endl;
     }
 
     in.close();
 }
 
-//return the light color 
-vec3 Lighting::probeColor(vec3 dir)
+// Return the light color.
+// For more information about the light probe images we use:
+// http://www.pauldebevec.com/Probes/
+glm::vec3 Lighting::probeColor(glm::vec3 dir)
 {
+    dir = glm::normalize(dir);
     float d = sqrt(dir.x * dir.x + dir.y * dir.y);
 
     float r;
@@ -108,10 +100,10 @@ vec3 Lighting::probeColor(vec3 dir)
     }
     else
     {
-        r = (1.0f / (2.0f * (float)MY_PI)) * acos(dir.z) / d;
+        r = (1.0f / (2.0f * M_PI)) * acos(dir.z) / d;
     }
 
-    vec2 texCoord;
+    glm::vec2 texCoord;
     texCoord.x = 0.5f + dir.x * r;
     texCoord.y = 0.5f + dir.y * r;
 
@@ -123,45 +115,40 @@ vec3 Lighting::probeColor(vec3 dir)
 
     int offset = 3 * index;
 
-    return vec3(_data[offset], _data[offset + 1], _data[offset + 2]);
-
-    return _pixels[index];
+    return glm::vec3(_data[offset], _data[offset + 1], _data[offset + 2]);
 }
 
-
-void Lighting::process(int sampleNumber, bool image = true)
+// Compute incident lighting at one or more sample points near object in terms of the SH basis.
+void Lighting::process(int sampleNumber, bool image)
 {
-    _band = 4;
     int sqrtnum = (int)sqrt(sampleNumber);
     int band2 = _band * _band;
-    float weight = 4.0f * (float)MY_PI / sampleNumber;
+    // @NOTE: this weight comes from the integral of solid angle ds, referred to section 6.2 in this paper.
+    float weight = 4.0f * M_PI / sampleNumber;
     Sampler stemp(sqrtnum);
 
     stemp.computeSH(_band);
-    //system("pause");
     _coeffs.clear();
-    _coeffs.resize(band2, vec3(0.0f, 0.0f, 0.0f));
+    _coeffs.resize(band2, glm::vec3(0.0f, 0.0f, 0.0f));
 
-
-    for (int i = 0; i < sampleNumber; ++i)
+    // For one channel: sampleNumber-dimension vector -> band2-dimension vector
+    for (int i = 0; i < sampleNumber; i++)
     {
-        vec3 dir = stemp._samples[i]._cartesCoord;
-        for (int j = 0; j < band2; ++j)
+        glm::vec3 dir = stemp._samples[i]._cartesCoord;
+        for (int j = 0; j < band2; j++)
         {
-            float sh_value = stemp._samples[i]._SHvalue[j];
+            float SHvalue = stemp._samples[i]._SHvalue[j];
             if (image)
             {
-                vec3 color = probeColor(dir);
-                _coeffs[j] += color * sh_value;
+                glm::vec3 color = probeColor(dir);
+                _coeffs[j] += color * SHvalue;
             }
             else
             {
-                _coeffs[j] += sh_value * Simplelight(stemp._samples[i]._sphericalCoord[0],
-                                                     stemp._samples[i]._sphericalCoord[1]);
+                _coeffs[j] += SHvalue * Simplelight(stemp._samples[i]._sphericalCoord[0],
+                                                    stemp._samples[i]._sphericalCoord[1]);
             }
         }
-
-        //std::cout << ((float)i/sampleNumber) << std::endl;
     }
 
     for (int i = 0; i < band2; ++i)
@@ -171,32 +158,34 @@ void Lighting::process(int sampleNumber, bool image = true)
 }
 
 //void Lighting::rotateZYZ(mat4 rM)//rM is rotation matrix
-void Lighting::rotateZYZ(vector<vec2>& para)
+void Lighting::rotateZYZ(std::vector<glm::vec2>& para)
 {
     int band2 = _band * _band;
     float theta, phi;
     //theta *= (float)M_PI/180.0f;
     //phi *= (float)M_PI/180.0f;
 
-    for (int i = 0; i < band2; ++i)
-        for (int j = 0; j < 3; ++j)
+    for (int i = 0; i < band2; i++)
+    {
+        for (int j = 0; j < 3; j++)
         {
             _Vcoeffs[j](i) = _coeffs[i][j];
         }
+    }
 
-    for (unsigned i = 0; i < para.size(); ++i)
+    for (size_t i = 0; i < para.size(); i++)
     {
         theta = para[i].x;
         phi = para[i].y;
 
-        vector<MatrixXf> X90;
+        std::vector<Eigen::MatrixXf> X90;
         XRotateMatrix(_band, X90);
         transfer(_band, X90, _Vcoeffs[0]);
         transfer(_band, X90, _Vcoeffs[1]);
         transfer(_band, X90, _Vcoeffs[2]);
 
 
-        vector<MatrixXf> Zalpha;
+        std::vector<Eigen::MatrixXf> Zalpha;
         ZRotateMatrix(_band, theta, Zalpha);
         transfer(_band, Zalpha, _Vcoeffs[0]);
         transfer(_band, Zalpha, _Vcoeffs[1]);
@@ -206,7 +195,7 @@ void Lighting::rotateZYZ(vector<vec2>& para)
         transfer(_band, X90, _Vcoeffs[1], true);
         transfer(_band, X90, _Vcoeffs[2], true);
 
-        vector<MatrixXf> Zbeta;
+        std::vector<Eigen::MatrixXf> Zbeta;
         ZRotateMatrix(_band, phi, Zbeta);
         transfer(_band, Zbeta, _Vcoeffs[0]);
         transfer(_band, Zbeta, _Vcoeffs[1]);
@@ -214,20 +203,17 @@ void Lighting::rotateZYZ(vector<vec2>& para)
     }
 }
 
-void Lighting::write2Disk(string outFile)
+void Lighting::write2Diskbin(std::string outFile)
 {
     std::ofstream out(outFile, std::ofstream::binary);
     out.write((char *)&_band, sizeof(int));
     int band2 = _band * _band;
-    for (int i = 0; i < band2; ++i)
+    for (int i = 0; i < band2; i++)
     {
-        /*	out << _coeffs[i].x << ' '
-                << _coeffs[i].y << ' '
-                << _coeffs[i].z << ' '
-                << std::endl;*/
         out.write((char *)&_coeffs[i].x, sizeof(float));
         out.write((char *)&_coeffs[i].y, sizeof(float));
         out.write((char *)&_coeffs[i].z, sizeof(float));
     }
     out.close();
+    std::cout << "Lighting probe generated." << std::endl;
 }

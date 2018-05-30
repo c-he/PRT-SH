@@ -3,9 +3,6 @@
 #include <iostream>
 #include <Windows.h>
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 // GLEW
 // #define GLEW_STATIC
 #include <GL/glew.h>
@@ -18,10 +15,10 @@
 #include <AntTweakBar.h>
 
 #include "UI.h"
-#include "Lighting.h"
+#include "lighting.h"
 #include "renderer.h"
-#include "DiffuseObject.h"
-#include "GeneralObject.h"
+#include "diffuseObject.h"
+#include "generalObject.h"
 #include "resource_manager.h"
 
 // #define FULL_SCREEN
@@ -74,7 +71,7 @@ int materialIndex = 0;
 int lastObject = -1;
 int lastLighting = -1;
 int lastTransfer = -1;
-int lastMaterial = 0;   // Diffuse
+int lastMaterial = 0; // Diffuse
 
 DiffuseObject* diffObject;
 GeneralObject* genObject;
@@ -347,7 +344,7 @@ void dataProcessing(int argc, char** argv)
     std::string ptype(argv[1]);
     std::string diffGeneal(argv[2]);
 
-    int samplenumber = 4096;
+    int sampleNumber = 4096;
     int band = 4;
 
     int type = atoi(argv[3]);
@@ -358,35 +355,34 @@ void dataProcessing(int argc, char** argv)
     }
     if (argc > 7)
     {
-        samplenumber = atoi(argv[7]);
+        sampleNumber = atoi(argv[7]);
     }
     if (ptype == "-l")
     {
         Lighting pattern(argv[2], PROBE, band);
-        //Lighting ltemp;
-        pattern.process(samplenumber, true);
-        pattern.write2Disk(argv[3]);
+        pattern.process(sampleNumber, true);
+        pattern.write2Diskbin(argv[3]);
     }
     else if (ptype == "-o")
     {
         const DWORD start = GetTickCount();
         if (diffGeneal == "-d")
         {
-            DiffuseObject otemp;
-            otemp.init(argv[4], albedo);
-            otemp.project2SH(type, band, samplenumber, 2);
-            otemp.write2Diskbin(argv[5]);
+            DiffuseObject diffObj;
+            diffObj.init(argv[4], albedo);
+            diffObj.project2SH(type, band, sampleNumber, 2);
+            diffObj.write2Diskbin(argv[5]);
         }
-        else
+        else if (diffGeneal == "-g")
         {
-            GeneralObject otemp;
-            otemp.init(argv[4], albedo);
-            otemp.project2SH(type, band, samplenumber, 1);
-            otemp.write2Disk(argv[5]);
+            GeneralObject genObj;
+            genObj.init(argv[4], albedo);
+            genObj.project2SH(type, band, sampleNumber, 1);
+            genObj.write2Disk(argv[5]);
         }
         const DWORD end = GetTickCount();
 
-        std::cout << "Processing time:" << (end - start) / 1000.0 << std::endl;
+        std::cout << "Processing time:" << (end - start) / 1000.0 << "seconds" << std::endl;
     }
 }
 

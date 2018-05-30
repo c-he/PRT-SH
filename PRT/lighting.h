@@ -2,78 +2,47 @@
 #define LIGHT_H_
 
 #include <string>
+#include <vector>
 #include <Eigen/Dense>
-#include <GL/glew.h>
 #include <glm/glm.hpp>
 
-#include "sampler.h"
-#include "shRotation.h"
-#include "utils.h"
-#include "simpleLighting.h"
-
-using std::string;
-using glm::mat4;
-using Eigen::VectorXf;
-using Eigen::MatrixXf;
-
-enum LightType { PROBE, CUBEMAP };
+enum LightType { PROBE, CROSS };
 
 class Lighting
 {
 public:
     Lighting() = default;
-    Lighting(string path, LightType type, int band); //construction function for process
-
-    Lighting(int band, VectorXf coeffs[3])
-    {
-        _band = band;
-        int band2 = band * band;
-
-        for (int k = 0; k < 3; ++k)
-        {
-            _Vcoeffs[k].resize(band2);
-            for (int i = 0; i < band2; ++i)
-                _Vcoeffs[k](i) = coeffs[k](i);
-        }
-
-        for (int i = 0; i < band2; ++i)
-            _coeffs.push_back(vec3(coeffs[0](i), coeffs[1](i), coeffs[2](i)));
-    }
+    // Constructor for preprocessing.
+    Lighting(std::string path, LightType type, int band);
+    Lighting(int band, Eigen::VectorXf coeffs[3]);
 
     ~Lighting();
 
-    void init(string CoeffPath, vec3 HDRaffect, vec3 Glossyaffect);
+    void init(std::string coeffPath, glm::vec3 hdrEffect, glm::vec3 glossyEffect);
+    glm::vec3 probeColor(glm::vec3 dir);
+    void process(int sampleNumber, bool image = true);
+    void write2Diskbin(std::string outFile);
+    void rotateZYZ(std::vector<glm::vec2>& para);
 
-    vec3 probeColor(vec3 dir);
-    void process(int sampleNumber, bool image);
-    void write2Disk(string outFile);
-
-    void rotateZYZ(vector<vec2>& para);
-    vec3 HDRaffect() { return _HDRaffect; }
-    vec3 Glossyaffect() { return _Glossyaffect; }
-
-
+    glm::vec3 hdrEffect() { return _hdrEffect; }
+    glm::vec3 glossyEffect() { return _glossyEffect; }
     int band() { return _band; }
 
-    vector<vec3> _coeffs;
-    VectorXf _Vcoeffs[3];
+    std::vector<glm::vec3> _coeffs;
+    Eigen::VectorXf _Vcoeffs[3];
 
 private:
     LightType _ltype;
-    string _path;
+    std::string _path;
 
-    vec3 _HDRaffect;
-    vec3 _Glossyaffect;
+    glm::vec3 _hdrEffect;
+    glm::vec3 _glossyEffect;
 
-    vec3* _pixels;
     int _width;
     int _height;
+    // The band of SH basis function.
+    int _band;
     float* _data;
-    GLuint _Format;
-    GLuint _Type;
-    GLuint _InternalFormat;
-
-    int _band; // means the band of SH function
 };
 
 #endif
