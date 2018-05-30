@@ -68,10 +68,7 @@ void Renderer::SetupColorBuffer(int type, glm::vec3 viewDir, bool diffuse)
 
 void Renderer::setupDiffuseBuffer(int type)
 {
-    if (_diffObject->band() != _lighting->band())
-    {
-        std::cout << "different number band!" << std::endl;
-    }
+    assert(_diffObject->band() == _lighting->band());
     int vertexnumber = _diffObject->_vertexes.size() / 3;
     int band2 = _diffObject->band() * _diffObject->band();
 
@@ -177,10 +174,7 @@ void Renderer::setupGeneralBuffer(int type, vec3 viewDir)
 
     std::cout << "buffer type " << type << std::endl;
 
-    if (_genObject->band() != _lighting->band())
-    {
-        std::cout << "different number band!" << std::endl;
-    }
+    assert(_genObject->band() == _lighting->band());
     int vertexnumber = _genObject->_vertexes.size() / 3;
     int band = _genObject->band();
     int band2 = band * band;

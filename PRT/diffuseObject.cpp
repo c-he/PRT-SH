@@ -175,11 +175,7 @@ void DiffuseObject::diffuseUnshadow(int size, int band2, Sampler* sampler, int t
         for (int j = 0; j < sampNumber; ++j)
         {
             Sample stemp = sampler->_samples[j];
-            float geo = glm::dot(normal, stemp._cartesCoord);
-            if (fabs(geo) > 1.1f) {
-                std::cout << "geo = " << geo << std::endl;
-                assert(false);
-            }
+            float geo = glm::dot(normal, glm::normalize(stemp._cartesCoord));
 
             if (geo <= 0.0f)
             {
