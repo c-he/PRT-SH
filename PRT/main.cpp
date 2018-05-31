@@ -21,21 +21,12 @@
 #include "generalObject.h"
 #include "resource_manager.h"
 
-#define FULL_SCREEN
+// #define FULL_SCREEN
 
 using namespace std;
 using glm::vec3;
 using glm::vec4;
 using glm::mat4;
-
-/*some process commends
-
-prt -l xxxx.hdr output.dat bandnumber samplenumber(4096)
-prt -o -d 1 xxxx.obj output.dat bandnumber samplenumber
-prt -o -g 1 xxxx.obj output.dat bandnumber samplenumber
-
-@Todo: binary IO
-*/
 
 // Window size.
 int WIDTH, HEIGHT;
@@ -48,18 +39,16 @@ bool keys[1024];
 GLfloat lastX = WIDTH / 2.0f, lastY = HEIGHT / 2.0f;
 bool firstMouse = true;
 
-const int lightNumber = 3;
+const int lightNumber = 5;
 const int ObjectNumber = 2;
 const int GeneralNumber = 2;
 
 std::string objects[] = {"buddha", "maxplanck"};
 std::string gobjects[] = {"buddha", "maxplanck"};
-std::string lightings[] = {"grace", "stpeters", "campus"};
+std::string lightings[] = {"galileo", "grace", "rnl", "stpeters", "uffizi"};
 std::string transferF[] = {"D", "DS", "DSI"};
 std::string albedos[] = {"01", "03", "05"};
 
-glm::vec3 hdrEffect[] = {glm::vec3(2.2f, 2.2f, 2.2f), glm::vec3(1.8f, 1.8f, 1.8f), glm::vec3(0.5f, 0.55f, 0.5f)};
-glm::vec3 glossyEffect[] = {glm::vec3(1.2f, 1.2f, 1.2f), glm::vec3(1.5f, 1.5f, 1.5f), glm::vec3(0.3f, 0.32f, 0.3f)};
 glm::vec3 albedo(0.15f, 0.15f, 0.15f);
 
 int objectIndex = -1;
@@ -67,11 +56,13 @@ int lightingIndex = -1;
 int transferFIndex = -1;
 int albedosIndex = -1;
 int materialIndex = 0;
+int bandIndex = 3;
 
 int lastObject = -1;
 int lastLighting = -1;
 int lastTransfer = -1;
-int lastMaterial = 0; // Diffuse
+int lastMaterial = 0;   // Diffuse
+int lastBand = 3;       // Quartic
 
 DiffuseObject* diffObject;
 GeneralObject* genObject;
@@ -294,11 +285,26 @@ void dataLoading()
     // 	genObject[i].readFDisk(dataFile);
     // }
 
+    glm::vec3 hdrEffect[] = { 
+        glm::vec3(2.2f, 2.2f, 2.2f), 
+        glm::vec3(1.8f, 1.8f, 1.8f), 
+        glm::vec3(0.5f, 0.55f, 0.5f),
+        glm::vec3(1.8f, 1.8f, 1.8f),
+        glm::vec3(1.8f, 1.8f, 1.8f)
+    };
+    glm::vec3 glossyEffect[] = { 
+        glm::vec3(1.2f, 1.2f, 1.2f), 
+        glm::vec3(1.5f, 1.5f, 1.5f), 
+        glm::vec3(0.3f, 0.32f, 0.3f),
+        glm::vec3(1.5f, 1.5f, 1.5f),
+        glm::vec3(1.5f, 1.5f, 1.5f)
+    };
     for (size_t i = 0; i < lightNumber; i++)
     {
-        std::string lightPattern = "processedData/lightings/" + lightings[i] + "_probe.dat";
+        std::string lightPattern = "processedData/lightings/quartic/" + lightings[i] + "_probe.dat";
         lighting[i].init(lightPattern, hdrEffect[i], glossyEffect[i]);
     }
+    simpleL.init("processedData/lightings/quartic/simple_probe.dat", glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
     std::cout << "Done" << std::endl;
 
@@ -306,11 +312,6 @@ void dataLoading()
     transferFIndex = 0;
     objectIndex = 0;
     lightingIndex = 0;
-    // changeScene(1,0);
-    // changeLight(0);
-    // changeObject(1);
-
-    simpleL.init("processedData/lightings/simple_probe.dat", glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
     if (materialIndex == 0)
     {
@@ -349,7 +350,6 @@ void dataProcessing(int argc, char** argv)
 
     if (ptype == "-l")
     {
-        // .\PRT.exe -l xxx_probe.hdr xxx_probe.dat [band] [sample number]
         if (argc > 4)
         {
             band = atoi(argv[4]);
@@ -359,9 +359,21 @@ void dataProcessing(int argc, char** argv)
             sampleNumber = atoi(argv[5]);
         }
 
-        Lighting pattern(argv[2], PROBE, band);
-        pattern.process(sampleNumber, true);
-        pattern.write2Diskbin(argv[3]);
+        if (diffGeneal == "-s")
+        {
+            // Processing simple light.
+            // .\PRT.exe -l -s simple_probe.dat [band] [sample number]
+            Lighting simplePattern("", PROBE, band);
+            simplePattern.process(sampleNumber, false);
+            simplePattern.write2Diskbin(argv[3]);
+        }
+        else
+        {
+            // .\PRT.exe -l xxx_probe.hdr xxx_probe.dat [band] [sample number]
+            Lighting pattern(argv[2], PROBE, band);
+            pattern.process(sampleNumber, true);
+            pattern.write2Diskbin(argv[3]);
+        }
     }
     else if (ptype == "-o")
     {
@@ -490,7 +502,7 @@ void checkUIStatus()
     if (lastSimple != simpleLight)
     {
         renderer.SetupColorBuffer(transferFIndex, glm::vec3(0.0f, 0.0f, 0.0f), true);
-        std::cout << "UI: Simple Light" << std::endl;
+        std::cout << "Console UI: Simple Light" << std::endl;
         lastSimple = simpleLight;
         if (simpleLight)
             drawCubemap = false;
@@ -507,6 +519,11 @@ void checkUIStatus()
         std::cout << materialIndex << std::endl;
 
         lastMaterial = materialIndex;
+    }
+    if(lastBand != bandIndex)
+    {
+        std::cout << "Console UI: SH Order change" << std::endl;
+        lastBand = bandIndex;
     }
 }
 

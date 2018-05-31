@@ -26,6 +26,7 @@ extern int objectIndex;
 extern int lightingIndex;
 extern int transferFIndex;
 extern int materialIndex;
+extern int bandIndex;
 
 // Window.
 extern int WIDTH;
@@ -42,9 +43,11 @@ typedef enum { UNSHADOW, SHADOW, INTERREFLECT } TransferFEUM;
 
 typedef enum { BUDDHA, MAXPLANCK } ObjectEUM;
 
-typedef enum { LIGHT1, LIGHT2, LIGHT3 } LightingEUM;
+typedef enum { LIGHT1, LIGHT2, LIGHT3, LIGHT4, LIGHT5 } LightingEUM;
 
 typedef enum { DIFFUSE, GLOSSY } MaterialEUM;
+
+typedef enum { LINEAR, QUADRATIC, CUBIC, QUARTIC } BandENUM;
 
 // Axis,angle convert to quat.
 inline void AxisAngletoQuat(float* q, const float* axis, float angle)
@@ -127,14 +130,13 @@ inline void TW_CALL GetAutoRotateCB(void* value, void* clientData)
 
 inline void UIInit()
 {
-    TwBar *bar, *info; // Pointer to a tweak bar
     float axis[] = {0.0f, 1.0f, 0.0f};
     float angle = 0.0f;
 
     TwInit(TW_OPENGL_CORE, NULL);
     TwWindowSize(WIDTH, HEIGHT);
 
-    bar = TwNewBar("Console");
+    TwBar* bar = TwNewBar("Console");
     TwDefine(" GLOBAL help='This example shows how to integrate AntTweakBar with GLFW and OpenGL.' ");
     TwDefine(" Console size='250 440' color='96 216 224' position='3 10' ");
 
@@ -142,15 +144,20 @@ inline void UIInit()
         TwEnumVal MaterialEV[2] = {{DIFFUSE, "diffuse"}, {GLOSSY, "glossy"}};
         TwType MaterialType = TwDefineEnum("Material Type", MaterialEV, 2);
         // Add 'Material Type' to 'bar': it is a modifable variable of type MaterialType.
-        TwAddVarRW(bar, "Material Type", MaterialType, &materialIndex,
-                   " keyIncr='<' keyDecr='>' help='Change object.' ");
+        TwAddVarRW(bar, "Material Type", MaterialType, &materialIndex, " help='Change object.' ");
+    }
+
+    {
+        TwEnumVal BandEV[4] = {{LINEAR, "linear"}, {QUADRATIC, "quadratic"}, {CUBIC, "cubic"}, {QUARTIC, "quartic"}};
+        TwType BandType = TwDefineEnum("SH Order", BandEV, 4);
+        TwAddVarRW(bar, "SH Order", BandType, &bandIndex, " help='Change SH order.' ");
     }
 
     TwAddVarRW(bar, "ObjRotation", TW_TYPE_QUAT4F, &g_Rotation,
                " label='Object Rotation' opened=false help='Change the object orientation.' ");
 
     TwAddVarCB(bar, "AutoRotate", TW_TYPE_BOOL32, SetAutoRotateCB, GetAutoRotateCB, NULL,
-               " label='Auto-Rotate' key=space help='Toggle auto-rotate mode.' ");
+               " label='Auto-Rotate' help='Toggle auto-rotate mode.' ");
 
     TwAddVarRW(bar, "CameraRotation", TW_TYPE_DIR3F, &camera_pos,
                " label='Camera Rotation' opened=true help='Change the camera direction.'");
@@ -164,25 +171,24 @@ inline void UIInit()
     {
         TwEnumVal ObjectEV[2] = {{BUDDHA, "buddha"}, {MAXPLANCK, "maxplanck"}};
         TwType ObjectType = TwDefineEnum("ObjectType", ObjectEV, 2);
-        TwAddVarRW(bar, "Object Type", ObjectType, &objectIndex, " keyIncr='<' keyDecr='>' help='Change object.' ");
+        TwAddVarRW(bar, "Object Type", ObjectType, &objectIndex, " help='Change object.' ");
     }
 
     {
         TwEnumVal tranFEV[3] = {{UNSHADOW, "unshadowed"}, {SHADOW, "shadowed"}, {INTERREFLECT, "interreflected"}};
         TwType tranFType = TwDefineEnum("tranFType", tranFEV, 3);
-        TwAddVarRW(bar, "Transfer Type", tranFType, &transferFIndex,
-                   " keyIncr='<' keyDecr='>' help='Change transfer function.' ");
+        TwAddVarRW(bar, "Transfer Type", tranFType, &transferFIndex, " help='Change transfer function.' ");
     }
 
     {
-        TwEnumVal LightingEV[3] = {{LIGHT1, "grace"}, {LIGHT2, "stpeters"}, {LIGHT3, "campus"}};
-        TwType LightType = TwDefineEnum("Lighting", LightingEV, 3);
-        TwAddVarRW(bar, "Environment Lighting", LightType, &lightingIndex,
-                   " keyIncr='<' keyDecr='>' help='Change object.' ");
+        TwEnumVal LightingEV[5] = {
+            {LIGHT1, "galileo"}, {LIGHT2, "grace"}, {LIGHT3, "rnl"}, {LIGHT4, "stpeters"}, {LIGHT5, "uffizi"}
+        };
+        TwType LightType = TwDefineEnum("Lighting", LightingEV, 5);
+        TwAddVarRW(bar, "Environment Lighting", LightType, &lightingIndex, " help='Change lighting.' ");
     }
-    // TwAddVarRW(bar, "Multi Sampling", TW_TYPE_BOOL32, &b_multiSampling, NULL);
 
-    info = TwNewBar("Mesh");
+    TwBar* info = TwNewBar("Mesh");
     TwDefine("Mesh size='250 320' text=light  color='40 40 40' position='3 450' valueswidth=100");
 
     TwAddVarRO(info, "FPS", TW_TYPE_UINT32, &fps, " label='FPS: ' ");

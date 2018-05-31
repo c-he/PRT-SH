@@ -9,22 +9,26 @@
 #include "utils.h"
 
 // Constructor for preprocessing.
-Lighting::Lighting(std::string path, LightType type, int band)
+Lighting::Lighting(std::string path, LightType type, int band):
+    _path(path), _ltype(type), _band(band)
 {
-    std::cout << "Lighting probe: " << path << std::endl;
-    _path = path;
-    _ltype = type;
-    _band = band;
+    if (path.empty())
+    {
+        std::cout << "Lighting probe: simple light" << std::endl;
+    }
+    else
+    {
+        std::cout << "Lighting probe: " << path << std::endl;
+        // Loading hdr textures.
+        std::cout << "Loading HDR texture: " << path << std::endl;
 
-    // Loading hdr textures.
-    std::cout << "Loading HDR texture: " << path << std::endl;
+        FILE* file = fopen(path.c_str(), "rb");
+        RGBE_ReadHeader(file, &_width, &_height, NULL);
+        _data = new float[3 * _width * _height];
+        RGBE_ReadPixels_RLE(file, _data, _width, _height);
 
-    FILE* file = fopen(path.c_str(), "rb");
-    RGBE_ReadHeader(file, &_width, &_height, NULL);
-    _data = new float[3 * _width * _height];
-    RGBE_ReadPixels_RLE(file, _data, _width, _height);
-
-    fclose(file);
+        fclose(file);
+    }
 }
 
 Lighting::Lighting(int band, Eigen::VectorXf coeffs[3])

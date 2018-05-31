@@ -32,16 +32,16 @@ public:
     Eigen::VectorXf _Vcoeffs[3];
 
 private:
-    LightType _ltype;
     std::string _path;
+    LightType _ltype;
+    // The band of SH basis function.
+    int _band;
 
     glm::vec3 _hdrEffect;
     glm::vec3 _glossyEffect;
 
     int _width;
     int _height;
-    // The band of SH basis function.
-    int _band;
     float* _data;
 };
 
