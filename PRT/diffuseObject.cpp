@@ -1,10 +1,10 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include "diffuseObject.h"
 #include <fstream>
 #include <istream>
 #include <sstream>
 #include <iostream>
+#include "diffuseObject.h"
 
 void DiffuseObject::write2Disk(std::string filename)
 {
@@ -66,6 +66,7 @@ void DiffuseObject::readFDisk(std::string filename)
     {
         std::string txtFile = filename + transf[k];
         std::ifstream in(txtFile);
+        assert(in);
         int size, band2;
 
         in >> size >> _band;
@@ -100,6 +101,8 @@ void DiffuseObject::readFDiskbin(std::string filename)
     {
         std::string dataFile = filename + transf[k];
         std::ifstream in(dataFile, std::ifstream::binary);
+        // Assure data file eist in order to avoid memory leak.
+        assert(in);
         unsigned int size, band2;
 
         in.read((char *)&size, sizeof(unsigned int));

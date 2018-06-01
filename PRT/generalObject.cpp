@@ -276,6 +276,7 @@ void GeneralObject::readFDisk(std::string filename)
         std::string temp = filename + transsf[s];
 
         std::ifstream in(temp, std::ifstream::binary);
+        assert(in);
         //std::ifstream in(temp);
 
         int size, band2;
