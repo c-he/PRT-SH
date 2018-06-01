@@ -69,7 +69,7 @@ void Renderer::SetupColorBuffer(int type, glm::vec3 viewDir, bool diffuse)
 void Renderer::setupDiffuseBuffer(int type)
 {
     assert(_diffObject->band() == _lighting->band());
-    int vertexnumber = _diffObject->_vertexes.size() / 3;
+    int vertexnumber = _diffObject->_vertices.size() / 3;
     int band2 = _diffObject->band() * _diffObject->band();
 
     // Generate color buffer.
@@ -107,23 +107,23 @@ void Renderer::setupDiffuseBuffer(int type)
     }
     // Generate mesh buffer.
     _meshBuffer.clear();
-    int facenumber = _diffObject->_renderIndex.size() / 3;
+    int facenumber = _diffObject->_indices.size() / 3;
     for (int i = 0; i < facenumber; ++i)
     {
         int offset = 3 * i;
         int index[3] = {
-            _diffObject->_renderIndex[offset + 0],
-            _diffObject->_renderIndex[offset + 1],
-            _diffObject->_renderIndex[offset + 2]
+            _diffObject->_indices[offset + 0],
+            _diffObject->_indices[offset + 1],
+            _diffObject->_indices[offset + 2]
         };
 
         for (int j = 0; j < 3; ++j)
         {
             int Vindex = 3 * index[j];
             MeshVertex vertex = {
-                _diffObject->_vertexes[Vindex + 0],
-                _diffObject->_vertexes[Vindex + 1],
-                _diffObject->_vertexes[Vindex + 2],
+                _diffObject->_vertices[Vindex + 0],
+                _diffObject->_vertices[Vindex + 1],
+                _diffObject->_vertices[Vindex + 2],
                 _colorBuffer[Vindex + 0],
                 _colorBuffer[Vindex + 1],
                 _colorBuffer[Vindex + 2]
@@ -175,13 +175,13 @@ void Renderer::setupGeneralBuffer(int type, vec3 viewDir)
     std::cout << "buffer type " << type << std::endl;
 
     assert(_genObject->band() == _lighting->band());
-    int vertexnumber = _genObject->_vertexes.size() / 3;
+    int vertexnumber = _genObject->_vertices.size() / 3;
     int band = _genObject->band();
     int band2 = band * band;
 
     // Generate color buffer.
     _colorBuffer.clear();
-    _colorBuffer.resize(_genObject->_vertexes.size());
+    _colorBuffer.resize(_genObject->_vertices.size());
 
     //std::cout << "viewDir"  << viewDir.x << ' '<< viewDir.y << ' ' << viewDir.z << std::endl;
     int validNumber = 0;
@@ -189,8 +189,8 @@ void Renderer::setupGeneralBuffer(int type, vec3 viewDir)
     for (int i = 0; i < vertexnumber; ++i)
     {
         int offset = 3 * i;
-        vec3 position = vec3(_genObject->_vertexes[offset], _genObject->_vertexes[offset + 1],
-                             _genObject->_vertexes[offset + 2]);
+        vec3 position = vec3(_genObject->_vertices[offset], _genObject->_vertices[offset + 1],
+                             _genObject->_vertices[offset + 2]);
         vec3 normal = vec3(_genObject->_normals[offset], _genObject->_normals[offset + 1],
                            _genObject->_normals[offset + 2]);
 
@@ -348,23 +348,23 @@ void Renderer::setupGeneralBuffer(int type, vec3 viewDir)
     }
     // Generate mesh buffer.
     _meshBuffer.clear();
-    int facenumber = _genObject->_renderIndex.size() / 3;
+    int facenumber = _genObject->_indices.size() / 3;
     for (int i = 0; i < facenumber; ++i)
     {
         int offset = 3 * i;
         int index[3] = {
-            _genObject->_renderIndex[offset + 0],
-            _genObject->_renderIndex[offset + 1],
-            _genObject->_renderIndex[offset + 2]
+            _genObject->_indices[offset + 0],
+            _genObject->_indices[offset + 1],
+            _genObject->_indices[offset + 2]
         };
 
         for (int j = 0; j < 3; ++j)
         {
             int Vindex = 3 * index[j];
             MeshVertex vertex = {
-                _genObject->_vertexes[Vindex + 0],
-                _genObject->_vertexes[Vindex + 1],
-                _genObject->_vertexes[Vindex + 2],
+                _genObject->_vertices[Vindex + 0],
+                _genObject->_vertices[Vindex + 1],
+                _genObject->_vertices[Vindex + 2],
                 _colorBuffer[Vindex + 0],
                 _colorBuffer[Vindex + 1],
                 _colorBuffer[Vindex + 2]
@@ -406,13 +406,13 @@ void Renderer::objDraw()
     glBindVertexArray(_VAO);
     if (_genObject == nullptr)
     {
-        vertices = _diffObject->_vertexes.size() / 3;
-        faces = _diffObject->_renderIndex.size() / 3;
+        vertices = _diffObject->_vertices.size() / 3;
+        faces = _diffObject->_indices.size() / 3;
     }
     else if (_diffObject == nullptr)
     {
-        vertices = _genObject->_vertexes.size() / 3;
-        faces = _genObject->_renderIndex.size() / 3;
+        vertices = _genObject->_vertices.size() / 3;
+        faces = _genObject->_indices.size() / 3;
     }
 
     glDrawArrays(GL_TRIANGLES, 0, _meshBuffer.size());

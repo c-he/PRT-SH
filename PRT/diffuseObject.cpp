@@ -1,27 +1,24 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include "diffuseObject.h"
+#include <fstream>
+#include <istream>
+#include <sstream>
+#include <iostream>
 
-void DiffuseObject::write2Disk(string filename)
+void DiffuseObject::write2Disk(std::string filename)
 {
     std::ofstream out(filename);
-    int size = _vertexes.size() / 3;
+    int size = _vertices.size() / 3;
     int band2 = _band * _band;
 
-    out << _vertexes.size() << std::endl;
+    out << _vertices.size() << std::endl;
     out << _band << std::endl;
 
     for (int i = 0; i < size; ++i)
     {
         for (int j = 0; j < band2; ++j)
         {
-            /*if(_isnan(_TransferFunc[i][j].x)
-                || _isnan(_TransferFunc[i][j].y)
-                || _isnan(_TransferFunc[i][j].z)
-                )
-            {
-                std::cout << "NaN!"<< std::endl;
-                exit(-1);
-            }*/
-
             out << _TransferFunc[i][j].x << ' '
                 << _TransferFunc[i][j].y << ' '
                 << _TransferFunc[i][j].z << ' ';
@@ -30,53 +27,48 @@ void DiffuseObject::write2Disk(string filename)
     }
 
     out.close();
-    std::cout << "Write done." << std::endl;
+    std::cout << "Diffuse object generated." << std::endl;
 }
 
-void DiffuseObject::write2Diskbin(string filename)
+void DiffuseObject::write2Diskbin(std::string filename)
 {
     std::ofstream out;
     out.open(filename.c_str(), std::ofstream::binary);
-    int size = _vertexes.size() / 3;
+    int size = _vertices.size() / 3;
     int band2 = _band * _band;
 
     out.write((char *)&size, sizeof(unsigned int));
     out.write((char *)&_band, sizeof(int));
-    //out << _band << std::endl;
+    //out << "band = " _band << std::endl;
 
     for (int i = 0; i < size; ++i)
     {
         for (int j = 0; j < band2; ++j)
         {
-            /*out << _TransferFunc[i][j].x  << ' '
-                << _TransferFunc[i][j].y  << ' '
-                << _TransferFunc[i][j].z  << ' ';*/
             out.write((char *)&_TransferFunc[i][j].x, sizeof(float));
             out.write((char *)&_TransferFunc[i][j].y, sizeof(float));
             out.write((char *)&_TransferFunc[i][j].z, sizeof(float));
         }
-        //out << std::endl;
     }
 
     out.close();
-    std::cout << "Write done." << std::endl;
+    std::cout << "Diffuse object generated." << std::endl;
 }
 
-void DiffuseObject::readFDisk(string filename)
+void DiffuseObject::readFDisk(std::string filename)
 {
-    string transf[3] = {"D01.txt", "DS01.txt", "DSI01.txt"};
+    std::string transf[3] = {"D01.txt", "DS01.txt", "DSI01.txt"};
 
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < 3; i++)
         _DTransferFunc[i].clear();
 
-    for (int k = 0; k < 3; ++k)
+    for (int k = 0; k < 3; k++)
     {
-        string unshadowed = filename + transf[k];
-        std::ifstream in(unshadowed);
+        std::string txtFile = filename + transf[k];
+        std::ifstream in(txtFile);
         int size, band2;
 
         in >> size >> _band;
-
         band2 = _band * _band;
 
         vector<vec3> empty(band2, vec3(0, 0, 0));
@@ -92,242 +84,195 @@ void DiffuseObject::readFDisk(string filename)
                     >> _DTransferFunc[k][i][j].z;
             }
         }
-
         in.close();
     }
 }
 
-void DiffuseObject::readFDiskbin(string filename)
+void DiffuseObject::readFDiskbin(std::string filename)
 {
     // string transf[3] = {"D01.dat","DS01.dat","DSI01.dat"};
-    string transf[2] = {"D01.dat", "DS01.dat"};
+    std::string transf[1] = {"DU.dat"};
 
-    for (int i = 0; i < 2; ++i)
+    for (int i = 0; i < 1; ++i)
         _DTransferFunc[i].clear();
 
-    for (int k = 0; k < 2; ++k)
+    for (int k = 0; k < 1; ++k)
     {
-        string unshadowed = filename + transf[k];
-        std::ifstream in(unshadowed, ifstream::binary);
+        std::string dataFile = filename + transf[k];
+        std::ifstream in(dataFile, std::ifstream::binary);
         unsigned int size, band2;
 
         in.read((char *)&size, sizeof(unsigned int));
         in.read((char *)&_band, sizeof(int));
 
-        //in >> size >> _band;
-
-
         band2 = _band * _band;
 
-        vector<vec3> empty(band2, vec3(0, 0, 0));
+        std::vector<glm::vec3> empty(band2, glm::vec3(0.0f));
 
-        for (unsigned i = 0; i < size; ++i)
+        for (size_t i = 0; i < size; ++i)
         {
             _DTransferFunc[k].push_back(empty);
 
-            for (unsigned j = 0; j < band2; ++j)
+            for (size_t j = 0; j < band2; ++j)
             {
-                /*	in >> _DTransferFunc[k][i][j].x 
-                       >> _DTransferFunc[k][i][j].y
-                       >> _DTransferFunc[k][i][j].z ;*/
-
                 in.read((char *)&_DTransferFunc[k][i][j].x, sizeof(float));
                 in.read((char *)&_DTransferFunc[k][i][j].y, sizeof(float));
                 in.read((char *)&_DTransferFunc[k][i][j].z, sizeof(float));
             }
         }
-
         in.close();
     }
 }
 
-void DiffuseObject::diffuseUnshadow(int size, int band2, Sampler* sampler, int type, BVHTree* Inbvht = NULL)
+void DiffuseObject::diffuseUnshadow(int size, int band2, Sampler* sampler, TransferType type, BVHTree* Inbvht)
 {
     bool shadow = false;
-    if (type > 1) shadow = true;
+    if (type != T_UNSHADOW)
+    {
+        shadow = true;
+    }
 
-    bool visiblity = true;
-    int sampNumber = sampler->_samples.size();
+    bool visibility;
 
-    BVHTree bvht;
-
-    vector<vec3> empty(band2, vec3(0.0f, 0.0f, 0.0f));
+    std::vector<glm::vec3> empty(band2, glm::vec3(0.0f));
     _TransferFunc.resize(size, empty);
 
+    // Build BVH.
+    BVHTree bvht;
     if (shadow)
     {
-        if (type < 7)
+        if (type == T_SHADOW)
             bvht.build(*this);
         else
             bvht = *Inbvht;
     }
 
+    // Sample.
+    const int sampleNumber = sampler->_samples.size();
+
 #pragma omp parallel for
-    for (int i = 0; i < size; ++i)
+    for (int i = 0; i < size; i++)
     {
         int index = 3 * i;
 
-        glm::vec3 normal(_normals[index], _normals[index + 1], _normals[index + 2]);
-        normal = glm::normalize(normal);
+        glm::vec3 normal(_normals[index + 0], _normals[index + 1], _normals[index + 2]);
 
-        int negeNumber = 0;
         int vNumber = 0;
-        for (int j = 0; j < sampNumber; ++j)
+        for (int j = 0; j < sampleNumber; j++)
         {
             Sample stemp = sampler->_samples[j];
-            float geo = glm::dot(normal, glm::normalize(stemp._cartesCoord));
+            float H = std::max(glm::dot(glm::normalize(normal), glm::normalize(stemp._cartesCoord)), 0.0f);
 
-            if (geo <= 0.0f)
-            {
-                negeNumber++;
-                continue;
-            }
-            //shadow
+            // Shadow.
             if (shadow)
             {
-                Ray testRay(vec3(
-                                _vertexes[index],
-                                _vertexes[index + 1],
-                                _vertexes[index + 2]),
-                            stemp._cartesCoord
-                );
-                testRay._o += 2 * M_DELTA * normal;
-                visiblity = !bvht.interTest(testRay);
-
-                if (visiblity == true)
-                {
-                    vNumber++;
-                }
+                Ray testRay(glm::vec3(_vertices[index + 0], _vertices[index + 1], _vertices[index + 2]),
+                            stemp._cartesCoord);
+                visibility = !bvht.interTest(testRay);
             }
             else
             {
-                visiblity = true;
+                visibility = true;
             }
 
-            if (!visiblity)
-                continue;
-
+            if (!visibility)
+            {
+                H = 0.0f;
+            }
+            // Projection.
             for (int k = 0; k < band2; ++k)
             {
                 float SHvalue = stemp._SHvalue[k];
 
-                _TransferFunc[i][k] += _albedo * SHvalue * geo;
+                _TransferFunc[i][k] += _albedo * SHvalue * H;
             }
         }
-
-        //std::cout <<"posNumber:" <<  (4096 - negeNumber)<< endl;
-        //std::cout <<"vNumber:" <<  vNumber << endl;
-
-        //_hitRayNumber[i] = sampNumber - vNumber;
-
-        //		if(!(i%10))
-        //		std::cout << i << std::endl;
     }
-
-    float weight = 4.0f * (float)MY_PI / sampler->_samples.size();
+    // Normalization.
+    float weight = 4.0f * M_PI / sampler->_samples.size();
 #pragma omp parallel for
-    for (int i = 0; i < size; ++i)
+    for (int i = 0; i < size; i++)
     {
-        //std::cout << i << std::endl;
         for (int j = 0; j < band2; ++j)
         {
             _TransferFunc[i][j] *= weight;
         }
     }
-    if (type == 1)
-        std::cout << "Unshadowed Transfer function done!" << std::endl;
+    if (type == T_UNSHADOW)
+        std::cout << "Unshadowed Transfer vector generated." << std::endl;
 }
 
-void DiffuseObject::diffuseShadow(int size, int band2, Sampler* sampler, int type, BVHTree* Inbvht = NULL)
+void DiffuseObject::diffuseShadow(int size, int band2, Sampler* sampler, TransferType type, BVHTree* Inbvht)
 {
-    std::cout << "Shadow begin" << std::endl;
-
     diffuseUnshadow(size, band2, sampler, type, Inbvht);
-    if (type == 3)
-        std::cout << "Shadowed Transfer function done!" << std::endl;
+    if (type == T_SHADOW)
+        std::cout << "Shadowed Transfer vector generated." << std::endl;
     //system("pause");
 }
 
-void DiffuseObject::interreflect(int size, int band2, Sampler* sampler, int type, int bounce = 1)
+void DiffuseObject::interreflect(int size, int band2, Sampler* sampler, TransferType type, int bounce = 1)
 {
-    //ifstream in(_modelname + "rtresult.txt");
-
     BVHTree bvht;
     bvht.build(*this);
 
     diffuseShadow(size, band2, sampler, type, &bvht);
 
+    const int sampleNumber = sampler->_samples.size();
 
-    int sampleNumber = sampler->_samples.size();
-
-
-    vector<vector<vec3>>* interReflect = new vector<vector<vec3>>[bounce + 1];
+    auto interReflect = new std::vector<std::vector<glm::vec3>>[bounce + 1];
 
     interReflect[0] = _TransferFunc;
-    vector<vec3> empty(band2, vec3(0.0f, 0.0f, 0.0f));
+    std::vector<glm::vec3> empty(band2, glm::vec3(0.0f));
 
-    float weight = 4.0f * (float)MY_PI / sampleNumber;
+    float weight = 4.0f * M_PI / sampleNumber;
 
-    for (int k = 0; k < bounce; ++k)
+    for (int k = 0; k < bounce; k++)
     {
-        vector<vector<vec3>> zeroVector(size, empty);
+        std::vector<std::vector<glm::vec3>> zeroVector(size, empty);
         interReflect[k + 1].resize(size);
 
 #pragma omp parallel for
-        for (int i = 0; i < size; ++i)
+        for (int i = 0; i < size; i++)
         {
             int offset = 3 * i;
-            vec3 normal = vec3(_normals[offset], _normals[offset + 1], _normals[offset + 2]);
+            glm::vec3 normal = glm::vec3(_normals[offset + 0], _normals[offset + 1], _normals[offset + 2]);
 
-            //int indirectSize = _rayTraceResult[i].size();
-
-            for (int j = 0; j < sampleNumber; ++j)
+            for (int j = 0; j < sampleNumber; j++)
             {
                 Sample stemp = sampler->_samples[j];
-                Ray rtemp(vec3(
-                              _vertexes[offset],
-                              _vertexes[offset + 1],
-                              _vertexes[offset + 2]),
-                          stemp._cartesCoord
-                );
-                rtemp._o += 2 * M_DELTA * normal;
+                Ray rtemp(glm::vec3(_vertices[offset + 0], _vertices[offset + 1], _vertices[offset + 2]),
+                          stemp._cartesCoord);
 
-                bool visiblity = !bvht.interTest(rtemp);
-                if (visiblity)
+                bool visibility = !bvht.interTest(rtemp);
+                if (visibility)
                     continue;
-                //Ray rtemp;
-
-                /*	in >> rtemp._dir.x >> rtemp._dir.y >> rtemp._dir.z >> rtemp._index 
-                        >> rtemp._o.x >> rtemp._o.y >> rtemp._o.z >> rtemp._t >> rtemp._tmax >> rtemp._tmin;*/
-
-                //rtemp.normalize();
-
-                float geo = glm::dot(rtemp._dir, normal);
-                if (geo <= 0) continue;
+                // The direction which is invisibile is where the indirect radiance comes from.
+                float H = std::max(glm::dot(rtemp._dir, normal), 0.0f);
 
                 int triIndex = 3 * rtemp._index;
                 int voffset[3];
-                vec3 p[3];
-                vector<vec3>* SHTrans[3];
-                for (int m = 0; m < 3; ++m)
+                glm::vec3 p[3];
+                std::vector<glm::vec3>* SHTrans[3];
+                for (int m = 0; m < 3; m++)
                 {
-                    voffset[m] = _renderIndex[triIndex + m];
+                    voffset[m] = _indices[triIndex + m];
                     SHTrans[m] = &interReflect[k][voffset[m]];
                     voffset[m] *= 3;
-                    p[m] = vec3(_vertexes[voffset[m]], _vertexes[voffset[m] + 1], _vertexes[voffset[m] + 2]);
+                    p[m] = glm::vec3(_vertices[voffset[m]], _vertices[voffset[m] + 1], _vertices[voffset[m] + 2]);
                 }
-                vec3 pc = rtemp._o + rtemp._t * rtemp._dir;
+                glm::vec3 pc = rtemp._o + (float)rtemp._t * rtemp._dir;
 
                 float u, v, w;
-                barycentric(pc, p, u, v, w); //barycentric for interpolate
+                // Barycentric coordinates for interpolation.
+                barycentric(pc, p, u, v, w);
 
-                vector<vec3> SHtemp;
+                std::vector<glm::vec3> SHtemp;
                 SHtemp.resize(band2);
 
-                for (int m = 0; m < band2; ++m)
+                for (int m = 0; m < band2; m++)
                 {
                     SHtemp[m] = w * SHTrans[0]->at(m) + u * SHTrans[1]->at(m) + v * SHTrans[2]->at(m);
-                    zeroVector[i][m] += geo * _albedo * SHtemp[m];
+                    zeroVector[i][m] += H * _albedo * SHtemp[m];
                 }
             }
         }
@@ -344,31 +289,32 @@ void DiffuseObject::interreflect(int size, int band2, Sampler* sampler, int type
         }
     }
     _TransferFunc = interReflect[bounce];
-    std::cout << "InterReflect Transfer function done!" << std::endl;
-    //in.close();
+    std::cout << "Interreflected transfer vector generated." << std::endl;
 }
 
-void DiffuseObject::project2SH(int mode, int band, int sampleNumber, int bounce = 1)
+void DiffuseObject::project2SH(int mode, int band, int sampleNumber, int bounce)
 {
     _band = band;
 
-    int size = _vertexes.size() / 3;
+    int size = _vertices.size() / 3;
     int band2 = band * band;
 
     Sampler stemp((unsigned)sqrt(sampleNumber));
     stemp.computeSH(band);
 
-
     if (mode == 1)
     {
-        diffuseUnshadow(size, band2, &stemp, 1);
+        std::cout << "Transfer Type: unshadowed" << std::endl;
+        diffuseUnshadow(size, band2, &stemp, T_UNSHADOW);
+    }
+    else if (mode == 2)
+    {
+        std::cout << "Transfer Type: shadowed" << std::endl;
+        diffuseShadow(size, band2, &stemp, T_SHADOW);
     }
     else if (mode == 3)
     {
-        diffuseShadow(size, band2, &stemp, 3);
-    }
-    else if (mode == 7)
-    {
-        interreflect(size, band2, &stemp, 7, bounce);
+        std::cout << "Transfer Type: interreflect" << std::endl;
+        interreflect(size, band2, &stemp, T_INTERREFLECT, bounce);
     }
 }

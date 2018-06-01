@@ -1,32 +1,28 @@
 #ifndef DIFFUSEOBJECT_H_
 #define DIFFUSEOBJECT_H_
 
+#include "bvhTree.h"
+#include "sampler.h"
 #include "object.h"
-#include "utils.h"
 
 class DiffuseObject : public Object
 {
-
 public:
-	void project2SH(int mode,int band,int sampleNumber,int bounce);
-
-	void write2Disk(string filename);
-	void write2Diskbin(string filename);
-	void readFDisk(string filename);
-	void readFDiskbin(string filename);
-
-	vector<vector<vec3>> _DTransferFunc[3];
+    void project2SH(int mode, int band, int sampleNumber, int bounce) override;
+    void write2Disk(std::string filename) override;
+    void write2Diskbin(std::string filename);
+    void readFDisk(std::string filename) override;
+    void readFDiskbin(std::string filename);
+    // For read.
+    std::vector<std::vector<glm::vec3>> _DTransferFunc[3];
 
 private:
-	
-	void diffuseUnshadow(int size,int band2,Sampler *sampler,int type,BVHTree* Inbvht);
-	void diffuseShadow(int size,int band2,Sampler *sampler, int type,BVHTree* Inbvht);
-	void interreflect(int size,int band2,Sampler *sampler,int type,int bounce);
 
-
-	vector<vector<vec3>> _TransferFunc;//transform function for diffuse material
-	
-
+    void diffuseUnshadow(int size, int band2, Sampler* sampler, TransferType type, BVHTree* Inbvht = nullptr);
+    void diffuseShadow(int size, int band2, Sampler* sampler, TransferType type, BVHTree* Inbvht = nullptr);
+    void interreflect(int size, int band2, Sampler* sampler, TransferType type, int bounce);
+    // For write.
+    std::vector<std::vector<glm::vec3>> _TransferFunc;
 };
 
 #endif

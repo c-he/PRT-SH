@@ -125,28 +125,6 @@ void changeTransfer(int index);
 
 int main(int argc, char** argv)
 {
-    // Preprocess light.
-    /*argc = 6;
-    argv[0] = "prt";
-    argv[1] = "-l";
-
-    argv[2] = "Lighting/cubemaptest.bmp";
-    argv[3] = "ProcessedData/simple_probe.dat";
-
-    argv[4] = "4";
-    argv[5] = "4096";*/
-
-    // Preprocess model.
-    /*argc = 7;
-    argv[0] = "prt";
-    argv[1] = "-o";
-    argv[2] = "-g";
-    argv[3] = "1";
-    argv[4] = "Scene/buddha.obj";
-    argv[5] = "Time/buddhaG01.dat";
-    argv[6] = "4";
-    argv[7] = "4096";*/
-
     if (argc >= 2)
     {
         dataProcessing(argc, argv);
@@ -207,7 +185,7 @@ int main(int argc, char** argv)
         glDepthFunc(GL_LESS);
         // Anti-aliasing.
         glEnable(GL_MULTISAMPLE);
-        glfwSwapInterval(0);
+        glfwSwapInterval(1);
 
         // Do some initialization (including loading data, shaders, models, etc.)
         dataLoading();
@@ -272,7 +250,7 @@ void dataLoading()
     for (size_t i = 0; i < ObjectNumber; i++)
     {
         std::string objFile = "Scene/" + objects[i] + ".obj";
-        std::string dataFile = "processedData/objects/" + objects[i];
+        std::string dataFile = "processedData/objects/quartic/" + objects[i];
         diffObject[i].init(objFile, albedo);
         diffObject[i].readFDiskbin(dataFile);
     }
@@ -287,14 +265,14 @@ void dataLoading()
 
     glm::vec3 hdrEffect[] = { 
         glm::vec3(2.2f, 2.2f, 2.2f), 
-        glm::vec3(1.8f, 1.8f, 1.8f), 
+        glm::vec3(2.2f, 2.2f, 2.2f),
         glm::vec3(0.5f, 0.55f, 0.5f),
         glm::vec3(1.8f, 1.8f, 1.8f),
         glm::vec3(1.8f, 1.8f, 1.8f)
     };
     glm::vec3 glossyEffect[] = { 
         glm::vec3(1.2f, 1.2f, 1.2f), 
-        glm::vec3(1.5f, 1.5f, 1.5f), 
+        glm::vec3(1.2f, 1.2f, 1.2f),
         glm::vec3(0.3f, 0.32f, 0.3f),
         glm::vec3(1.5f, 1.5f, 1.5f),
         glm::vec3(1.5f, 1.5f, 1.5f)

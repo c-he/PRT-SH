@@ -1,4 +1,4 @@
-#ifndef UTILS_H_
+﻿#ifndef UTILS_H_
 #define UTILS_H_
 
 const double MY_PI = 3.14159265358979323846;
@@ -13,6 +13,7 @@ const float M_DELTA = 1e-6f;
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 using glm::vec3;
 using std::cout;
@@ -20,7 +21,7 @@ using std::endl;
 
 struct Triangle
 {
-    vec3 _v0, _v1, _v2;
+    glm::vec3 _v0, _v1, _v2;
     int _index;
 
     Triangle()
@@ -36,40 +37,29 @@ struct Triangle
 
 struct Ray
 {
-    vec3 _o; //origin
-    vec3 _dir; //direction
-    vec3 _inv;
+    // Origin.
+    glm::vec3 _o;
+    // Direction.
+    glm::vec3 _dir;
+    glm::vec3 _inv;
+    // Intersection parameter.
+    double _tmin;
+    double _tmax;
+    double _t;
+    int _index;
 
-    float _tmin;
-    float _tmax;
-    float _t; // intersect parameter
-    int _index; //intersect index
-
-    Ray()
-    {
-    }
-
-    Ray(vec3 o, vec3 d, float tmin = 0.0f, float tmax = M_INFINITE)
+    Ray() = default;
+    // Set tmin for avoiding the "epsilon problem" or the shadow acne problem.
+    Ray(glm::vec3 o, glm::vec3 d, double tmin = M_DELTA, double tmax = DBL_MAX)
         : _o(o), _dir(d), _tmin(tmin), _tmax(tmax)
-    {
-        normalize();
-    }
-
-    void normalize()
     {
         _inv.x = 1.0f / _dir.x;
         _inv.y = 1.0f / _dir.y;
         _inv.z = 1.0f / _dir.z;
 
-        _t = (float)M_INFINITE;
-        float length = sqrt(_dir.x * _dir.x + _dir.y * _dir.y + _dir.z * _dir.z);
-
-        if (fabs(length) <= M_ZERO)
-            return;
-
-        _dir.x /= length;
-        _dir.y /= length;
-        _dir.z /= length;
+        _t = DBL_MAX;
+        // Normalize.
+        _dir = glm::normalize(_dir);
     }
 };
 
@@ -139,89 +129,80 @@ inline float random0to1(int n)
     return (rand() % (n + 1)) / (float)n;
 }
 
-inline void barycentric(vec3 pc, vec3 p[3], float& u, float& v, float& w)
+/*
+ * Compute barycentric coordinates (u, v, w) for point pc with respect to triangle (p[0], p[1], p[2]).
+ * For more information, please refer: Real-Time Collision Detection, Christer Ericson, pp. 47-48
+ */
+inline void barycentric(glm::vec3 pc, glm::vec3 p[3], float& u, float& v, float& w)
 {
-    vec3 x = 100.0f * (p[1] - p[0]);
-    vec3 y = 100.0f * (p[2] - p[0]);
-    vec3 pv = 100.0f * (pc - p[0]);
+    glm::vec3 v0 = p[1] - p[0];
+    glm::vec3 v1 = p[2] - p[0];
+    glm::vec3 v2 = pc - p[0];
 
-    float A = glm::dot(x, x);
-    float B = glm::dot(x, y);
-    float C = glm::dot(y, y);
-    float E = glm::dot(pv, x);
-    float F = glm::dot(pv, y);
+    float d00 = glm::dot(v0, v0);
+    float d01 = glm::dot(v0, v1);
+    float d11 = glm::dot(v1, v1);
+    float d20 = glm::dot(v2, v0);
+    float d21 = glm::dot(v2, v1);
+    float denom = d00 * d11 - d01 * d01;
 
-    float delta = A * C - B * B;
-
-    if (fabs(delta) <= M_ZERO)
+    if (fabs(denom) < M_ZERO)
     {
-        std::cout << "Three vertices are colinear" << std::endl;
+        std::cout << "Three vertices are colinear." << std::endl;
+        for (int i = 0; i < 3; i++)
+        {
+            std::cout << "p[" << i << "] = " << glm::to_string(p[i]) << std::endl;
+        }
+        std::cout << "pc = " << glm::to_string(pc) << std::endl;
 
-        for (int i = 0; i < 3; ++i)
-            std::cout << i << ' ' << p[i].x << ' ' << p[i].y << ' ' << p[i].z << std::endl;
-
-        std::cout << "pc" << ' ' << pc.x << ' ' << pc.y << ' ' << pc.z << std::endl;
-
-        //system("pause");
-
-        //exit(-1);
-        u = v = w = 1 / 3.0f;
+        u = v = w = 1.0f / 3.0f;
         return;
     }
 
-    u = (E * C - B * F) / delta;
-    v = (A * F - B * E) / delta;
-
-    w = 1.0f - u - v;
-
-    if (_isnan(u) || _isnan(v))
-    {
-        std::cout << "NaN!" << std::endl;
-        exit(-1);
-    }
+    v = (d11 * d20 - d01 * d21) / denom;
+    w = (d00 * d21 - d01 * d20) / denom;
+    u = 1.0f - v - w;
 }
 
-inline bool rayTriangle(Ray& ray, Triangle& in) //vec3& p0,vec3 &p1,vec3 &p2)
+/*
+ * Moller–Trumbore intersection algorithm for ray triangle intersection.
+ * For more information, please refer:
+ * https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm?oldformat=true
+ */
+inline bool rayTriangle(Ray& ray, Triangle& in)
 {
-    vec3 edge1 = in._v1 - in._v0;
-    vec3 edge2 = in._v2 - in._v0;
-
-    vec3 crossVec = glm::cross(ray._dir, edge2);
-
-    float dotvalue = glm::dot(edge1, crossVec);
-
-    if (fabs(dotvalue) < M_ZERO)
+    glm::vec3 e1 = in._v1 - in._v0;
+    glm::vec3 e2 = in._v2 - in._v0;
+    glm::vec3 p = glm::cross(ray._dir, e2);
+    float a = glm::dot(e1, p);
+    if (a < M_ZERO)
+    {
+        return false;
+    }
+    float f = 1.0f / a;
+    glm::vec3 s = ray._o - in._v0;
+    float beta = f * glm::dot(s, p);
+    if(beta < 0.0f || beta > 1.0f)
     {
         return false;
     }
 
-    float inv = 1.0f / dotvalue;
-
-    vec3 diffVec = ray._o - in._v0;
-
-
-    float u = glm::dot(diffVec, crossVec) * inv;
-    if (u < 0.0f || u > 1.0f)
-        return false;
-
-    vec3 q = glm::cross(diffVec, edge1);
-
-    float v = glm::dot(ray._dir, q) * inv;
-
-    if (v < 0.0f || u + v > 1.0)
-        return false;
-
-    float t = glm::dot(edge2, q) * inv;
-    if (t <= 0.0f)
-        return false;
-
-    if (t < ray._t)
+    glm::vec3 q = glm::cross(s, e1);
+    float gamma = f * glm::dot(ray._dir, q);
+    if(gamma < 0.0f || beta + gamma > 1.0f)
     {
+        return false;
+    }
+
+    float t = f * glm::dot(e2, q);
+    if(t >= ray._tmin && t <= ray._tmax)
+    {
+        // Hit, record the hit parameter and the triangle index.
         ray._t = t;
         ray._index = in._index;
+        return true;
     }
-
-    return true;
+    return false;
 }
 
 // return value [0,2 *M_PI]

@@ -14,36 +14,39 @@ using std::vector;
 using Eigen::MatrixXf;
 using Eigen::VectorXf;
 
-class GeneralObject: public Object
+class GeneralObject : public Object
 {
-	
 public:
-	GeneralObject(){_difforGeneral = true;_glossiness = 4.0f;}
-	void project2SH(int mode,int band,int sampleNumber,int bounce);
-	void write2Disk(string filename);
-	void readFDisk(string filename);
+    GeneralObject()
+    {
+        _difforGeneral = true;
+        _glossiness = 4.0f;
+    }
 
-	void computeTBN();
-	void computeKernel();
-	void setGlossiness();
+    void project2SH(int mode, int band, int sampleNumber, int bounce);
+    void write2Disk(std::string filename);
+    void readFDisk(std::string filename);
+
+    void computeTBN();
+    void computeKernel();
+    void setGlossiness();
 
 private:
 
-	void unshadowed(int size, int band2,Sampler *sampler,int type);
-	void interReflect(int size, int band2,Sampler *sampler,int type,int bounce);
+    void unshadowed(int size, int band2, Sampler* sampler, int type);
+    void interReflect(int size, int band2, Sampler* sampler, int type, int bounce);
 public:
-	vector<MatrixXf> _TransferMatrix[2];
+    vector<MatrixXf> _TransferMatrix[2];
 
-	//vector<vec3> _tan1;
-	//vector<vec3> _tan2;
-	vector<vec4> _tangent;
+    //vector<vec3> _tan1;
+    //vector<vec3> _tan2;
+    vector<vec4> _tangent;
 
-	VectorXf _glossyKernel[3];
+    VectorXf _glossyKernel[3];
 
-	VectorXf _BRDFcoeff;
+    VectorXf _BRDFcoeff;
 
-	float _glossiness;
-
+    float _glossiness;
 };
 
 #endif

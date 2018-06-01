@@ -28,7 +28,6 @@ int BVHTree::split(int start, int size, float pivot, int axis)
 
 bool BVHTree::interTest(Ray &ray)
 {
-	ray.normalize();
 	bool result = _root->hit(ray);
 	return result;
 }
@@ -38,7 +37,7 @@ void BVHTree::build(Object &obj)
 	std::cout <<"BVHTree Build." << std::endl;
 	int faceNumber = 0;
 
-	int facenumber = obj._renderIndex.size()/3;
+	int facenumber = obj._indices.size()/3;
 	_triangles.clear();
 
 	for(int i = 0;i < facenumber; ++i)
@@ -51,11 +50,11 @@ void BVHTree::build(Object &obj)
 
 		for(int j = 0;j < 3; ++j)
 		{
-			index[j] = 3 * obj._renderIndex[offset + j];
+			index[j] = 3 * obj._indices[offset + j];
 
-			v[j].x = obj._vertexes[index[j]];
-			v[j].y = obj._vertexes[index[j] + 1];
-			v[j].z = obj._vertexes[index[j] + 2];
+			v[j].x = obj._vertices[index[j]];
+			v[j].y = obj._vertices[index[j] + 1];
+			v[j].z = obj._vertices[index[j] + 2];
 		}
 		//debug
 

@@ -1,3 +1,4 @@
+#include "bvhTree.h"
 #include "generalObject.h"
 
 void GeneralObject::computeKernel()
@@ -7,7 +8,7 @@ void GeneralObject::computeKernel()
     Sampler stemp(64);
     stemp.computeSH(_band);
     int band2 = _band * _band;
-    int vertexNumber = _vertexes.size() / 3;
+    int vertexNumber = _vertices.size() / 3;
     int sampleNumber = stemp._samples.size();
 
     float weight = 4.0f * (float)MY_PI / sampleNumber;
@@ -83,9 +84,9 @@ void GeneralObject::unshadowed(int size, int band2, Sampler* sampler, int type)
                             if (type > 1)
                             {
                                 Ray testRay(vec3(
-                                                _vertexes[offset],
-                                                _vertexes[offset + 1],
-                                                _vertexes[offset + 2]),
+                                                _vertices[offset],
+                                                _vertices[offset + 1],
+                                                _vertices[offset + 2]),
                                             stemp._cartesCoord);
 
                                 testRay._o += 2 * M_DELTA * normal;
@@ -117,7 +118,7 @@ void GeneralObject::project2SH(int mode, int band, int sampleNumber, int bounce)
     _difforGeneral = true;
     _band = band;
 
-    int size = _vertexes.size() / 3;
+    int size = _vertices.size() / 3;
     int band2 = _band * _band;
 
     Sampler stemp((unsigned)sqrt(sampleNumber));
@@ -141,8 +142,8 @@ void GeneralObject::project2SH(int mode, int band, int sampleNumber, int bounce)
 //B = (N x T) * T_w
 void GeneralObject::computeTBN()
 {
-    int vertexNumber = _vertexes.size() / 3;
-    int faceNumber = _renderIndex.size() / 3;
+    int vertexNumber = _vertices.size() / 3;
+    int faceNumber = _indices.size() / 3;
 
     vector<vec3> tan1;
     vector<vec3> tan2;
@@ -160,9 +161,9 @@ void GeneralObject::computeTBN()
 
         for (int j = 0; j < 3; ++j)
         {
-            vindex[j] = 3 * _renderIndex[renderIndexoffset + j];
-            tindex[j] = 2 * _renderIndex[renderIndexoffset + j];
-            p[j] = vec3(_vertexes[vindex[j]], _vertexes[vindex[j] + 1], _vertexes[vindex[j] + 2]);
+            vindex[j] = 3 * _indices[renderIndexoffset + j];
+            tindex[j] = 2 * _indices[renderIndexoffset + j];
+            p[j] = vec3(_vertices[vindex[j]], _vertices[vindex[j] + 1], _vertices[vindex[j] + 2]);
             w[j] = glm::vec2(_texcoords[tindex[j]], _texcoords[tindex[j] + 1]);
 
             tindex[j] /= 2;
@@ -231,10 +232,10 @@ void GeneralObject::computeTBN()
     //std::cout << "debug" << std::endl;
 }
 
-void GeneralObject::write2Disk(string filename)
+void GeneralObject::write2Disk(std::string filename)
 {
     std::ofstream out(filename, std::ofstream::binary);
-    int size = _vertexes.size() / 3;
+    int size = _vertices.size() / 3;
     int band2 = _band * _band;
 
     out.write((char *)&size, sizeof(int));
@@ -261,9 +262,9 @@ void GeneralObject::write2Disk(string filename)
     std::cout << "Write Done" << std::endl;
 }
 
-void GeneralObject::readFDisk(string filename)
+void GeneralObject::readFDisk(std::string filename)
 {
-    string transsf[2] = {"G01.dat", "GS01.dat"};
+    std::string transsf[2] = {"G01.dat", "GS01.dat"};
 
     for (int i = 0; i < 2; ++i)
         _TransferMatrix[i].clear();
@@ -272,7 +273,7 @@ void GeneralObject::readFDisk(string filename)
 
     for (int s = 0; s < number; ++s)
     {
-        string temp = filename + transsf[s];
+        std::string temp = filename + transsf[s];
 
         std::ifstream in(temp, std::ifstream::binary);
         //std::ifstream in(temp);
