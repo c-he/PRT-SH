@@ -33,6 +33,7 @@ public:
 
 private:
     std::string _path;
+    std::string _filename;
     LightType _ltype;
     // The band of SH basis function.
     int _band;

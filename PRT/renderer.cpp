@@ -13,6 +13,7 @@ extern bool simpleLight;
 extern std::string lightings[];
 extern int lightingIndex;
 extern int objectIndex;
+extern int bandIndex;
 
 // Window.
 extern int WIDTH;
@@ -29,9 +30,9 @@ extern glm::vec3 camera_up;
 extern int g_AutoRotate;
 extern float rotateMatrix[4 * 4]; // Rotation matrix.
 
-extern DiffuseObject* diffObject;
+extern DiffuseObject** diffObject;
 extern GeneralObject* genObject;
-extern Lighting* lighting;
+extern Lighting** lighting;
 extern Lighting simpleL;
 
 // Mesh information.
@@ -499,16 +500,16 @@ void Renderer::Render()
         {
             rotatePara.push_back(glm::vec2(0.0f, 2.0f * M_PI - thetatemp));
             //rotatePara.push_back(vec2(3.0f*M_PI/2.0f,M_PI/2.0f));
-            lighting[lightingIndex].rotateZYZ(rotatePara);
+            lighting[lightingIndex][bandIndex].rotateZYZ(rotatePara);
         }
         if (materialIndex == 0)
         {
-            Setup(&diffObject[objectIndex], &lighting[lightingIndex]);
+            Setup(&diffObject[objectIndex][bandIndex], &lighting[lightingIndex][bandIndex]);
             SetupColorBuffer(transferFIndex, vec3(0.0f, 0.0f, 0.0f), true);
         }
         else
         {
-            Setup(&genObject[objectIndex], &lighting[lightingIndex]);
+            Setup(&genObject[objectIndex], &lighting[lightingIndex][bandIndex]);
             SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
         }
     }
@@ -517,7 +518,7 @@ void Renderer::Render()
     {
         if (glm::any(glm::notEqual(camera_pos, last_camera_pos)))
         {
-            Setup(&genObject[objectIndex], &lighting[lightingIndex]);
+            Setup(&genObject[objectIndex], &lighting[lightingIndex][bandIndex]);
             SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
             last_camera_pos = camera_pos;
         }

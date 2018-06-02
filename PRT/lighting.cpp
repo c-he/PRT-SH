@@ -1,12 +1,16 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include <opencv2/opencv.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include "lighting.h"
 #include "rgbe.h"
 #include "sampler.h"
 #include "shRotation.h"
 #include "simpleLighting.h"
 #include "utils.h"
+
+extern std::string bands[];
 
 // Constructor for preprocessing.
 Lighting::Lighting(std::string path, LightType type, int band):
@@ -18,9 +22,13 @@ Lighting::Lighting(std::string path, LightType type, int band):
     }
     else
     {
-        std::cout << "Lighting probe: " << path << std::endl;
+        size_t beginIndex = path.rfind('\\');
+        size_t endIndex = path.rfind('.');
+        // std::cout << "begin = " << beginIndex << "\end = " << endIndex << std::endl;
+        _filename = path.substr(beginIndex + 1, endIndex - beginIndex - 1);
+        std::cout << "Lighting probe: " << _filename << std::endl;
         // Loading hdr textures.
-        std::cout << "Loading HDR texture: " << path << std::endl;
+        std::cout << "Loading HDR texture: " << _filename << std::endl;
 
         FILE* file = fopen(path.c_str(), "rb");
         RGBE_ReadHeader(file, &_width, &_height, NULL);
@@ -159,7 +167,33 @@ void Lighting::process(int sampleNumber, bool image)
     for (int i = 0; i < band2; ++i)
     {
         _coeffs[i] = _coeffs[i] * weight;
+        // std::cout << glm::to_string(_coeffs[i]) << std::endl;
     }
+
+    // Bake an img_length * img_length image to visualize.
+    const int img_length = 120;
+    const int band_length = 120 / _band;
+    cv::Mat red(img_length, img_length, CV_32FC1);
+    cv::Mat green(img_length, img_length, CV_32FC1);
+    cv::Mat blue(img_length, img_length, CV_32FC1);
+    cv::Mat img = cv::Mat::zeros(img_length, img_length, CV_32FC3);
+    for (int i = 0; i < img_length; i++)
+    {
+        for (int j = 0; j < img_length; j++)
+        {
+            // Opencv uses BGR color format.
+            blue.at<float>(i * img_length + j) = _coeffs[(i / band_length) * _band + (j / band_length)].b;
+            green.at<float>(i * img_length + j) = _coeffs[(i / band_length) * _band + (j / band_length)].g;
+            red.at<float>(i * img_length + j) = _coeffs[(i / band_length) * _band + (j / band_length)].r;
+        }
+    }
+    std::vector<cv::Mat> channels = {blue, green, red};
+    cv::merge(channels, img);
+    cv::Mat3b img_8UC3;
+    img.convertTo(img_8UC3, CV_8UC3, 255);
+    // imshow("image", img_8UC3);
+    cv::imwrite("../../PRT/processedData/lightings/" + bands[_band - 2] + "/" + _filename + ".jpg", img_8UC3);
+    cvWaitKey(0);
 }
 
 //void Lighting::rotateZYZ(mat4 rM)//rM is rotation matrix

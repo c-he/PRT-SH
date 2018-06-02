@@ -39,15 +39,17 @@ bool keys[1024];
 GLfloat lastX = WIDTH / 2.0f, lastY = HEIGHT / 2.0f;
 bool firstMouse = true;
 
-const int lightNumber = 5;
+const int LightNumber = 5;
 const int ObjectNumber = 2;
 const int GeneralNumber = 2;
+const int BandNumber = 4;
 
 std::string objects[] = {"buddha", "maxplanck"};
 std::string gobjects[] = {"buddha", "maxplanck"};
 std::string lightings[] = {"galileo", "grace", "rnl", "stpeters", "uffizi"};
 std::string transferF[] = {"D", "DS", "DSI"};
 std::string albedos[] = {"01", "03", "05"};
+std::string bands[] = {"linear", "quadratic", "cubic", "quartic"};
 
 glm::vec3 albedo(0.15f, 0.15f, 0.15f);
 
@@ -61,12 +63,12 @@ int bandIndex = 3;
 int lastObject = -1;
 int lastLighting = -1;
 int lastTransfer = -1;
-int lastMaterial = 0;   // Diffuse
-int lastBand = 3;       // Quartic
+int lastMaterial = 0; // Diffuse
+int lastBand = 3; // Quartic
 
-DiffuseObject* diffObject;
+DiffuseObject** diffObject;
 GeneralObject* genObject;
-Lighting* lighting;
+Lighting** lighting;
 Lighting simpleL;
 Renderer renderer;
 
@@ -122,6 +124,7 @@ void checkUIStatus();
 void changeLight(int index);
 void changeObject(int index);
 void changeTransfer(int index);
+void changeBand(int index);
 
 int main(int argc, char** argv)
 {
@@ -190,7 +193,7 @@ int main(int argc, char** argv)
         // Do some initialization (including loading data, shaders, models, etc.)
         dataLoading();
         shaderLoading();
-        renderer.Init(lightNumber);
+        renderer.Init(LightNumber);
         UIInit();
         lastTime = glfwGetTime();
 
@@ -243,16 +246,20 @@ void dataLoading()
 {
     std::cout << "Loading data ................ " << std::endl;
 
-    diffObject = new DiffuseObject[ObjectNumber];
+    diffObject = new DiffuseObject*[ObjectNumber];
     genObject = new GeneralObject[GeneralNumber];
-    lighting = new Lighting[lightNumber];
+    lighting = new Lighting*[LightNumber];
 
     for (size_t i = 0; i < ObjectNumber; i++)
     {
+        diffObject[i] = new DiffuseObject[BandNumber];
         std::string objFile = "Scene/" + objects[i] + ".obj";
-        std::string dataFile = "processedData/objects/quartic/" + objects[i];
-        diffObject[i].init(objFile, albedo);
-        diffObject[i].readFDiskbin(dataFile);
+        for (size_t j = 0; j < BandNumber; j++)
+        {
+            std::string dataFile = "processedData/objects/" + bands[bandIndex] + "/" + objects[i];
+            diffObject[i][j].init(objFile, albedo);
+            diffObject[i][j].readFDiskbin(dataFile);
+        }
     }
 
     // for (size_t i = 0; i < GeneralNumber; i++)
@@ -263,44 +270,52 @@ void dataLoading()
     // 	genObject[i].readFDisk(dataFile);
     // }
 
-    glm::vec3 hdrEffect[] = { 
-        glm::vec3(2.2f, 2.2f, 2.2f), 
+    glm::vec3 hdrEffect[] = {
+        glm::vec3(2.2f, 2.2f, 2.2f),
         glm::vec3(2.2f, 2.2f, 2.2f),
         glm::vec3(0.5f, 0.55f, 0.5f),
         glm::vec3(1.8f, 1.8f, 1.8f),
         glm::vec3(1.8f, 1.8f, 1.8f)
     };
-    glm::vec3 glossyEffect[] = { 
-        glm::vec3(1.2f, 1.2f, 1.2f), 
+    glm::vec3 glossyEffect[] = {
+        glm::vec3(1.2f, 1.2f, 1.2f),
         glm::vec3(1.2f, 1.2f, 1.2f),
         glm::vec3(0.3f, 0.32f, 0.3f),
         glm::vec3(1.5f, 1.5f, 1.5f),
         glm::vec3(1.5f, 1.5f, 1.5f)
     };
-    for (size_t i = 0; i < lightNumber; i++)
+    for (size_t i = 0; i < LightNumber; i++)
     {
-        std::string lightPattern = "processedData/lightings/quartic/" + lightings[i] + "_probe.dat";
-        lighting[i].init(lightPattern, hdrEffect[i], glossyEffect[i]);
+        lighting[i] = new Lighting[BandNumber];
+        for (size_t j = 0; j < BandNumber; j++)
+        {
+            std::string lightPattern = "processedData/lightings/" + bands[bandIndex] + "/" + lightings[i] +
+                "_probe.dat";
+            lighting[i][j].init(lightPattern, hdrEffect[i], glossyEffect[i]);
+        }
     }
-    simpleL.init("processedData/lightings/quartic/simple_probe.dat", glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+    simpleL.init("processedData/lightings/quartic/simple_probe.dat", glm::vec3(1.0f, 1.0f, 1.0f),
+                 glm::vec3(1.0f, 1.0f, 1.0f));
 
     std::cout << "Done" << std::endl;
 
+    // Initialize indices.
     albedosIndex = 0;
     transferFIndex = 0;
     objectIndex = 0;
     lightingIndex = 0;
+    bandIndex = 3;
 
     if (materialIndex == 0)
     {
         // Diffuse Rendering.
-        renderer.Setup(&diffObject[0], &lighting[0]);
+        renderer.Setup(&diffObject[objectIndex][bandIndex], &lighting[lightingIndex][bandIndex]);
         renderer.SetupColorBuffer(0, glm::vec3(0.0f, 0.0f, 1.0f), true);
     }
     else
     {
         // General Rendering.
-        renderer.Setup(&genObject[0], &lighting[0]);
+        renderer.Setup(&genObject[objectIndex], &lighting[lightingIndex][bandIndex]);
         renderer.SetupColorBuffer(0, camera_dis * camera_pos, false);
     }
 
@@ -482,10 +497,7 @@ void checkUIStatus()
         renderer.SetupColorBuffer(transferFIndex, glm::vec3(0.0f, 0.0f, 0.0f), true);
         std::cout << "Console UI: Simple Light" << std::endl;
         lastSimple = simpleLight;
-        if (simpleLight)
-            drawCubemap = false;
-        else
-            drawCubemap = true;
+        drawCubemap = simpleLight;
     }
     if (lastMaterial != materialIndex)
     {
@@ -494,30 +506,29 @@ void checkUIStatus()
         {
             changeLight(lightingIndex);
         }
-        std::cout << materialIndex << std::endl;
+        std::cout << "Console UI: Material change" << std::endl;
 
         lastMaterial = materialIndex;
     }
-    if(lastBand != bandIndex)
+    if (lastBand != bandIndex)
     {
         std::cout << "Console UI: SH Order change" << std::endl;
+        changeBand(bandIndex);
         lastBand = bandIndex;
     }
 }
 
 void changeLight(int index)
 {
-    //	string lightString = "ProcessedData/"+lightings[index] + "_probe.txt";
-    //	lighting.init(lightString);
-    if (materialIndex == 1)
+    if (materialIndex == 0)
     {
-        renderer.Setup(&genObject[objectIndex], &lighting[index]);
-        renderer.SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
+        renderer.Setup(&diffObject[objectIndex][bandIndex], &lighting[index][bandIndex]);
+        renderer.SetupColorBuffer(transferFIndex, glm::vec3(0.0f, 0.0f, 0.0f), true);
     }
     else
     {
-        renderer.Setup(&diffObject[objectIndex], &lighting[index]);
-        renderer.SetupColorBuffer(transferFIndex, vec3(0.0f, 0.0f, 0.0f), true);
+        renderer.Setup(&genObject[objectIndex], &lighting[index][bandIndex]);
+        renderer.SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
     }
 }
 
@@ -525,12 +536,12 @@ void changeObject(int index)
 {
     if (materialIndex == 0)
     {
-        renderer.Setup(&diffObject[index], &lighting[lightingIndex]);
-        renderer.SetupColorBuffer(transferFIndex, vec3(0.0f, 0.0f, 0.0f), true);
+        renderer.Setup(&diffObject[index][bandIndex], &lighting[lightingIndex][bandIndex]);
+        renderer.SetupColorBuffer(transferFIndex, glm::vec3(0.0f, 0.0f, 0.0f), true);
     }
     else
     {
-        renderer.Setup(&genObject[index], &lighting[lightingIndex]);
+        renderer.Setup(&genObject[index], &lighting[lightingIndex][bandIndex]);
         renderer.SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
     }
 }
@@ -539,12 +550,26 @@ void changeTransfer(int index)
 {
     if (materialIndex == 0)
     {
-        renderer.Setup(&diffObject[objectIndex], &lighting[lightingIndex]);
-        renderer.SetupColorBuffer(index, vec3(0.0f, 0.0f, 0.0f), true);
+        renderer.Setup(&diffObject[objectIndex][bandIndex], &lighting[lightingIndex][bandIndex]);
+        renderer.SetupColorBuffer(index, glm::vec3(0.0f, 0.0f, 0.0f), true);
     }
     else
     {
-        renderer.Setup(&genObject[objectIndex], &lighting[lightingIndex]);
+        renderer.Setup(&genObject[objectIndex], &lighting[lightingIndex][bandIndex]);
+        renderer.SetupColorBuffer(index, camera_dis * camera_pos, false);
+    }
+}
+
+void changeBand(int index)
+{
+    if (materialIndex == 0)
+    {
+        renderer.Setup(&diffObject[objectIndex][index], &lighting[lightingIndex][index]);
+        renderer.SetupColorBuffer(transferFIndex, glm::vec3(0.0f, 0.0f, 0.0f), true);
+    }
+    else
+    {
+        renderer.Setup(&genObject[objectIndex], &lighting[lightingIndex][index]);
         renderer.SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
     }
 }
