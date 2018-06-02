@@ -33,7 +33,7 @@ extern float rotateMatrix[4 * 4]; // Rotation matrix.
 extern DiffuseObject** diffObject;
 extern GeneralObject* genObject;
 extern Lighting** lighting;
-extern Lighting simpleL;
+extern Lighting* simpleL;
 
 // Mesh information.
 int vertices;
@@ -89,7 +89,7 @@ void Renderer::setupDiffuseBuffer(int type)
             {
                 for (int k = 0; k < 3; ++k)
                 {
-                    lightcoeff[k] = simpleL._Vcoeffs[k](j);
+                    lightcoeff[k] = simpleL[bandIndex]._Vcoeffs[k](j);
                 }
             }
 
@@ -494,7 +494,7 @@ void Renderer::Render()
         if (simpleLight)
         {
             rotatePara.push_back(glm::vec2(theta, phi));
-            simpleL.rotateZYZ(rotatePara);
+            simpleL[bandIndex].rotateZYZ(rotatePara);
         }
         if (b_rotate)
         {

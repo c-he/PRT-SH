@@ -28,7 +28,7 @@ Lighting::Lighting(std::string path, LightType type, int band):
         _filename = path.substr(beginIndex + 1, endIndex - beginIndex - 1);
         std::cout << "Lighting probe: " << _filename << std::endl;
         // Loading hdr textures.
-        std::cout << "Loading HDR texture: " << _filename << std::endl;
+        std::cout << "Loading HDR texture: " << path << std::endl;
 
         FILE* file = fopen(path.c_str(), "rb");
         RGBE_ReadHeader(file, &_width, &_height, NULL);

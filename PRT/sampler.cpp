@@ -49,11 +49,6 @@ void Sampler::computeSH(int band)
         {
             for (int m = -l; m <= l; m++)
             {
-                if (l == 1 && m == -1)
-                {
-                    //system("pause");
-                }
-
                 int index = l * (l + 1) + m;
                 _samples[i]._SHvalue[index] = (float)SphericalH::SHvalue(
                     _samples[i]._sphericalCoord[0], _samples[i]._sphericalCoord[1], l, m);
@@ -62,7 +57,6 @@ void Sampler::computeSH(int band)
                     std::cout << "NAN." << std::endl;
                     system("pause");
                 }
-                // std::cout << _samples[i]._SHvalue[index] << std::endl;
                 if (fabs(_samples[i]._SHvalue[index]) > 1.0f)
                 {
                     std::cout << "Value more than 1." << std::endl;
@@ -70,6 +64,5 @@ void Sampler::computeSH(int band)
                 }
             }
         }
-        //std::cout << (float)i / _samples.size() << std::endl;
     }
 }

@@ -12,6 +12,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+// AntTweakBar
 #include <AntTweakBar.h>
 
 #include "UI.h"
@@ -69,7 +70,7 @@ int lastBand = 3; // Quartic
 DiffuseObject** diffObject;
 GeneralObject* genObject;
 Lighting** lighting;
-Lighting simpleL;
+Lighting* simpleL;
 Renderer renderer;
 
 // Cubemap.
@@ -256,7 +257,7 @@ void dataLoading()
         std::string objFile = "Scene/" + objects[i] + ".obj";
         for (size_t j = 0; j < BandNumber; j++)
         {
-            std::string dataFile = "processedData/objects/" + bands[bandIndex] + "/" + objects[i];
+            std::string dataFile = "processedData/objects/" + bands[j] + "/" + objects[i];
             diffObject[i][j].init(objFile, albedo);
             diffObject[i][j].readFDiskbin(dataFile);
         }
@@ -289,13 +290,18 @@ void dataLoading()
         lighting[i] = new Lighting[BandNumber];
         for (size_t j = 0; j < BandNumber; j++)
         {
-            std::string lightPattern = "processedData/lightings/" + bands[bandIndex] + "/" + lightings[i] +
+            std::string lightPattern = "processedData/lightings/" + bands[j] + "/" + lightings[i] +
                 "_probe.dat";
             lighting[i][j].init(lightPattern, hdrEffect[i], glossyEffect[i]);
         }
     }
-    simpleL.init("processedData/lightings/quartic/simple_probe.dat", glm::vec3(1.0f, 1.0f, 1.0f),
-                 glm::vec3(1.0f, 1.0f, 1.0f));
+
+    simpleL = new Lighting[BandNumber];
+    for (size_t i = 0; i < BandNumber; i++)
+    {
+        simpleL[i].init("processedData/lightings/" + bands[i] + "/simple_probe.dat", glm::vec3(1.0f, 1.0f, 1.0f),
+                        glm::vec3(1.0f, 1.0f, 1.0f));
+    }
 
     std::cout << "Done" << std::endl;
 
@@ -497,7 +503,7 @@ void checkUIStatus()
         renderer.SetupColorBuffer(transferFIndex, glm::vec3(0.0f, 0.0f, 0.0f), true);
         std::cout << "Console UI: Simple Light" << std::endl;
         lastSimple = simpleLight;
-        drawCubemap = simpleLight;
+        drawCubemap = !simpleLight;
     }
     if (lastMaterial != materialIndex)
     {

@@ -72,7 +72,10 @@ void DiffuseObject::readFDisk(std::string filename)
         in >> size >> _band;
         band2 = _band * _band;
 
-        vector<vec3> empty(band2, vec3(0, 0, 0));
+        std::cout << "Diffuse object: " << filename << std::endl;
+        std::cout << "band = " << _band << std::endl;
+
+        std::vector<glm::vec3> empty(band2, vec3(0, 0, 0));
 
         for (int i = 0; i < size; ++i)
         {
@@ -107,6 +110,9 @@ void DiffuseObject::readFDiskbin(std::string filename)
 
         in.read((char *)&size, sizeof(unsigned int));
         in.read((char *)&_band, sizeof(int));
+
+        std::cout << "Diffuse object: " << filename << std::endl;
+        std::cout << "band = " << _band << std::endl;
 
         band2 = _band * _band;
 
