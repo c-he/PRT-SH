@@ -6,12 +6,8 @@ const double M_INFINITE = 1e10f;
 const double M_ZERO = 1e-9;
 const float M_DELTA = 1e-6f;
 
-#include <ctime>
-#include <cstdlib>
 #include <iostream>
 #include <algorithm>
-
-#include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
@@ -122,11 +118,6 @@ inline int minusOnePower(int n)
     }
 
     return 1;
-}
-
-inline float random0to1(int n)
-{
-    return (rand() % (n + 1)) / (float)n;
 }
 
 /*

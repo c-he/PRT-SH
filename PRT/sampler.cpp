@@ -1,11 +1,9 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include <ctime>
 #include <iostream>
 #include <random>
 #include "sampler.h"
 #include "sphericalHarmonics.h"
-#include "utils.h"
 
 Sampler::Sampler(unsigned n)
 {
