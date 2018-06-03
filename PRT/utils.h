@@ -135,12 +135,12 @@ inline void barycentric(glm::vec3 pc, glm::vec3 p[3], float& u, float& v, float&
 
     if (fabs(denom) < M_ZERO)
     {
-        std::cout << "Three vertices are colinear." << std::endl;
-        for (int i = 0; i < 3; i++)
-        {
-            std::cout << "p[" << i << "] = " << glm::to_string(p[i]) << std::endl;
-        }
-        std::cout << "pc = " << glm::to_string(pc) << std::endl;
+        // std::cout << "Three vertices are colinear." << std::endl;
+        // for (int i = 0; i < 3; i++)
+        // {
+        //     std::cout << "p[" << i << "] = " << glm::to_string(p[i]) << std::endl;
+        // }
+        // std::cout << "pc = " << glm::to_string(pc) << std::endl;
 
         u = v = w = 1.0f / 3.0f;
         return;

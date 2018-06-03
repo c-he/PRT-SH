@@ -1,0 +1,131 @@
+- SH order: quartic
+Diffuse object: buddha
+Transfer Type: shadowed
+BVHTree: Start building
+BVHTree: Building done
+Shadowed Transfer vector generated.
+Diffuse object generated.
+Processing time:50.578 seconds
+
+Diffuse object: buddha
+Transfer Type: interreflect
+BVHTree: Start building
+BVHTree: Building done
+Interreflected transfer vector generated.
+Diffuse object generated.
+Processing time:107.062 seconds
+
+Diffuse object: maxplanck
+Transfer Type: shadowed
+BVHTree: Start building
+BVHTree: Building done
+Shadowed Transfer vector generated.
+Diffuse object generated.
+Processing time:48.953 seconds
+
+Diffuse object: maxplanck
+Transfer Type: interreflect
+BVHTree: Start building
+BVHTree: Building done
+Interreflected transfer vector generated.
+Diffuse object generated.
+Processing time:94.703 seconds
+
+- SH order: cubic
+Diffuse object: buddha
+Transfer Type: shadowed
+BVHTree: Start building
+BVHTree: Building done
+Shadowed Transfer vector generated.
+Diffuse object generated.
+Processing time:49.641 seconds
+
+Diffuse object: buddha
+Transfer Type: interreflect
+BVHTree: Start building
+BVHTree: Building done
+Interreflected transfer vector generated.
+Diffuse object generated.
+Processing time:104.547 seconds
+
+Diffuse object: maxplanck
+Transfer Type: shadowed
+BVHTree: Start building
+BVHTree: Building done
+Shadowed Transfer vector generated.
+Diffuse object generated.
+Processing time:48.078 seconds
+
+Diffuse object: maxplanck
+Transfer Type: interreflect
+BVHTree: Start building
+BVHTree: Building done
+Interreflected transfer vector generated.
+Diffuse object generated.
+Processing time:94.797 seconds
+
+- SH order: quadratic
+Diffuse object: buddha
+Transfer Type: shadowed
+BVHTree: Start building
+BVHTree: Building done
+Shadowed Transfer vector generated.
+Diffuse object generated.
+Processing time:49.203 seconds
+
+Diffuse object: buddha
+Transfer Type: interreflect
+BVHTree: Start building
+BVHTree: Building done
+Interreflected transfer vector generated.
+Diffuse object generated.
+Processing time:101.797 seconds
+
+Diffuse object: maxplanck
+Transfer Type: shadowed
+BVHTree: Start building
+BVHTree: Building done
+Shadowed Transfer vector generated.
+Diffuse object generated.
+Processing time:47.578 seconds
+
+Diffuse object: maxplanck
+Transfer Type: interreflect
+BVHTree: Start building
+BVHTree: Building done
+Interreflected transfer vector generated.
+Diffuse object generated.
+Processing time:92.891 seconds
+
+- SH order: linear
+Diffuse object: buddha
+Transfer Type: shadowed
+BVHTree: Start building
+BVHTree: Building done
+Shadowed Transfer vector generated.
+Diffuse object generated.
+Processing time:48.015 seconds
+
+Diffuse object: buddha
+Transfer Type: interreflect
+BVHTree: Start building
+BVHTree: Building done
+Interreflected transfer vector generated.
+Diffuse object generated.
+Processing time:100.328 seconds
+
+Diffuse object: maxplanck
+Transfer Type: shadowed
+BVHTree: Start building
+BVHTree: Building done
+Shadowed Transfer vector generated.
+Diffuse object generated.
+Processing time:46.437 seconds
+
+Diffuse object: maxplanck
+Transfer Type: interreflect
+BVHTree: Start building
+BVHTree: Building done
+Interreflected transfer vector generated.
+Diffuse object generated.
+Processing time:92.156 seconds
