@@ -192,10 +192,13 @@ inline bool rayTriangle(Ray& ray, Triangle& in)
     return false;
 }
 
-// return value [0,2 *M_PI]
+/*
+ * @input parameters: sin(theta), cos(theta)
+ * @output parameter: theta
+ * @description: use Trigonometric functions to calculate the corresponding value in [0, 2PI].
+ */
 inline float inverseSC(float sinV, float cosV)
 {
-    //sinV = glm::clamp(sinV,-1.0f,1.0f);
     cosV = glm::clamp(cosV, -1.0f, 1.0f);
     float result = acos(cosV);
     if (sinV < 0)

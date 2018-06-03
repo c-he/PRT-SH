@@ -28,6 +28,7 @@ extern glm::vec3 camera_up;
 
 // Rotation.
 extern int g_AutoRotate;
+extern int g_RotateTime;
 extern float rotateMatrix[4 * 4]; // Rotation matrix.
 
 extern DiffuseObject** diffObject;
@@ -428,8 +429,9 @@ void Renderer::Render()
     bool b_rotate = false;
     if (g_AutoRotate)
     {
-        float axis[3] = {0, 1, 0};
+        float axis[3] = {0.0f, 1.0f, 0.0f};
         float angle = glfwGetTime() - g_RotateTime;
+        // std::cout << "angle = " << angle << std::endl;
         float quat[4];
         AxisAngletoQuat(quat, axis, angle);
         Multi(g_RotateStart, quat, g_Rotation);
@@ -455,15 +457,14 @@ void Renderer::Render()
         rotateVector = glm::clamp(rotateVector, -1.0f, 1.0f);
         thetatemp = acos(rotateVector.z);
         if (dir.x < 0)
-            thetatemp = 2 * (float)M_PI - thetatemp;
-
+        {
+            thetatemp = 2 * M_PI - thetatemp;
+        }
         b_rotateLight = true;
     }
     if (simpleLight)
     {
-        //rotateVector = vec3(light_dir[0],light_dir[1],light_dir[2]);
         rotateVector = glm::vec3(light_dir[2], light_dir[0], light_dir[1]);
-
         b_rotateLight = true;
     }
 
@@ -497,7 +498,6 @@ void Renderer::Render()
         if (b_rotate)
         {
             rotatePara.push_back(glm::vec2(0.0f, 2.0f * M_PI - thetatemp));
-            //rotatePara.push_back(vec2(3.0f*M_PI/2.0f,M_PI/2.0f));
             lighting[lightingIndex][bandIndex].rotateZYZ(rotatePara);
         }
         if (materialIndex == 0)

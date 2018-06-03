@@ -7,17 +7,15 @@
 class Scene
 {
 public:
+    std::vector<float> _vertexes;
+    std::vector<float> _normals;
+    std::vector<float> _texcoords;
 	
-
 private:
 	float vmaxX,vmaxY,vmaxZ;
 	float vminX,vminY,vminZ;
 
 	std::string _fileName;
-public:
-	std::vector<float> _vertexes;
-	std::vector<float> _normals;
-	std::vector<float> _texcoords;
 };
 
 #endif

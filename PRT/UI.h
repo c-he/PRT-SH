@@ -34,6 +34,7 @@ extern int HEIGHT;
 
 // GLFW
 extern GLFWwindow* window;
+
 extern int key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 extern int button_calback(GLFWwindow* window, int button, int action, int mods);
 extern int mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -49,7 +50,7 @@ typedef enum { DIFFUSE, GLOSSY } MaterialEUM;
 
 typedef enum { LINEAR, QUADRATIC, CUBIC, QUARTIC } BandENUM;
 
-// Axis,angle convert to quat.
+// Axis,angle convert to quaternion.
 inline void AxisAngletoQuat(float* q, const float* axis, float angle)
 {
     float sinxita, length;
@@ -63,7 +64,7 @@ inline void AxisAngletoQuat(float* q, const float* axis, float angle)
     q[3] = (float)cos(0.5f * angle);
 }
 
-// quat to rotate matrix
+// Quaternion to rotate matrix.
 inline void QuattoMatrix(const float* q, float* mat)
 {
     float yy2 = 2.0f * q[1] * q[1];
@@ -104,12 +105,13 @@ inline void Terminate()
 
 inline void TW_CALL SetAutoRotateCB(const void* value, void* clientData)
 {
-    (void)clientData; // unused
+    (void)clientData;
 
-    g_AutoRotate = *(const int *)value; // copy value to g_AutoRotate
+    // Copy value to g_AutoRotate.
+    g_AutoRotate = *(const int *)value;
     if (g_AutoRotate != 0)
     {
-        // init rotation
+        // Initialize rotation.
         g_RotateTime = glfwGetTime();
         g_RotateStart[0] = g_Rotation[0];
         g_RotateStart[1] = g_Rotation[1];
@@ -119,7 +121,9 @@ inline void TW_CALL SetAutoRotateCB(const void* value, void* clientData)
         TwDefine(" Console/ObjRotation readonly ");
     }
     else
+    {
         TwDefine(" Console/ObjRotation readwrite ");
+    }
 }
 
 inline void TW_CALL GetAutoRotateCB(void* value, void* clientData)
@@ -205,7 +209,7 @@ inline void UIInit()
     TwAddVarRO(info, "nbV", TW_TYPE_UINT32, &vertices, " label='Vertices: ' ");
     TwAddVarRO(info, "nbF", TW_TYPE_UINT32, &faces, " label='Triangles: ' ");
 
-    g_RotateTime = glfwGetTime();
+    // g_RotateTime = glfwGetTime();
 
     AxisAngletoQuat(g_Rotation, axis, angle);
     AxisAngletoQuat(g_RotateStart, axis, angle);

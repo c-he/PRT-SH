@@ -196,13 +196,11 @@ void Lighting::process(int sampleNumber, bool image)
     cvWaitKey(0);
 }
 
-//void Lighting::rotateZYZ(mat4 rM)//rM is rotation matrix
+// Rotating SH coefficients.
 void Lighting::rotateZYZ(std::vector<glm::vec2>& para)
 {
     int band2 = _band * _band;
     float theta, phi;
-    //theta *= (float)M_PI/180.0f;
-    //phi *= (float)M_PI/180.0f;
 
     for (int i = 0; i < band2; i++)
     {
