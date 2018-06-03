@@ -73,7 +73,7 @@ private:
 
     void objDraw();
     void setupDiffuseBuffer(int type);
-    void setupGeneralBuffer(int type, vec3 viewDir);
+    void setupGeneralBuffer(int type, glm::vec3 viewDir);
 };
 
 #endif

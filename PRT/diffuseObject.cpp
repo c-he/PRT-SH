@@ -75,7 +75,7 @@ void DiffuseObject::readFDisk(std::string filename)
         std::cout << "Diffuse object: " << filename << std::endl;
         std::cout << "band = " << _band << std::endl;
 
-        std::vector<glm::vec3> empty(band2, vec3(0, 0, 0));
+        std::vector<glm::vec3> empty(band2, glm::vec3(0.0f));
 
         for (int i = 0; i < size; ++i)
         {
@@ -166,7 +166,6 @@ void DiffuseObject::diffuseUnshadow(int size, int band2, Sampler* sampler, Trans
 
         glm::vec3 normal(_normals[index + 0], _normals[index + 1], _normals[index + 2]);
 
-        int vNumber = 0;
         for (int j = 0; j < sampleNumber; j++)
         {
             Sample stemp = sampler->_samples[j];
@@ -177,7 +176,7 @@ void DiffuseObject::diffuseUnshadow(int size, int band2, Sampler* sampler, Trans
             {
                 Ray testRay(glm::vec3(_vertices[index + 0], _vertices[index + 1], _vertices[index + 2]),
                             stemp._cartesCoord);
-                visibility = !bvht.interTest(testRay);
+                visibility = !bvht.intersect(testRay);
             }
             else
             {
@@ -189,7 +188,7 @@ void DiffuseObject::diffuseUnshadow(int size, int band2, Sampler* sampler, Trans
                 H = 0.0f;
             }
             // Projection.
-            for (int k = 0; k < band2; ++k)
+            for (int k = 0; k < band2; k++)
             {
                 float SHvalue = stemp._SHvalue[k];
 
@@ -219,7 +218,7 @@ void DiffuseObject::diffuseShadow(int size, int band2, Sampler* sampler, Transfe
     //system("pause");
 }
 
-void DiffuseObject::interreflect(int size, int band2, Sampler* sampler, TransferType type, int bounce = 1)
+void DiffuseObject::diffuseInterreflect(int size, int band2, Sampler* sampler, TransferType type, int bounce)
 {
     BVHTree bvht;
     bvht.build(*this);
@@ -252,7 +251,7 @@ void DiffuseObject::interreflect(int size, int band2, Sampler* sampler, Transfer
                 Ray rtemp(glm::vec3(_vertices[offset + 0], _vertices[offset + 1], _vertices[offset + 2]),
                           stemp._cartesCoord);
 
-                bool visibility = !bvht.interTest(rtemp);
+                bool visibility = !bvht.intersect(rtemp);
                 if (visibility)
                     continue;
                 // The direction which is invisibile is where the indirect radiance comes from.
@@ -267,7 +266,7 @@ void DiffuseObject::interreflect(int size, int band2, Sampler* sampler, Transfer
                     voffset[m] = _indices[triIndex + m];
                     SHTrans[m] = &interReflect[k][voffset[m]];
                     voffset[m] *= 3;
-                    p[m] = glm::vec3(_vertices[voffset[m]], _vertices[voffset[m] + 1], _vertices[voffset[m] + 2]);
+                    p[m] = glm::vec3(_vertices[voffset[m] + 0], _vertices[voffset[m] + 1], _vertices[voffset[m] + 2]);
                 }
                 glm::vec3 pc = rtemp._o + (float)rtemp._t * rtemp._dir;
 
@@ -280,7 +279,7 @@ void DiffuseObject::interreflect(int size, int band2, Sampler* sampler, Transfer
 
                 for (int m = 0; m < band2; m++)
                 {
-                    SHtemp[m] = w * SHTrans[0]->at(m) + u * SHTrans[1]->at(m) + v * SHTrans[2]->at(m);
+                    SHtemp[m] = u * SHTrans[0]->at(m) + v * SHTrans[1]->at(m) + w * SHTrans[2]->at(m);
                     zeroVector[i][m] += H * _albedo * SHtemp[m];
                 }
             }
@@ -298,6 +297,7 @@ void DiffuseObject::interreflect(int size, int band2, Sampler* sampler, Transfer
         }
     }
     _TransferFunc = interReflect[bounce];
+    delete[] interReflect;
     std::cout << "Interreflected transfer vector generated." << std::endl;
 }
 
@@ -324,6 +324,6 @@ void DiffuseObject::project2SH(int mode, int band, int sampleNumber, int bounce)
     else if (mode == 3)
     {
         std::cout << "Transfer Type: interreflect" << std::endl;
-        interreflect(size, band2, &stemp, T_INTERREFLECT, bounce);
+        diffuseInterreflect(size, band2, &stemp, T_INTERREFLECT, bounce);
     }
 }

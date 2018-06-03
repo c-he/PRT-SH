@@ -7,10 +7,6 @@
 #include <glm/glm.hpp>
 #include "utils.h"
 
-const int PREDIFFUSE = 1;
-const int PRESHADOW = 1 << 1;
-const int PREINTERREFLECT = 1 << 2;
-
 enum TransferType
 {
     T_UNSHADOW,
@@ -50,10 +46,11 @@ public:
 
     // Project to SH function.
     virtual void project2SH(int mode, int band, int sampleNumber, int bounce) =0;
+    // IO functions.
     virtual void write2Disk(std::string filename) =0;
-    // virtual void write2Diskbin(std::string filename);
+    virtual void write2Diskbin(std::string filename) = 0;
     virtual void readFDisk(std::string filename) =0;
-    // virtual void readFDiskbin(std::string filename);
+    virtual void readFDiskbin(std::string filename) = 0;
     bool intersectTest(Ray& ray, int facenumber);
     void normVertices();
 

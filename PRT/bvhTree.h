@@ -2,104 +2,91 @@
 #define BVHTREE_H_
 
 #include <vector>
-using std::vector;
 
 #include "boundingBox.h"
 #include "object.h"
 
-const int XAXIS = 0;
-const int YAXIS = 1;
-const int ZAXIS = 2;
-
-class Object;
-
+#define XAXIS 0
+#define YAXIS 1
+#define ZAXIS 2
 
 struct BVHNode
 {
-	bool _leafornot;
+    bool _leaf;
+    BVHNode *_left, *_right;
+    Triangle *_tri0, *_tri1;
+    BBox _bbox;
 
-	BVHNode *_left,*_right;
+    //BVHNode()
+    BVHNode()
+    {
+        setNULL();
+    }
 
-	Triangle *_tri0,*_tri1;
+    BVHNode(Triangle& t1)
+    {
+        setNULL();
+        _bbox = BBox(t1);
+        _tri0 = new Triangle(t1);
+        _leaf = true;
+    }
 
-	BBox _bbox;
+    BVHNode(Triangle& t1, Triangle& t2)
+    {
+        setNULL();
+        _bbox = merge(BBox(t1), BBox(t2));
+        _tri0 = new Triangle(t1);
+        _tri1 = new Triangle(t2);
+        _leaf = true;
+    }
 
+    bool hit(Ray& ray)
+    {
+        if (!_bbox.rayIntersect(ray))
+        {
+            return false;
+        }
+        if (_leaf)
+        {
+            if (rayTriangle(ray, *_tri0))
+            {
+                return true;
+            }
 
-	void setNULL()
-	{
-		_leafornot = false;// interior node
-		_left = _right = NULL;
-		_tri0 = _tri1 = NULL;
+            if (_tri1 == nullptr)
+            {
+                return false;
+            }
 
-	}
+            return (rayTriangle(ray, *_tri1));
+        }
 
-	//BVHNode()
-	BVHNode()
-	{
-		setNULL();
-	}
+        return ((_left->hit(ray)) || (_right->hit(ray)));
+    }
 
-	BVHNode(Triangle &t1)
-	{
-		setNULL();
-		_bbox = BBox(t1);
-		_tri0 = new Triangle(t1);
-		_leafornot = true;
-	}
-	BVHNode(Triangle &t1,Triangle &t2)
-	{
-		setNULL();
-		_bbox = merge(BBox(t1),BBox(t2));
-		_tri0 = new Triangle(t1);
-		_tri1 = new Triangle(t2);
-		_leafornot = true;
-	}
-
-	bool hit(Ray &ray)
-	{
-
-		if(!_bbox.rayIntersect(ray))	
-		{
-			return false;
-		}
-		else
-		{
-			if(_leafornot == true)
-			{
-
-				if(rayTriangle(ray,*_tri0))
-				{
-					return true;
-				}
-
-				if(_tri1 == NULL)
-				{
-					return false;
-				}
-
-				return (rayTriangle(ray,*_tri1));
-			}
-
-			return ((_left->hit(ray))||(_right->hit(ray)));
-		}
-
-	}
+    void setNULL()
+    {
+        // Interior node.
+        _leaf = false;
+        _left = _right = nullptr;
+        _tri0 = _tri1 = nullptr;
+    }
 };
 
 class BVHTree
 {
 public:
     BVHTree() = default;
-	void build( Object &obj);
-	BVHNode * buildBranch(int start,int size, int axis,int &faceNumber);
-	int split(int start,int size, float pivot, int axis);
-	bool interTest(Ray &ray);
+    void build(Object& obj);
+    bool intersect(Ray& ray);
 
 private:
-	vector<Triangle> _triangles;
-	BVHNode *_root;
+    int split(int start, int size, float pivot, int axis);
+    BVHNode * recursiveBuild(int start, int size, int axis, int& faceNumber);
 
-	vector<Triangle> _nodeTri;
+    std::vector<Triangle> _triangles;
+    std::vector<Triangle> _nodeTri;
+    BVHNode* _root;
 };
 
 #endif

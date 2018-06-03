@@ -7,55 +7,51 @@
 
 #include "utils.h"
 
-using glm::vec3;
-using std::vector;
-
 class BBox
 {
 public:
-	BBox() = default;
-	BBox(Triangle &in);
-	BBox(vector<Triangle> &inlist);
-	
+    BBox() = default;
+    BBox(glm::vec3 pMin, glm::vec3 pMax);
+    BBox(Triangle& in);
+    BBox(std::vector<Triangle>& inlist);
 
-	bool rayIntersect(Ray &ray);
+    bool rayIntersect(Ray& ray);
 
-	void setCenter()
-	{
-		_center = (_v[0] + _v[1])/2.0f;
-	}
+    float area()
+    {
+        glm::vec3 diff = _v[1] - _v[0];
+        return 2.0f * (diff.x * diff.y + diff.x * diff.z + diff.y * diff.z);
+    }
 
-	float area()
-	{
-		vec3 diff = _v[1] - _v[0];
-		return 2.0f *(diff.x * diff.y + diff.x * diff.z + diff.y * diff.z);
-	}
+    float volume()
+    {
+        glm::vec3 diff = _v[1] - _v[0];
+        return diff.x * diff.y * diff.z;
+    }
 
-	float volumn()
-	{
-		vec3 diff = _v[1] - _v[0];
-		return diff.x * diff.y * diff.z;
-	}
+    //_v[0] for min,_v[1] for max
+    glm::vec3 _v[2];
+    glm::vec3 _center;
 
-
-	vec3 _v[2];//_v[0] for min,_v[1] for max
-	vec3 _center;
+private:
+    void setCenter()
+    {
+        _center = (_v[0] + _v[1]) / 2.0f;
+    }
 };
 
 inline BBox merge(BBox b1, BBox b2)
 {
-	BBox result;
-	result._v[0].x = std::min(b1._v[0].x, b2._v[0].x);
-	result._v[0].y = std::min(b1._v[0].y, b2._v[0].y);
-	result._v[0].z = std::min(b1._v[0].z, b2._v[0].z);
+    glm::vec3 pMin, pMax;
+    pMin.x = std::min(b1._v[0].x, b2._v[0].x);
+    pMin.y = std::min(b1._v[0].y, b2._v[0].y);
+    pMin.z = std::min(b1._v[0].z, b2._v[0].z);
 
-	result._v[1].x = std::max(b1._v[1].x,b2._v[1].x);
-	result._v[1].y = std::max(b1._v[1].y,b2._v[1].y);
-	result._v[1].z = std::max(b1._v[1].z,b2._v[1].z);
+    pMax.x = std::max(b1._v[1].x, b2._v[1].x);
+    pMax.y = std::max(b1._v[1].y, b2._v[1].y);
+    pMax.z = std::max(b1._v[1].z, b2._v[1].z);
 
-	result.setCenter();
-
-	return result;
+    return BBox(pMin, pMax);
 };
 
 #endif

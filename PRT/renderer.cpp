@@ -159,7 +159,7 @@ void Renderer::setupDiffuseBuffer(int type)
     glBindVertexArray(0);
 }
 
-void Renderer::setupGeneralBuffer(int type, vec3 viewDir)
+void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
 {
     std::cout << "type" << type << std::endl;
     std::cout << "name" << _genObject->_modelname << std::endl;
@@ -190,16 +190,16 @@ void Renderer::setupGeneralBuffer(int type, vec3 viewDir)
     for (int i = 0; i < vertexnumber; ++i)
     {
         int offset = 3 * i;
-        vec3 position = vec3(_genObject->_vertices[offset], _genObject->_vertices[offset + 1],
-                             _genObject->_vertices[offset + 2]);
-        vec3 normal = vec3(_genObject->_normals[offset], _genObject->_normals[offset + 1],
-                           _genObject->_normals[offset + 2]);
+        glm::vec3 position(_genObject->_vertices[offset], _genObject->_vertices[offset + 1],
+                           _genObject->_vertices[offset + 2]);
+        glm::vec3 normal(_genObject->_normals[offset], _genObject->_normals[offset + 1],
+                         _genObject->_normals[offset + 2]);
 
 
         float color[3];
         //float lightcoeff[3];
 
-        VectorXf transferedLight[3];
+        Eigen::VectorXf transferedLight[3];
         if (type == 0)
         {
             transferedLight[0] = _genObject->_TransferMatrix[0][i] * _lighting->_Vcoeffs[0];
@@ -217,8 +217,8 @@ void Renderer::setupGeneralBuffer(int type, vec3 viewDir)
         Lighting lightingtemp(band, transferedLight);
 
         float rotateMatrix[3][3];
-        vec3 tangent = vec3(_genObject->_tangent[i].x, _genObject->_tangent[i].y, _genObject->_tangent[i].z);
-        vec3 binormal = glm::cross(normal, tangent) * _genObject->_tangent[i].w;
+        glm::vec3 tangent(_genObject->_tangent[i].x, _genObject->_tangent[i].y, _genObject->_tangent[i].z);
+        glm::vec3 binormal = glm::cross(normal, tangent) * _genObject->_tangent[i].w;
         //vec3 binormal = glm::cross(normal,tangent);
 
         //TEST DATA 1 PASSED
@@ -272,11 +272,9 @@ void Renderer::setupGeneralBuffer(int type, vec3 viewDir)
         binormal = glm::cross(normal,tangent) ;*/
 
         //yzx(OpenGL) to zxy(not OpenGL)
-        vec3 mattangent, matnormal, matbinormal;
-        matnormal = vec3(normal.z, normal.x, normal.y);
-        mattangent = vec3(tangent.z, tangent.x, tangent.y);
-        matbinormal = vec3(binormal.z, binormal.x, binormal.y);
-
+        glm::vec3 mattangent(normal.z, normal.x, normal.y);
+        glm::vec3 matnormal(tangent.z, tangent.x, tangent.y);
+        glm::vec3 matbinormal(binormal.z, binormal.x, binormal.y);
 
         //rotate matrix in zxy
         for (int m = 0; m < 3; ++m)rotateMatrix[m][0] = mattangent[m];
@@ -310,7 +308,7 @@ void Renderer::setupGeneralBuffer(int type, vec3 viewDir)
             }
         }
 
-        vec3 dir = viewDir;
+        glm::vec3 dir = viewDir;
 
         dir = glm::normalize(dir);
 
@@ -445,15 +443,15 @@ void Renderer::Render()
     shader.SetMatrix4("view", view);
     shader.SetMatrix4("projection", projection);
 
-    vec3 rotateVector;
+    glm::vec3 rotateVector;
     bool b_rotateLight = false;
     float thetatemp;
     //float phitemp;
     if (b_rotate)
     {
         glm::mat4 rM = glm::make_mat4(rotateMatrix);
-        vec4 dir = rM * vec4(0.0f, 0.0f, 1.0f, 0.0f);
-        rotateVector = vec3(dir.x, dir.y, dir.z);
+        glm::vec4 dir = rM * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
+        rotateVector = glm::vec3(dir.x, dir.y, dir.z);
         rotateVector = glm::clamp(rotateVector, -1.0f, 1.0f);
         thetatemp = acos(rotateVector.z);
         if (dir.x < 0)
@@ -464,7 +462,7 @@ void Renderer::Render()
     if (simpleLight)
     {
         //rotateVector = vec3(light_dir[0],light_dir[1],light_dir[2]);
-        rotateVector = vec3(light_dir[2], light_dir[0], light_dir[1]);
+        rotateVector = glm::vec3(light_dir[2], light_dir[0], light_dir[1]);
 
         b_rotateLight = true;
     }
@@ -505,7 +503,7 @@ void Renderer::Render()
         if (materialIndex == 0)
         {
             Setup(&diffObject[objectIndex][bandIndex], &lighting[lightingIndex][bandIndex]);
-            SetupColorBuffer(transferFIndex, vec3(0.0f, 0.0f, 0.0f), true);
+            SetupColorBuffer(transferFIndex, glm::vec3(0.0f, 0.0f, 0.0f), true);
         }
         else
         {

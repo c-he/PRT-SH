@@ -254,7 +254,7 @@ void dataLoading()
     for (size_t i = 0; i < ObjectNumber; i++)
     {
         diffObject[i] = new DiffuseObject[BandNumber];
-        std::string objFile = "Scene/" + objects[i] + ".obj";
+        std::string objFile = "objects/" + objects[i] + ".obj";
         for (size_t j = 0; j < BandNumber; j++)
         {
             std::string dataFile = "processedData/objects/" + bands[j] + "/" + objects[i];
@@ -393,7 +393,7 @@ void dataProcessing(int argc, char** argv)
         {
             DiffuseObject diffObj;
             diffObj.init(argv[4], albedo);
-            diffObj.project2SH(transferType, band, sampleNumber, 2);
+            diffObj.project2SH(transferType, band, sampleNumber, 1);
             diffObj.write2Diskbin(argv[5]);
         }
         else if (diffGeneal == "-g")

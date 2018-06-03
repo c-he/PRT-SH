@@ -1,19 +1,15 @@
 ﻿#ifndef UTILS_H_
 #define UTILS_H_
 
-const double MY_PI = 3.14159265358979323846;
-const double M_INFINITE = 1e10f;
-const double M_ZERO = 1e-9;
-const float M_DELTA = 1e-6f;
-
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include <iostream>
 #include <algorithm>
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-using glm::vec3;
-using std::cout;
-using std::endl;
+#define M_ZERO 1e-9
+#define M_DELTA 1e-6f
 
 struct Triangle
 {
@@ -25,7 +21,7 @@ struct Triangle
         _index = -1;
     }
 
-    Triangle(vec3 v0, vec3 v1, vec3 v2, int index)
+    Triangle(glm::vec3 v0, glm::vec3 v1, glm::vec3 v2, int index)
         : _v0(v0), _v1(v1), _v2(v2), _index(index)
     {
     }
@@ -173,20 +169,20 @@ inline bool rayTriangle(Ray& ray, Triangle& in)
     float f = 1.0f / a;
     glm::vec3 s = ray._o - in._v0;
     float beta = f * glm::dot(s, p);
-    if(beta < 0.0f || beta > 1.0f)
+    if (beta < 0.0f || beta > 1.0f)
     {
         return false;
     }
 
     glm::vec3 q = glm::cross(s, e1);
     float gamma = f * glm::dot(ray._dir, q);
-    if(gamma < 0.0f || beta + gamma > 1.0f)
+    if (gamma < 0.0f || beta + gamma > 1.0f)
     {
         return false;
     }
 
     float t = f * glm::dot(e2, q);
-    if(t >= ray._tmin && t <= ray._tmax)
+    if (t >= ray._tmin && t <= ray._tmax)
     {
         // Hit, record the hit parameter and the triangle index.
         ray._t = t;
@@ -203,7 +199,7 @@ inline float inverseSC(float sinV, float cosV)
     cosV = glm::clamp(cosV, -1.0f, 1.0f);
     float result = acos(cosV);
     if (sinV < 0)
-        result = 2.0f * (float)MY_PI - result;
+        result = 2.0f * M_PI - result;
     return result;
 }
 
@@ -260,7 +256,7 @@ inline void rotateMatrixtoYZY(float mat[3][3], float& alpha, float& beta, float&
     {
         if (mat[1][1] == -1)
         {
-            beta = (float)MY_PI;
+            beta = M_PI;
             gamma = 0.0f;
             alpha = atan2(mat[2][0], mat[0][0]);
 
@@ -308,7 +304,7 @@ inline void rotateMatrixtoXYX(float mat[3][3], float& alpha, float& beta, float&
     {
         if (mat[0][0] == -1)
         {
-            beta = (float)MY_PI;
+            beta = M_PI;
             gamma = 0.0f;
             alpha = atan2(mat[2][0], mat[0][0]);
         }

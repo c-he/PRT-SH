@@ -261,7 +261,7 @@ __pycache__/
 *.pyc
 
 # Exception
-!/PRT/Scene/*.obj
+!/PRT/objects/*.obj
 
 /PRT/include
 /PRT/lib
