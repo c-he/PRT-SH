@@ -72,7 +72,7 @@
 
 ![](https://github.com/Fairyland0902/PRT-SH/raw/master/screenshots/diffuse.PNG)
 
-> From left to right: diffuse, unshadowed; diffuse shadowed; diffuse interreflected (bounce = 1)
+> From left to right: diffuse, unshadowed; diffuse, shadowed; diffuse, interreflected (bounce = 1)
 
 
 
