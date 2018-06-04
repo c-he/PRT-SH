@@ -68,13 +68,11 @@
 
 ### Results
 
-- DIffuse, unshadowed
+- DIffuse  Surface Self-Transfer
 
-![](https://github.com/Fairyland0902/PRT-SH/raw/master/screenshots/1.png)
+![](https://github.com/Fairyland0902/PRT-SH/raw/master/screenshots/diffuse.png)
 
-![](https://github.com/Fairyland0902/PRT-SH/raw/master/screenshots/2.png)
-
-![](https://github.com/Fairyland0902/PRT-SH/raw/master/screenshots/3.png)
+> From left to right: diffuse, unshadowed; diffuse shadowed; diffuse interreflected (bounce = 1)
 
 
 

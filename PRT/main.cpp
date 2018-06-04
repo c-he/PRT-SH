@@ -22,7 +22,7 @@
 #include "generalObject.h"
 #include "resource_manager.h"
 
-// #define FULL_SCREEN
+#define FULL_SCREEN
 
 using namespace std;
 using glm::vec3;
@@ -73,10 +73,10 @@ Lighting** lighting;
 Lighting* simpleL;
 Renderer renderer;
 
-// Cubemap.
-bool drawCubemap = true;
-bool simpleLight = false;
-bool lastSimple = false;
+// Cubemap & Simple Light.
+bool drawCubemap = false;
+bool simpleLight = true;
+bool lastSimple = true;
 
 // Camera.
 float camera_dis = 3.0f;

@@ -94,13 +94,12 @@ void DiffuseObject::readFDisk(std::string filename)
 
 void DiffuseObject::readFDiskbin(std::string filename)
 {
-    // string transf[3] = {"D01.dat","DS01.dat","DSI01.dat"};
-    std::string transf[1] = {"DU.dat"};
+    std::string transf[3] = {"DU.dat", "DS.dat", "DI.dat"};
 
-    for (int i = 0; i < 1; ++i)
+    for (int i = 0; i < 3; i++)
         _DTransferFunc[i].clear();
 
-    for (int k = 0; k < 1; ++k)
+    for (int k = 0; k < 3; k++)
     {
         std::string dataFile = filename + transf[k];
         std::ifstream in(dataFile, std::ifstream::binary);
@@ -111,7 +110,7 @@ void DiffuseObject::readFDiskbin(std::string filename)
         in.read((char *)&size, sizeof(unsigned int));
         in.read((char *)&_band, sizeof(int));
 
-        std::cout << "Diffuse object: " << filename << std::endl;
+        std::cout << "Diffuse object: " << filename + transf[k] << std::endl;
         std::cout << "band = " << _band << std::endl;
 
         band2 = _band * _band;

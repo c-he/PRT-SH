@@ -48,7 +48,7 @@ BBox::BBox(std::vector<Triangle>& inlist)
 }
 
 /*
- *  Smits¡¯ method.
+ *  Smits method.
  * For more information, please refer: http://www.cs.utah.edu/~awilliam/box/box.pdf
  */
 bool BBox::rayIntersect(Ray& r)
