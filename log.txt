@@ -35,7 +35,7 @@ Glossy object: buddha
 Transfer Type: unshadowed
 Unshadowed transfer matrix generated.
 Glossy object generated.
-Processing time:78.953 seconds
+Processing time:58.031 seconds
 
 Glossy object: buddha
 Transfer Type: shadowed
@@ -43,7 +43,7 @@ BVHTree: Start building
 BVHTree: Building done
 Shadowed transfer matrix generated.
 Glossy object generated.
-Processing time:124.172 seconds
+Processing time:105.25 seconds
 
 Glossy object: buddha
 Transfer Type: interreflect
@@ -51,13 +51,13 @@ BVHTree: Start building
 BVHTree: Building done
 Interreflected transfer matrix generated.
 Glossy object generated.
-Processing time:262.219 seconds
+Processing time:239.406 seconds
 
 Glossy object: maxplanck
 Transfer Type: unshadowed
 Unshadowed transfer matrix generated.
 Glossy object generated.
-Processing time:78.094 seconds
+Processing time:58.828 seconds
 
 Glossy object: maxplanck
 Transfer Type: shadowed
@@ -65,7 +65,7 @@ BVHTree: Start building
 BVHTree: Building done
 Shadowed transfer matrix generated.
 Glossy object generated.
-Processing time:121.921 seconds
+Processing time:101.484 seconds
 
 Glossy object: maxplanck
 Transfer Type: interreflect
@@ -73,7 +73,7 @@ BVHTree: Start building
 BVHTree: Building done
 Interreflected transfer matrix generated.
 Glossy object generated.
-Processing time:184.75 seconds
+Processing time:164.656 seconds
 
 - SH order: cubic
 Diffuse object: buddha
