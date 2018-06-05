@@ -76,7 +76,7 @@
 
 - Glossy Surface Self-Transfer
 
-![](https://github.com/Fairyland0902/PRT-SH/raw/master/screenshots/glossy.PNG)
+![](https://github.com/Fairyland0902/PRT-SH/raw/master/screenshots/glossy.png)
 
 > From left to right: glossy, unshadowed; glossy, shadowed; glossy, interreflected (bounce = 1)
 
