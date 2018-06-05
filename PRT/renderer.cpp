@@ -29,7 +29,8 @@ extern glm::vec3 camera_up;
 // Rotation.
 extern int g_AutoRotate;
 extern int g_RotateTime;
-extern float rotateMatrix[4 * 4]; // Rotation matrix.
+extern glm::fquat last_Rotation;
+extern glm::mat4 rotateMatrix;
 
 extern DiffuseObject** diffObject;
 extern GeneralObject* genObject;
@@ -224,8 +225,8 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
 
         // Calculate R in Cartesian Coordinates.
         glm::vec3 N = glm::normalize(normal);
-        glm::vec3 L = glm::normalize(viewDir);
-        glm::vec3 R = 2 * glm::dot(N, L) * N - L;
+        glm::vec3 V = glm::normalize(viewDir);
+        glm::vec3 R = 2 * glm::dot(N, V) * N - V;
         // Convert R to spherical coordinates.
         float theta = acos(R.z);
         float phi = inverseSC(R.y / sin(theta), R.x / sin(theta));
@@ -326,16 +327,20 @@ void Renderer::Render()
     bool b_rotate = false;
     if (g_AutoRotate)
     {
-        float axis[3] = {0.0f, 1.0f, 0.0f};
+        glm::vec3 axis(0.0f, 1.0f, 0.0f);
         float angle = glfwGetTime() - g_RotateTime;
         // std::cout << "angle = " << angle << std::endl;
-        float quat[4];
-        AxisAngletoQuat(quat, axis, angle);
-        Multi(g_RotateStart, quat, g_Rotation);
+        glm::fquat quat = glm::angleAxis(angle, axis);
+        g_Rotation = quat * g_RotateStart;
         b_rotate = true;
     }
-    QuattoMatrix(g_Rotation, rotateMatrix);
-    model = glm::make_mat4(rotateMatrix) * model;
+    if(g_Rotation != last_Rotation)
+    {
+        b_rotate = true;
+        last_Rotation = g_Rotation;
+    }
+    rotateMatrix = glm::mat4_cast(g_Rotation);
+    model = rotateMatrix * model;
     Shader shader = ResourceManager::GetShader("prt");
     shader.Use();
     shader.SetMatrix4("model", model);
@@ -347,8 +352,7 @@ void Renderer::Render()
     float thetatemp;
     if (b_rotate)
     {
-        glm::mat4 rM = glm::make_mat4(rotateMatrix);
-        glm::vec4 dir = rM * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
+        glm::vec4 dir = rotateMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
         rotateVector = glm::vec3(dir.x, dir.y, dir.z);
         rotateVector = glm::clamp(rotateVector, -1.0f, 1.0f);
         thetatemp = acos(rotateVector.z);

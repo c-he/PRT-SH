@@ -3,6 +3,7 @@
 
 #include <AntTweakBar.h>
 #include <GLFW/glfw3.h>
+#include <glm/gtx/quaternion.hpp>
 
 extern glm::vec3 camera_pos;
 extern glm::vec3 light_dir;
@@ -10,10 +11,10 @@ extern glm::vec3 light_dir;
 extern bool simpleLight;
 
 // Rotation.
-extern float g_Rotation[4];
+extern glm::fquat g_Rotation;
+extern glm::fquat g_RotateStart;
 extern int g_AutoRotate;
 extern int g_RotateTime;
-extern float g_RotateStart[4];
 
 // Mesh Information.
 extern int fps;
@@ -50,54 +51,6 @@ typedef enum { DIFFUSE, GLOSSY } MaterialEUM;
 
 typedef enum { LINEAR, QUADRATIC, CUBIC, QUARTIC } BandENUM;
 
-// Axis,angle convert to quaternion.
-inline void AxisAngletoQuat(float* q, const float* axis, float angle)
-{
-    float sinxita, length;
-
-    sinxita = (float)sin(0.5f * angle);
-    length = (float)sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
-
-    q[0] = sinxita * axis[0] / length;
-    q[1] = sinxita * axis[1] / length;
-    q[2] = sinxita * axis[2] / length;
-    q[3] = (float)cos(0.5f * angle);
-}
-
-// Quaternion to rotate matrix.
-inline void QuattoMatrix(const float* q, float* mat)
-{
-    float yy2 = 2.0f * q[1] * q[1];
-    float xy2 = 2.0f * q[0] * q[1];
-    float xz2 = 2.0f * q[0] * q[2];
-    float yz2 = 2.0f * q[1] * q[2];
-    float zz2 = 2.0f * q[2] * q[2];
-    float wz2 = 2.0f * q[3] * q[2];
-    float wy2 = 2.0f * q[3] * q[1];
-    float wx2 = 2.0f * q[3] * q[0];
-    float xx2 = 2.0f * q[0] * q[0];
-    mat[0] = -yy2 - zz2 + 1.0f;
-    mat[1] = xy2 + wz2;
-    mat[2] = xz2 - wy2;
-    mat[4] = xy2 - wz2;
-    mat[5] = -xx2 - zz2 + 1.0f;
-    mat[6] = yz2 + wx2;
-    mat[8] = xz2 + wy2;
-    mat[9] = yz2 - wx2;
-    mat[10] = -xx2 - yy2 + 1.0f;
-    mat[3] = mat[7] = mat[11] = mat[12] = mat[13] = mat[14] = 0;
-    mat[15] = 1;
-}
-
-// Multiply quaternion.
-inline void Multi(const float* q1, const float* q2, float* result)
-{
-    result[0] = q1[3] * q2[0] + q1[0] * q2[3] + q1[1] * q2[2] - q1[2] * q2[1];
-    result[1] = q1[3] * q2[1] + q1[1] * q2[3] + q1[2] * q2[0] - q1[0] * q2[2];
-    result[2] = q1[3] * q2[2] + q1[2] * q2[3] + q1[0] * q2[1] - q1[1] * q2[0];
-    result[3] = q1[3] * q2[3] - (q1[0] * q2[0] + q1[1] * q2[1] + q1[2] * q2[2]);
-}
-
 inline void Terminate()
 {
     TwTerminate();
@@ -113,10 +66,7 @@ inline void TW_CALL SetAutoRotateCB(const void* value, void* clientData)
     {
         // Initialize rotation.
         g_RotateTime = glfwGetTime();
-        g_RotateStart[0] = g_Rotation[0];
-        g_RotateStart[1] = g_Rotation[1];
-        g_RotateStart[2] = g_Rotation[2];
-        g_RotateStart[3] = g_Rotation[3];
+        g_RotateStart = g_Rotation;
 
         TwDefine(" Console/ObjRotation readonly ");
     }
@@ -134,7 +84,7 @@ inline void TW_CALL GetAutoRotateCB(void* value, void* clientData)
 
 inline void UIInit()
 {
-    float axis[] = {0.0f, 1.0f, 0.0f};
+    glm::vec3 axis(0.0f, 1.0f, 0.0f);
     float angle = 0.0f;
 
     TwInit(TW_OPENGL_CORE, NULL);
@@ -209,10 +159,9 @@ inline void UIInit()
     TwAddVarRO(info, "nbV", TW_TYPE_UINT32, &vertices, " label='Vertices: ' ");
     TwAddVarRO(info, "nbF", TW_TYPE_UINT32, &faces, " label='Triangles: ' ");
 
-    // g_RotateTime = glfwGetTime();
-
-    AxisAngletoQuat(g_Rotation, axis, angle);
-    AxisAngletoQuat(g_RotateStart, axis, angle);
+    g_RotateTime = glfwGetTime();
+    g_RotateStart = glm::angleAxis(glm::radians(angle), axis);
+    g_Rotation = glm::angleAxis(glm::radians(angle), axis);
 
     // Set GLFW event callbacks.
     glfwSetCursorPosCallback(window, (GLFWcursorposfun)mouse_callback);

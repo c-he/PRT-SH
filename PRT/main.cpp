@@ -10,6 +10,7 @@
 #include <GLFW/glfw3.h>
 // GLM
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 // AntTweakBar
 #include <AntTweakBar.h>
@@ -82,11 +83,12 @@ float simpleLightTheta = 43.3f;
 float simpleLightPhi = 225.0f;
 
 // Rotation.
-float g_Rotation[] = {0.0f, 0.0f, 0.0f, 1.0f};
+glm::fquat g_Rotation(0.0f, 0.0f, 0.0f, 1.0f);
+glm::fquat last_Rotation(0.0f, 0.0f, 0.0f, 1.0f);
+glm::fquat g_RotateStart(0.0f, 0.0f, 0.0f, 1.0f);
+glm::mat4 rotateMatrix;
 int g_AutoRotate = 0;
 int g_RotateTime = 0;
-float g_RotateStart[] = {0.0f, 0.0f, 0.0f, 1.0f};
-float rotateMatrix[4 * 4]; // Rotation matrix
 
 // FPS.
 double currTime;
