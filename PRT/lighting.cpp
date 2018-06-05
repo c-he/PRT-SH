@@ -192,7 +192,14 @@ void Lighting::process(int sampleNumber, bool image)
     cv::Mat3b img_8UC3;
     img.convertTo(img_8UC3, CV_8UC3, 255);
     // imshow("image", img_8UC3);
-    cv::imwrite("../../PRT/processedData/lightings/" + bands[_band - 2] + "/" + _filename + ".jpg", img_8UC3);
+    if (image)
+    {
+        cv::imwrite("../../PRT/processedData/lightings/" + bands[_band - 2] + "/" + _filename + ".jpg", img_8UC3);
+    }
+    else
+    {
+        cv::imwrite("../../PRT/processedData/lightings/" + bands[_band - 2] + "/simple_probe.jpg", img_8UC3);
+    }
     cvWaitKey(0);
 }
 

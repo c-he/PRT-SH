@@ -2,7 +2,6 @@
 #include <cmath>
 #include <fstream>
 #include <istream>
-#include <sstream>
 #include <iostream>
 #include "diffuseObject.h"
 
@@ -253,7 +252,7 @@ void DiffuseObject::diffuseInterreflect(int size, int band2, Sampler* sampler, T
                 bool visibility = !bvht.intersect(rtemp);
                 if (visibility)
                     continue;
-                // The direction which is invisibile is where the indirect radiance comes from.
+                // The direction which is invisible is where the indirect radiance comes from.
                 float H = std::max(glm::dot(rtemp._dir, normal), 0.0f);
 
                 int triIndex = 3 * rtemp._index;

@@ -275,7 +275,7 @@ void GeneralObject::glossyUnshadow(int size, int band2, class Sampler* sampler, 
     bool visibility;
 
     Eigen::MatrixXf empty(band2, band2);
-    empty = Eigen::MatrixXf::Zero(band2, band2);
+    empty.setZero();
     _TransferMatrix[0].resize(size, empty);
 
     // Build BVH.
@@ -395,7 +395,7 @@ void GeneralObject::glossyInterReflect(int size, int band2, Sampler* sampler, Tr
 
     interReflect[0] = _TransferMatrix[0];
     Eigen::MatrixXf empty(band2, band2);
-    empty = Eigen::MatrixXf::Zero(band2, band2);
+    empty.setZero();
 
     float weight = 4.0f * M_PI / sampleNumber;
 
@@ -421,7 +421,7 @@ void GeneralObject::glossyInterReflect(int size, int band2, Sampler* sampler, Tr
                 {
                     continue;
                 }
-                // The direction which is invisibile is where the indirect radiance comes from.
+                // The direction which is invisible is where the indirect radiance comes from.
                 float G = std::max(glm::dot(glm::normalize(normal), rtemp._dir), 0.0f);
 
                 int triIndex = 3 * rtemp._index;

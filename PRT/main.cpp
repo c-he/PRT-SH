@@ -10,7 +10,6 @@
 #include <GLFW/glfw3.h>
 // GLM
 #include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 // AntTweakBar
 #include <AntTweakBar.h>
@@ -23,11 +22,6 @@
 #include "resource_manager.h"
 
 // #define FULL_SCREEN
-
-using namespace std;
-using glm::vec3;
-using glm::vec4;
-using glm::mat4;
 
 // Window size.
 int WIDTH, HEIGHT;
@@ -48,7 +42,6 @@ const int BandNumber = 4;
 std::string objects[] = {"buddha", "maxplanck"};
 std::string gobjects[] = {"buddha", "maxplanck"};
 std::string lightings[] = {"galileo", "grace", "rnl", "stpeters", "uffizi"};
-std::string albedos[] = {"01", "03", "05"};
 std::string bands[] = {"linear", "quadratic", "cubic", "quartic"};
 
 glm::vec3 albedo(0.15f, 0.15f, 0.15f);
@@ -56,7 +49,6 @@ glm::vec3 albedo(0.15f, 0.15f, 0.15f);
 int objectIndex = -1;
 int lightingIndex = -1;
 int transferFIndex = -1;
-int albedosIndex = -1;
 int materialIndex = 0;
 int bandIndex = 3;
 
@@ -99,7 +91,7 @@ float rotateMatrix[4 * 4]; // Rotation matrix
 // FPS.
 double currTime;
 double lastTime;
-int frames;
+int frames = 0;
 int fps;
 
 // GLFW
@@ -236,7 +228,7 @@ void calculateFPS()
 
     if ((currTime - lastTime) >= 1.0f)
     {
-        fps = static_cast<int>(frames / (currTime - lastTime));
+        fps = frames / (currTime - lastTime);
         // std::cout << "FPS: " << fps << std::endl;
         frames = 0;
         lastTime = currTime;
@@ -272,18 +264,18 @@ void dataLoading()
     }
 
     glm::vec3 hdrEffect[] = {
+        glm::vec3(1.2f, 1.2f, 1.2f),
         glm::vec3(2.2f, 2.2f, 2.2f),
-        glm::vec3(2.2f, 2.2f, 2.2f),
-        glm::vec3(0.5f, 0.55f, 0.5f),
+        glm::vec3(1.2f, 1.2f, 1.2f),
         glm::vec3(1.8f, 1.8f, 1.8f),
         glm::vec3(1.8f, 1.8f, 1.8f)
     };
     glm::vec3 glossyEffect[] = {
         glm::vec3(1.2f, 1.2f, 1.2f),
+        glm::vec3(2.2f, 2.2f, 2.2f),
         glm::vec3(1.2f, 1.2f, 1.2f),
-        glm::vec3(0.3f, 0.32f, 0.3f),
-        glm::vec3(1.5f, 1.5f, 1.5f),
-        glm::vec3(1.5f, 1.5f, 1.5f)
+        glm::vec3(1.8f, 1.8f, 1.8f),
+        glm::vec3(1.8f, 1.8f, 1.8f)
     };
     for (size_t i = 0; i < LightNumber; i++)
     {
@@ -306,7 +298,6 @@ void dataLoading()
     std::cout << "Done" << std::endl;
 
     // Initialize indices.
-    albedosIndex = 0;
     transferFIndex = 0;
     objectIndex = 0;
     lightingIndex = 0;
@@ -464,7 +455,7 @@ int button_calback(GLFWwindow* window, int button, int action, int mods)
 
 int scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    if (yoffset > 0)
+    if (yoffset > 0 && camera_dis >= 1.0f)
     {
         camera_dis -= 0.2f;
     }

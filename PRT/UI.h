@@ -157,40 +157,40 @@ inline void UIInit()
         TwAddVarRW(bar, "SH Order", BandType, &bandIndex, " help='Change SH order.' ");
     }
 
-    TwAddVarRW(bar, "ObjRotation", TW_TYPE_QUAT4F, &g_Rotation,
-               " label='Object Rotation' opened=false help='Change the object orientation.' ");
-
-    TwAddVarCB(bar, "AutoRotate", TW_TYPE_BOOL32, SetAutoRotateCB, GetAutoRotateCB, NULL,
-               " label='Auto-Rotate' help='Toggle auto-rotate mode.' ");
-
-    TwAddVarRW(bar, "CameraRotation", TW_TYPE_DIR3F, &camera_pos,
-               " label='Camera Rotation' opened=true help='Change the camera direction.'");
-
-    TwAddVarRW(bar, "Simple Light", TW_TYPE_BOOLCPP, &simpleLight,
-               " label='Simple Light' help='Change the simple light'");
-
-    TwAddVarRW(bar, "LightRotation", TW_TYPE_DIR3F, &light_dir,
-               " label='Light Rotation' opened=true help='Change the camera direction.'");
-
     {
-        TwEnumVal ObjectEV[2] = {{BUDDHA, "buddha"}, {MAXPLANCK, "maxplanck"}};
+        TwEnumVal ObjectEV[2] = { { BUDDHA, "buddha" },{ MAXPLANCK, "maxplanck" } };
         TwType ObjectType = TwDefineEnum("ObjectType", ObjectEV, 2);
         TwAddVarRW(bar, "Object Type", ObjectType, &objectIndex, " help='Change object.' ");
     }
 
     {
-        TwEnumVal tranFEV[3] = {{UNSHADOW, "unshadowed"}, {SHADOW, "shadowed"}, {INTERREFLECT, "interreflected"}};
+        TwEnumVal tranFEV[3] = { { UNSHADOW, "unshadowed" },{ SHADOW, "shadowed" },{ INTERREFLECT, "interreflected" } };
         TwType tranFType = TwDefineEnum("tranFType", tranFEV, 3);
         TwAddVarRW(bar, "Transfer Type", tranFType, &transferFIndex, " help='Change transfer function.' ");
     }
 
     {
         TwEnumVal LightingEV[5] = {
-            {LIGHT1, "galileo"}, {LIGHT2, "grace"}, {LIGHT3, "rnl"}, {LIGHT4, "stpeters"}, {LIGHT5, "uffizi"}
+            { LIGHT1, "galileo" },{ LIGHT2, "grace" },{ LIGHT3, "rnl" },{ LIGHT4, "stpeters" },{ LIGHT5, "uffizi" }
         };
         TwType LightType = TwDefineEnum("Lighting", LightingEV, 5);
         TwAddVarRW(bar, "Environment Lighting", LightType, &lightingIndex, " help='Change lighting.' ");
     }
+
+    TwAddVarRW(bar, "ObjRotation", TW_TYPE_QUAT4F, &g_Rotation,
+               " label='Object Orientation' opened=false help='Change the object orientation.' ");
+
+    TwAddVarCB(bar, "AutoRotate", TW_TYPE_BOOL32, SetAutoRotateCB, GetAutoRotateCB, NULL,
+        " label='Auto-Rotate' help='Toggle auto-rotate mode.' ");
+
+    TwAddVarRW(bar, "CameraRotation", TW_TYPE_DIR3F, &camera_pos,
+               " label='Camera Direction' opened=true help='Change the camera direction.'");
+
+    TwAddVarRW(bar, "LightRotation", TW_TYPE_DIR3F, &light_dir,
+               " label='Light Direction' opened=true help='Change the light direction.'");
+
+    TwAddVarRW(bar, "Simple Light", TW_TYPE_BOOLCPP, &simpleLight,
+        " label='Simple Light' help='Change the simple light'");
 
     TwBar* info = TwNewBar("Mesh");
     TwDefine("Mesh size='250 320' text=light  color='40 40 40' position='3 450' valueswidth=100");

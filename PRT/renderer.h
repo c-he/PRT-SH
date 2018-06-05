@@ -5,7 +5,6 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include "hdrTextureCube.h"
-#include "scene.h"
 #include "lighting.h"
 #include "diffuseObject.h"
 #include "generalObject.h"
@@ -31,14 +30,8 @@ public:
     Renderer() = default;
     virtual ~Renderer();
 
-    void Init(const int lightNumber);
+    void Init(int lightNumber);
     void Render();
-
-    void Setup(Scene* scene, Lighting* light)
-    {
-        _scene = scene;
-        _lighting = light;
-    }
 
     void Setup(DiffuseObject* obj, Lighting* light)
     {
@@ -57,7 +50,6 @@ public:
     void SetupColorBuffer(int type, glm::vec3 viewDir, bool diffuse = true);
 
 private:
-    Scene* _scene;
     DiffuseObject* _diffObject;
     GeneralObject* _genObject;
 

@@ -212,23 +212,18 @@ inline void rotateMatrixtoZYZ(float mat[3][3], float& alpha, float& beta, float&
     float sinbeta = sin(beta);
     if ((fabs(mat[1][2]) + fabs(mat[0][2]) + fabs(mat[2][0]) + fabs(mat[2][1])) < M_ZERO)
     {
-        if (mat[3][3] == -1)
+        if (mat[2][2] == -1)
         {
+            beta = M_PI;
+            gamma = 0.0f;
+            alpha = atan2(mat[2][0], mat[0][0]);
         }
         else
         {
             beta = 0.0f;
             gamma = 0.0f;
+            alpha = inverseSC(mat[0][2], mat[0][0]);
         }
-
-        std::cout << "fuck zero" << std::endl;
-        {
-            std::cout << "the matrix" << std::endl;
-            for (int i = 0; i < 3; ++i)
-                for (int j = 0; j < 3; ++j)
-                    std::cout << mat[i][j];
-        }
-        //	system("pause");
     }
     else
     {
@@ -246,13 +241,6 @@ inline void rotateMatrixtoZYZ(float mat[3][3], float& alpha, float& beta, float&
 
 inline void rotateMatrixtoYZY(float mat[3][3], float& alpha, float& beta, float& gamma)
 {
-    /*	{
-            //std::cout << "the matrix"<<std::endl;
-            for(int i = 0;i < 3; ++i)
-                for(int j = 0;j < 3; ++j)
-                    std::cout << mat[i][j];
-    
-        }*/
     beta = acos(glm::clamp(mat[1][1], -1.0f, 1.0f));
     float sinbeta = sin(beta);
     if ((fabs(mat[0][1]) + fabs(mat[1][0]) + fabs(mat[1][2]) + fabs(mat[2][1])) < M_ZERO)
@@ -262,22 +250,13 @@ inline void rotateMatrixtoYZY(float mat[3][3], float& alpha, float& beta, float&
             beta = M_PI;
             gamma = 0.0f;
             alpha = atan2(mat[2][0], mat[0][0]);
-
-
-            //system("pause");
         }
         else
         {
-            //beta = M_PI
-            //mat[1][1] == 1
             beta = 0.0f;
             gamma = 0.0f;
-            //alpha = atan2(mat[0][2],mat[0][0]);
             alpha = inverseSC(mat[0][2], mat[0][0]);
         }
-
-
-        //system("pause");
     }
     else
     {
@@ -295,12 +274,6 @@ inline void rotateMatrixtoYZY(float mat[3][3], float& alpha, float& beta, float&
 
 inline void rotateMatrixtoXYX(float mat[3][3], float& alpha, float& beta, float& gamma)
 {
-    {
-        //std::cout << "the matrix"<<std::endl;
-        for (int i = 0; i < 3; ++i)
-            for (int j = 0; j < 3; ++j)
-                std::cout << mat[i][j];
-    }
     beta = acos(glm::clamp(mat[0][0], -1.0f, 1.0f));
     float sinbeta = sin(beta);
     if ((fabs(mat[0][1]) + fabs(mat[0][2]) + fabs(mat[1][0]) + fabs(mat[2][0])) < M_ZERO)
@@ -313,15 +286,10 @@ inline void rotateMatrixtoXYX(float mat[3][3], float& alpha, float& beta, float&
         }
         else
         {
-            //beta = M_PI
-            //mat[1][1] == 1
             beta = 0.0f;
             gamma = 0.0f;
             alpha = atan2(mat[0][2], mat[0][0]);
         }
-
-
-        //system("pause");
     }
     else
     {

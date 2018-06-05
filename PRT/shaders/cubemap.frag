@@ -8,6 +8,14 @@ uniform samplerCube cubemap;
 
 void main()
 {
+    // const float gamma = 2.2;
+    // vec3 hdrColor = textureCube(cubemap, TexCoords).rgb;
+
+    // // Reinhard Tone Mapping
+    // vec3 mapped = hdrColor / (hdrColor + vec3(1.0));
+    // // Gamma Correction
+    // mapped = pow(mapped, vec3(1.0 / gamma));
+
+    // FragColor = vec4(mapped, 1.0);
     FragColor = textureCube(cubemap, TexCoords);
-    // FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }

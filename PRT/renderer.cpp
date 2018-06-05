@@ -76,30 +76,31 @@ void Renderer::setupDiffuseBuffer(int type)
     _colorBuffer.clear();
     for (int i = 0; i < vertexnumber; ++i)
     {
-        float cr = 0, cg = 0, cb = 0;
-        float lightcoeff[3];
+        float cr = 0.0f, cg = 0.0f, cb = 0.0f;
+        glm::vec3 lightcoeff;
         for (int j = 0; j < band2; ++j)
         {
-            lightcoeff[0] = _lighting->_Vcoeffs[0](j);
-            lightcoeff[1] = _lighting->_Vcoeffs[1](j);
-            lightcoeff[2] = _lighting->_Vcoeffs[2](j);
-
             if (simpleLight)
             {
-                for (int k = 0; k < 3; ++k)
-                {
-                    lightcoeff[k] = simpleL[bandIndex]._Vcoeffs[k](j);
-                }
+                lightcoeff.r = simpleL[bandIndex]._Vcoeffs[0](j);
+                lightcoeff.g = simpleL[bandIndex]._Vcoeffs[1](j);
+                lightcoeff.b = simpleL[bandIndex]._Vcoeffs[2](j);
+            }
+            else
+            {
+                lightcoeff.r = _lighting->_Vcoeffs[0](j);
+                lightcoeff.g = _lighting->_Vcoeffs[1](j);
+                lightcoeff.b = _lighting->_Vcoeffs[2](j);
             }
 
-            cr += lightcoeff[0] * _diffObject->_DTransferFunc[type][i][j][0];
-            cg += lightcoeff[1] * _diffObject->_DTransferFunc[type][i][j][1];
-            cb += lightcoeff[2] * _diffObject->_DTransferFunc[type][i][j][2];
+            cr += lightcoeff.r * _diffObject->_DTransferFunc[type][i][j].r;
+            cg += lightcoeff.g * _diffObject->_DTransferFunc[type][i][j].g;
+            cb += lightcoeff.b * _diffObject->_DTransferFunc[type][i][j].b;
         }
 
-        cr *= _lighting->hdrEffect().x;
-        cg *= _lighting->hdrEffect().y;
-        cb *= _lighting->hdrEffect().z;
+        cr *= _lighting->hdrEffect().r;
+        cg *= _lighting->hdrEffect().g;
+        cb *= _lighting->hdrEffect().b;
 
         _colorBuffer.push_back(cr);
         _colorBuffer.push_back(cg);
@@ -108,7 +109,7 @@ void Renderer::setupDiffuseBuffer(int type)
     // Generate mesh buffer.
     _meshBuffer.clear();
     int facenumber = _diffObject->_indices.size() / 3;
-    for (int i = 0; i < facenumber; ++i)
+    for (int i = 0; i < facenumber; i++)
     {
         int offset = 3 * i;
         int index[3] = {
@@ -117,7 +118,7 @@ void Renderer::setupDiffuseBuffer(int type)
             _diffObject->_indices[offset + 2]
         };
 
-        for (int j = 0; j < 3; ++j)
+        for (int j = 0; j < 3; j++)
         {
             int Vindex = 3 * index[j];
             MeshVertex vertex = {
@@ -169,15 +170,14 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
     _colorBuffer.resize(_genObject->_vertices.size());
 
 #pragma omp parallel for
-    for (int i = 0; i < vertexnumber; ++i)
+    for (int i = 0; i < vertexnumber; i++)
     {
         int offset = 3 * i;
         glm::vec3 normal(_genObject->_normals[offset], _genObject->_normals[offset + 1],
                          _genObject->_normals[offset + 2]);
 
         float color[3];
-        //float lightcoeff[3];
-
+        // Matrix multiplication.
         Eigen::VectorXf transferedLight[3];
         transferedLight[0] = _genObject->_TransferMatrix[type][i] * _lighting->_Vcoeffs[0];
         transferedLight[1] = _genObject->_TransferMatrix[type][i] * _lighting->_Vcoeffs[1];
@@ -189,68 +189,53 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
         glm::vec3 tangent(_genObject->_tangent[i].x, _genObject->_tangent[i].y, _genObject->_tangent[i].z);
         glm::vec3 binormal = glm::cross(normal, tangent) * _genObject->_tangent[i].w;
 
-        //yzx(OpenGL) to zxy(not OpenGL)
-        glm::vec3 mattangent(normal.z, normal.x, normal.y);
-        glm::vec3 matnormal(tangent.z, tangent.x, tangent.y);
-        glm::vec3 matbinormal(binormal.z, binormal.x, binormal.y);
-
-        //rotate matrix in zxy
         for (int m = 0; m < 3; m++)
-            rotateMatrix[m][0] = mattangent[m];
+            rotateMatrix[m][0] = tangent[m];
         for (int m = 0; m < 3; m++)
-            rotateMatrix[m][1] = matbinormal[m];
+            rotateMatrix[m][1] = binormal[m];
         for (int m = 0; m < 3; m++)
-            rotateMatrix[m][2] = matnormal[m];
+            rotateMatrix[m][2] = normal[m];
 
         float alpha, beta, gamma;
 
         rotateMatrixtoYZY(rotateMatrix, alpha, beta, gamma);
 
         std::vector<glm::vec2> paraResult;
-        paraResult.push_back(glm::vec2(gamma, beta));
-        paraResult.push_back(glm::vec2(alpha, 0.0f));
+        paraResult.emplace_back(glm::vec2(gamma, beta));
+        paraResult.emplace_back(glm::vec2(alpha, 0.0f));
 
         lightingtemp.rotateZYZ(paraResult);
 
         // CONVOLUTION wih BRDF.
-        for (int l = 0; l < band; ++l)
+        for (int l = 0; l < band; l++)
         {
             float alpha_l_0 = sqrt((4.0f * M_PI) / (2 * l + 1));
 
             int BRDFindex = l * (l + 1);
-            for (int m = -l; m <= l; ++m)
+            for (int m = -l; m <= l; m++)
             {
                 int index = BRDFindex + m;
-                for (int k = 0; k < 3; ++k)
+                for (int k = 0; k < 3; k++)
                 {
                     lightingtemp._Vcoeffs[k](index) *= (alpha_l_0 * _genObject->_BRDFcoeff(BRDFindex));
                 }
             }
         }
 
-        glm::vec3 dir = glm::normalize(viewDir);
-
-        float theta = 0.0f, phi = 0.0f;
-
-        if (glm::dot(normal, dir) < 0)
-        {
-            _colorBuffer[3 * i + 0] = 0.0f;
-            _colorBuffer[3 * i + 1] = 0.0f;
-            _colorBuffer[3 * i + 2] = 0.0f;
-
-            continue;
-        }
-
-        theta = acos(glm::clamp(glm::dot(normal, dir), -1.0f, 1.0f));
-        //phi = acos(glm::clamp(glm::dot(normal,dir),-1.0f,1.0f));
-        //	std::cout <<"Theta" << theta << std::endl;
-
-        for (int s = 0; s < 3; ++s)
+        // Calculate R in Cartesian Coordinates.
+        glm::vec3 N = glm::normalize(normal);
+        glm::vec3 L = glm::normalize(viewDir);
+        glm::vec3 R = 2 * glm::dot(N, L) * N - L;
+        // Convert R to spherical coordinates.
+        float theta = acos(R.z);
+        float phi = inverseSC(R.y / sin(theta), R.x / sin(theta));
+        // Evaluate at the view-dependent reflection direction R.
+        for (int s = 0; s < 3; s++)
         {
             color[s] = 0.0f;
-            for (int l = 0; l < band; ++l)
+            for (int l = 0; l < band; l++)
             {
-                for (int m = -l; m <= l; ++m)
+                for (int m = -l; m <= l; m++)
                 {
                     int index = l * (l + 1) + m;
                     color[s] += lightingtemp._Vcoeffs[s](index) * (float)SphericalH::SHvalue(theta, phi, l, m);
@@ -264,7 +249,7 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
     // Generate mesh buffer.
     _meshBuffer.clear();
     int facenumber = _genObject->_indices.size() / 3;
-    for (int i = 0; i < facenumber; ++i)
+    for (int i = 0; i < facenumber; i++)
     {
         int offset = 3 * i;
         int index[3] = {
@@ -273,7 +258,7 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
             _genObject->_indices[offset + 2]
         };
 
-        for (int j = 0; j < 3; ++j)
+        for (int j = 0; j < 3; j++)
         {
             int Vindex = 3 * index[j];
             MeshVertex vertex = {
@@ -360,7 +345,6 @@ void Renderer::Render()
     glm::vec3 rotateVector;
     bool b_rotateLight = false;
     float thetatemp;
-    //float phitemp;
     if (b_rotate)
     {
         glm::mat4 rM = glm::make_mat4(rotateMatrix);
@@ -376,7 +360,7 @@ void Renderer::Render()
     }
     if (simpleLight)
     {
-        rotateVector = glm::vec3(light_dir[2], light_dir[0], light_dir[1]);
+        rotateVector = light_dir;
         b_rotateLight = true;
     }
 
@@ -404,13 +388,21 @@ void Renderer::Render()
 
         if (simpleLight)
         {
-            rotatePara.push_back(glm::vec2(theta, phi));
+            rotatePara.emplace_back(glm::vec2(theta, phi));
             simpleL[bandIndex].rotateZYZ(rotatePara);
         }
         if (b_rotate)
         {
-            rotatePara.push_back(glm::vec2(0.0f, 2.0f * M_PI - thetatemp));
-            lighting[lightingIndex][bandIndex].rotateZYZ(rotatePara);
+            rotatePara.emplace_back(glm::vec2(0.0f, 2.0f * M_PI - thetatemp));
+            // @FIXME: simple light rotation.
+            if (simpleLight)
+            {
+                simpleL[bandIndex].rotateZYZ(rotatePara);
+            }
+            else
+            {
+                lighting[lightingIndex][bandIndex].rotateZYZ(rotatePara);
+            }
         }
         if (materialIndex == 0)
         {
@@ -445,7 +437,6 @@ void Renderer::Render()
         view = glm::mat4(glm::mat3(view));
         shader.SetMatrix4("view", view);
         shader.SetMatrix4("projection", projection);
-        // std::cout << "lighting index: " << lightingIndex << std::endl;
         hdrTextures[lightingIndex].Draw();
     }
 }

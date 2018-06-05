@@ -10,9 +10,9 @@ Sampler::Sampler(unsigned n)
     static std::default_random_engine e;
     static std::uniform_real_distribution<float> u(0, 1);
 
-    for (unsigned i = 0; i < n; ++i)
+    for (unsigned i = 0; i < n; i++)
     {
-        for (unsigned j = 0; j < n; ++j)
+        for (unsigned j = 0; j < n; j++)
         {
             glm::vec2 spherical;
             glm::vec3 cartesian;

@@ -153,7 +153,6 @@
     <ClCompile Include="resource_manager.cpp" />
     <ClCompile Include="rgbe.c" />
     <ClCompile Include="sampler.cpp" />
-    <ClCompile Include="scene.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="texture.cpp" />
@@ -172,7 +171,6 @@
     <ClInclude Include="resource_manager.h" />
     <ClInclude Include="rgbe.h" />
     <ClInclude Include="sampler.h" />
-    <ClInclude Include="scene.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="shRotation.h" />
     <ClInclude Include="simpleLighting.h" />
