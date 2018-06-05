@@ -22,7 +22,7 @@
 #include "generalObject.h"
 #include "resource_manager.h"
 
-#define FULL_SCREEN
+// #define FULL_SCREEN
 
 using namespace std;
 using glm::vec3;
@@ -48,7 +48,6 @@ const int BandNumber = 4;
 std::string objects[] = {"buddha", "maxplanck"};
 std::string gobjects[] = {"buddha", "maxplanck"};
 std::string lightings[] = {"galileo", "grace", "rnl", "stpeters", "uffizi"};
-std::string transferF[] = {"D", "DS", "DSI"};
 std::string albedos[] = {"01", "03", "05"};
 std::string bands[] = {"linear", "quadratic", "cubic", "quartic"};
 
@@ -263,13 +262,13 @@ void dataLoading()
         }
     }
 
-    // for (size_t i = 0; i < GeneralNumber; i++)
-    // {
-    // 	std::string objFile = "Scene/" + gobjects[i] + ".obj";
-    // 	std::string dataFile = "ProcessedData/" + gobjects[i];
-    // 	genObject[i].init(objFile, albedo);
-    // 	genObject[i].readFDisk(dataFile);
-    // }
+    for (size_t i = 0; i < GeneralNumber; i++)
+    {
+    	std::string objFile = "objects/" + gobjects[i] + ".obj";
+    	std::string dataFile = "processedData/objects/quartic/" + gobjects[i];
+    	genObject[i].init(objFile, albedo);
+    	genObject[i].readFDiskbin(dataFile);
+    }
 
     glm::vec3 hdrEffect[] = {
         glm::vec3(2.2f, 2.2f, 2.2f),
@@ -401,7 +400,7 @@ void dataProcessing(int argc, char** argv)
             GeneralObject genObj;
             genObj.init(argv[4], albedo);
             genObj.project2SH(transferType, band, sampleNumber, 1);
-            genObj.write2Disk(argv[5]);
+            genObj.write2Diskbin(argv[5]);
         }
         const DWORD end = GetTickCount();
 

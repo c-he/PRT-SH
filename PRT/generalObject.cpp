@@ -56,16 +56,14 @@ void GeneralObject::write2Diskbin(std::string filename)
 
 void GeneralObject::readFDisk(std::string filename)
 {
-    std::string transsf[2] = {"G01.dat", "GS01.dat"};
+    std::string transf[3] = {"GU.txt", "GS.txt", "GI.txt"};
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 3; i++)
         _TransferMatrix[i].clear();
 
-    // int number = (_modelname == "Scene/buddha.obj") ? 2 : 1;
-
-    for (int s = 0; s < 2; s++)
+    for (int s = 0; s < 3; s++)
     {
-        std::string temp = filename + transsf[s];
+        std::string temp = filename + transf[s];
         std::ifstream in(temp);
         assert(in);
 
@@ -99,16 +97,14 @@ void GeneralObject::readFDisk(std::string filename)
 
 void GeneralObject::readFDiskbin(std::string filename)
 {
-    std::string transsf[2] = {"G01.dat", "GS01.dat"};
+    std::string transf[3] = {"GU.dat", "GS.dat", "GI.dat"};
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 3; i++)
         _TransferMatrix[i].clear();
 
-    // int number = (_modelname == "Scene/buddha.obj") ? 2 : 1;
-
-    for (int s = 0; s < 2; s++)
+    for (int s = 0; s < 3; s++)
     {
-        std::string temp = filename + transsf[s];
+        std::string temp = filename + transf[s];
 
         std::ifstream in(temp, std::ifstream::binary);
         assert(in);
@@ -120,7 +116,7 @@ void GeneralObject::readFDiskbin(std::string filename)
 
         band2 = _band * _band;
 
-        std::cout << "Glossy object: " << filename << std::endl;
+        std::cout << "Glossy object: " << filename + transf[s] << std::endl;
         std::cout << "band = " << _band << std::endl;
 
         Eigen::MatrixXf empty(band2, band2);

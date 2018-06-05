@@ -57,7 +57,7 @@ void DiffuseObject::write2Diskbin(std::string filename)
 
 void DiffuseObject::readFDisk(std::string filename)
 {
-    std::string transf[3] = {"D01.txt", "DS01.txt", "DSI01.txt"};
+    std::string transf[3] = {"DU.txt", "DS.txt", "DI.txt"};
 
     for (int i = 0; i < 3; i++)
         _DTransferFunc[i].clear();
