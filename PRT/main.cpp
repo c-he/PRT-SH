@@ -21,7 +21,7 @@
 #include "generalObject.h"
 #include "resource_manager.h"
 
-// #define FULL_SCREEN
+#define FULL_SCREEN
 
 // Window size.
 int WIDTH, HEIGHT;
