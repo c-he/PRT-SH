@@ -70,7 +70,7 @@
 
 - DIffuse  Surface Self-Transfer
 
-![](https://github.com/Fairyland0902/PRT-SH/raw/master/screenshots/diffuse.PNG)
+![](https://github.com/Fairyland0902/PRT-SH/raw/master/screenshots/diffuse.png)
 
 > From left to right: diffuse, unshadowed; diffuse, shadowed; diffuse, interreflected (bounce = 1)
 
