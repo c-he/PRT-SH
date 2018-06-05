@@ -206,14 +206,14 @@ void DiffuseObject::diffuseUnshadow(int size, int band2, Sampler* sampler, Trans
         }
     }
     if (type == T_UNSHADOW)
-        std::cout << "Unshadowed Transfer vector generated." << std::endl;
+        std::cout << "Unshadowed transfer vector generated." << std::endl;
 }
 
 void DiffuseObject::diffuseShadow(int size, int band2, Sampler* sampler, TransferType type, BVHTree* Inbvht)
 {
     diffuseUnshadow(size, band2, sampler, type, Inbvht);
     if (type == T_SHADOW)
-        std::cout << "Shadowed Transfer vector generated." << std::endl;
+        std::cout << "Shadowed transfer vector generated." << std::endl;
     //system("pause");
 }
 

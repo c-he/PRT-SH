@@ -79,3 +79,4 @@
 ### Notes
 
 1. It is highly recommended to compile this project in **Release** mode. BTW, you can choose either x86 or x64, but personally I prefer **x64**.
+2. Because the data files for glossy objects are too large (**300MB**), we ignore them from git and you may need to generate them manually.

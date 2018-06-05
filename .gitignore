@@ -265,3 +265,6 @@ __pycache__/
 
 /PRT/include
 /PRT/lib
+
+# These files are too large
+/PRT/processedData/objects/quartic/*G*.dat

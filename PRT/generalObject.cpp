@@ -279,6 +279,7 @@ void GeneralObject::glossyUnshadow(int size, int band2, class Sampler* sampler, 
     bool visibility;
 
     Eigen::MatrixXf empty(band2, band2);
+    empty = Eigen::MatrixXf::Zero(band2, band2);
     _TransferMatrix[0].resize(size, empty);
 
     // Build BVH.
@@ -297,61 +298,79 @@ void GeneralObject::glossyUnshadow(int size, int band2, class Sampler* sampler, 
 
     // Sample.
     const int sampleNumber = sampler->_samples.size();
+#pragma omp parallel for
+    for (int k = 0; k < size; k++)
+    {
+        int index = 3 * k;
+        glm::vec3 normal = glm::vec3(_normals[index + 0], _normals[index + 1], _normals[index + 2]);
+
+        for (int j = 0; j < sampleNumber; j++)
+        {
+            Sample stemp = sampler->_samples[j];
+            float G = std::max(glm::dot(glm::normalize(normal), glm::normalize(stemp._cartesCoord)),
+                               0.0f);
+
+            // Shadow.
+            if (shadow)
+            {
+                Ray testRay(glm::vec3(_vertices[index + 0], _vertices[index + 1], _vertices[index + 2]),
+                            stemp._cartesCoord);
+                visibility = !bvht.intersect(testRay);
+            }
+            else
+            {
+                visibility = true;
+            }
+
+            if (!visibility)
+            {
+                G = 0.0f;
+            }
+
+            // Projection.
+            for (int li = 0; li < _band; li++)
+            {
+                for (int mi = -li; mi <= li; mi++)
+                {
+                    for (int lj = 0; lj < _band; lj++)
+                    {
+                        for (int mj = -lj; mj <= lj; mj++)
+                        {
+                            int iindex = li * (li + 1) + mi;
+                            int jindex = lj * (lj + 1) + mj;
+
+                            // @NOTE: G term is added because it's the special case. 
+                            _TransferMatrix[0][k](iindex, jindex) += stemp._SHvalue[iindex] * stemp._SHvalue[jindex] *
+                                G;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // Normalization.
     float weight = 4.0f * M_PI / sampleNumber;
 #pragma omp parallel for
     for (int k = 0; k < size; k++)
     {
-        int offset = 3 * k;
-        glm::vec3 normal = glm::vec3(_normals[offset + 0], _normals[offset + 1], _normals[offset + 2]);
-
         for (int li = 0; li < _band; li++)
         {
             for (int mi = -li; mi <= li; mi++)
             {
                 for (int lj = 0; lj < _band; lj++)
                 {
-                    for (int mj = -lj; mj <= lj; ++mj)
+                    for (int mj = -lj; mj <= lj; mj++)
                     {
                         int iindex = li * (li + 1) + mi;
                         int jindex = lj * (lj + 1) + mj;
 
-                        float integral = 0.0f;
-                        for (int j = 0; j < sampleNumber; ++j)
-                        {
-                            Sample stemp = sampler->_samples[j];
-                            float G = std::max(glm::dot(glm::normalize(normal), glm::normalize(stemp._cartesCoord)),
-                                               0.0f);
-
-                            if (shadow)
-                            {
-                                Ray testRay(
-                                    glm::vec3(_vertices[offset + 0], _vertices[offset + 1], _vertices[offset + 2]),
-                                    stemp._cartesCoord);
-                                visibility = !bvht.intersect(testRay);
-                            }
-                            else
-                            {
-                                visibility = true;
-                            }
-
-                            if (!visibility)
-                            {
-                                G = 0.0f;
-                            }
-
-                            // @NOTE: G term is added because it's the special case. 
-                            //integral += stemp._SHvalue[iindex]*stemp._SHvalue[jindex]*geo ;//yi,zj
-                            integral += stemp._SHvalue[iindex] * stemp._SHvalue[jindex] * G; //yi,zj
-                        }
-                        // Normalization.
-                        integral *= weight;
-
-                        _TransferMatrix[0][k](iindex, jindex) = integral;
+                        _TransferMatrix[0][k](iindex, jindex) *= weight;
                     }
                 }
             }
         }
     }
+
     if (type == T_UNSHADOW)
     {
         std::cout << "Unshadowed transfer matrix generated." << std::endl;
@@ -360,7 +379,7 @@ void GeneralObject::glossyUnshadow(int size, int band2, class Sampler* sampler, 
 
 void GeneralObject::glossyShadow(int size, int band2, Sampler* sampler, TransferType type, BVHTree* Inbvht)
 {
-    glossyShadow(size, band2, sampler, type, Inbvht);
+    glossyUnshadow(size, band2, sampler, type, Inbvht);
     if (type == T_SHADOW)
     {
         std::cout << "Shadowed transfer matrix generated." << std::endl;
@@ -380,6 +399,7 @@ void GeneralObject::glossyInterReflect(int size, int band2, Sampler* sampler, Tr
 
     interReflect[0] = _TransferMatrix[0];
     Eigen::MatrixXf empty(band2, band2);
+    empty = Eigen::MatrixXf::Zero(band2, band2);
 
     float weight = 4.0f * M_PI / sampleNumber;
 
@@ -394,58 +414,53 @@ void GeneralObject::glossyInterReflect(int size, int band2, Sampler* sampler, Tr
             int offset = 3 * i;
             glm::vec3 normal = glm::vec3(_normals[offset + 0], _normals[offset + 1], _normals[offset + 2]);
 
-            for (int li = 0; li < _band; li++)
+            for (int j = 0; j < sampleNumber; j++)
             {
-                for (int mi = -li; mi <= li; mi++)
+                Sample stemp = sampler->_samples[j];
+                Ray rtemp(glm::vec3(_vertices[offset + 0], _vertices[offset + 1], _vertices[offset + 2]),
+                          stemp._cartesCoord);
+                bool visibility = !bvht.intersect(rtemp);
+
+                if (visibility)
                 {
-                    for (int lj = 0; lj < _band; lj++)
+                    continue;
+                }
+                // The direction which is invisibile is where the indirect radiance comes from.
+                float G = std::max(glm::dot(glm::normalize(normal), rtemp._dir), 0.0f);
+
+                int triIndex = 3 * rtemp._index;
+                int voffset[3];
+                glm::vec3 p[3];
+                Eigen::MatrixXf SHTrans[3];
+                for (int m = 0; m < 3; m++)
+                {
+                    voffset[m] = _indices[triIndex + m];
+                    SHTrans[m] = interReflect[k][voffset[m]];
+                    voffset[m] *= 3;
+                    p[m] = glm::vec3(_vertices[voffset[m] + 0], _vertices[voffset[m] + 1],
+                                     _vertices[voffset[m] + 2]);
+                }
+                glm::vec3 pc = rtemp._o + (float)rtemp._t * rtemp._dir;
+
+                float u, v, w;
+                // Barycentric coordinates for interpolation.
+                barycentric(pc, p, u, v, w);
+
+                for (int li = 0; li < _band; li++)
+                {
+                    for (int mi = -li; mi <= li; mi++)
                     {
-                        for (int mj = -lj; mj <= lj; ++mj)
+                        for (int lj = 0; lj < _band; lj++)
                         {
-                            int iindex = li * (li + 1) + mi;
-                            int jindex = lj * (lj + 1) + mj;
-
-                            float integral = 0.0f;
-                            for (int j = 0; j < sampleNumber; ++j)
+                            for (int mj = -lj; mj <= lj; ++mj)
                             {
-                                Sample stemp = sampler->_samples[j];
-                                Ray rtemp(
-                                    glm::vec3(_vertices[offset + 0], _vertices[offset + 1], _vertices[offset + 2]),
-                                    stemp._cartesCoord);
-                                bool visibility = !bvht.intersect(rtemp);
-
-                                if (visibility)
-                                {
-                                    continue;
-                                }
-                                // The direction which is invisibile is where the indirect radiance comes from.
-                                float G = std::max(glm::dot(glm::normalize(normal), rtemp._dir), 0.0f);
-
-                                int triIndex = 3 * rtemp._index;
-                                int voffset[3];
-                                glm::vec3 p[3];
-                                Eigen::MatrixXf SHTrans[3];
-                                for (int m = 0; m < 3; m++)
-                                {
-                                    voffset[m] = _indices[triIndex + m];
-                                    SHTrans[m] = interReflect[k][voffset[m]];
-                                    voffset[m] *= 3;
-                                    p[m] = glm::vec3(_vertices[voffset[m] + 0], _vertices[voffset[m] + 1],
-                                                     _vertices[voffset[m] + 2]);
-                                }
-                                glm::vec3 pc = rtemp._o + (float)rtemp._t * rtemp._dir;
-
-                                float u, v, w;
-                                // Barycentric coordinates for interpolation.
-                                barycentric(pc, p, u, v, w);
+                                int iindex = li * (li + 1) + mi;
+                                int jindex = lj * (lj + 1) + mj;
 
                                 float SHtemp = u * SHTrans[0](iindex, jindex) + v * SHTrans[1](iindex, jindex) + w *
                                     SHTrans[2](iindex, jindex);
-                                integral += SHtemp * G;
+                                zeroVector[i](iindex, jindex) += SHtemp * G;
                             }
-                            // Normalization.
-                            integral *= weight;
-                            zeroVector[i](iindex, jindex) = integral;
                         }
                     }
                 }
@@ -455,6 +470,24 @@ void GeneralObject::glossyInterReflect(int size, int band2, Sampler* sampler, Tr
 #pragma omp parallel for
         for (int i = 0; i < size; i++)
         {
+            // Normalization.
+            for (int li = 0; li < _band; li++)
+            {
+                for (int mi = -li; mi <= li; mi++)
+                {
+                    for (int lj = 0; lj < _band; lj++)
+                    {
+                        for (int mj = -lj; mj <= lj; mj++)
+                        {
+                            int iindex = li * (li + 1) + mi;
+                            int jindex = lj * (lj + 1) + mj;
+
+                            zeroVector[i](iindex, jindex) *= weight;
+                        }
+                    }
+                }
+            }
+            // Propogation.
             interReflect[k + 1][i] = interReflect[k][i] + zeroVector[i];
         }
     }

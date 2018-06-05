@@ -31,6 +31,36 @@ Interreflected transfer vector generated.
 Diffuse object generated.
 Processing time:94.703 seconds
 
+Glossy object: buddha
+Transfer Type: unshadowed
+Unshadowed transfer matrix generated.
+Glossy object generated.
+Processing time:78.953 seconds
+
+Glossy object: buddha
+Transfer Type: shadowed
+BVHTree: Start building
+BVHTree: Building done
+Shadowed transfer matrix generated.
+Glossy object generated.
+Processing time:124.172 seconds
+
+Glossy object: buddha
+Transfer Type: interreflect
+BVHTree: Start building
+BVHTree: Building done
+Interreflected transfer matrix generated.
+Glossy object generated.
+Processing time:262.219 seconds
+
+Glossy object: maxplanck
+Transfer Type: interreflect
+BVHTree: Start building
+BVHTree: Building done
+Interreflected transfer matrix generated.
+Glossy object generated.
+Processing time:185.703 seconds
+
 - SH order: cubic
 Diffuse object: buddha
 Transfer Type: shadowed
