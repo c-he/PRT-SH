@@ -125,6 +125,7 @@ void changeLight(int index);
 void changeObject(int index);
 void changeTransfer(int index);
 void changeBand(int index);
+void changeMaterial(int index);
 
 int main(int argc, char** argv)
 {
@@ -264,10 +265,10 @@ void dataLoading()
 
     for (size_t i = 0; i < GeneralNumber; i++)
     {
-    	std::string objFile = "objects/" + gobjects[i] + ".obj";
-    	std::string dataFile = "processedData/objects/quartic/" + gobjects[i];
-    	genObject[i].init(objFile, albedo);
-    	genObject[i].readFDiskbin(dataFile);
+        std::string objFile = "objects/" + gobjects[i] + ".obj";
+        std::string dataFile = "processedData/objects/quartic/" + gobjects[i];
+        genObject[i].init(objFile, albedo);
+        genObject[i].readFDiskbin(dataFile);
     }
 
     glm::vec3 hdrEffect[] = {
@@ -491,28 +492,28 @@ void checkUIStatus()
     }
     if (lastTransfer != transferFIndex)
     {
-        if ((materialIndex == 0) || ((materialIndex == 1) && (objectIndex == 0)))
-        {
-            changeTransfer(transferFIndex);
-            lastTransfer = transferFIndex;
-        }
+        std::cout << "Console UI: Transfer Type change" << std::endl;
+        changeTransfer(transferFIndex);
+        lastTransfer = transferFIndex;
     }
     if (lastSimple != simpleLight)
     {
-        renderer.SetupColorBuffer(transferFIndex, glm::vec3(0.0f, 0.0f, 0.0f), true);
         std::cout << "Console UI: Simple Light" << std::endl;
+        if (materialIndex == 0)
+        {
+            renderer.SetupColorBuffer(transferFIndex, glm::vec3(0.0f, 0.0f, 0.0f), true);
+        }
+        else
+        {
+            renderer.SetupColorBuffer(transferFIndex, glm::vec3(0.0f, 0.0f, 0.0f), false);
+        }
         lastSimple = simpleLight;
         drawCubemap = !simpleLight;
     }
     if (lastMaterial != materialIndex)
     {
-        if (((materialIndex == 0) && (objectIndex < ObjectNumber)) || ((materialIndex == 1) && (objectIndex <
-            GeneralNumber)))
-        {
-            changeLight(lightingIndex);
-        }
         std::cout << "Console UI: Material change" << std::endl;
-
+        changeMaterial(materialIndex);
         lastMaterial = materialIndex;
     }
     if (lastBand != bandIndex)
@@ -567,14 +568,24 @@ void changeTransfer(int index)
 
 void changeBand(int index)
 {
+    // We only generate data for diffuse transfer.
     if (materialIndex == 0)
     {
         renderer.Setup(&diffObject[objectIndex][index], &lighting[lightingIndex][index]);
         renderer.SetupColorBuffer(transferFIndex, glm::vec3(0.0f, 0.0f, 0.0f), true);
     }
+}
+
+void changeMaterial(int index)
+{
+    if (index == 0)
+    {
+        renderer.Setup(&diffObject[objectIndex][bandIndex], &lighting[lightingIndex][bandIndex]);
+        renderer.SetupColorBuffer(transferFIndex, glm::vec3(0.0f, 0.0f, 0.0f), true);
+    }
     else
     {
-        renderer.Setup(&genObject[objectIndex], &lighting[lightingIndex][index]);
+        renderer.Setup(&genObject[objectIndex], &lighting[lightingIndex][bandIndex]);
         renderer.SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
     }
 }

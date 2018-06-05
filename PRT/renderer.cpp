@@ -40,8 +40,6 @@ extern Lighting* simpleL;
 int vertices;
 int faces;
 
-using glm::mat3;
-
 Renderer::~Renderer()
 {
     delete[]hdrTextures;
@@ -162,115 +160,34 @@ void Renderer::setupDiffuseBuffer(int type)
 
 void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
 {
-    std::cout << "type" << type << std::endl;
-    std::cout << "name" << _genObject->_modelname << std::endl;
-    if (objectIndex == 0)
-    {
-        if (type > 1)
-            type = 1;
-    }
-    else
-    {
-        type = 0;
-    }
-
-    std::cout << "buffer type " << type << std::endl;
-
     assert(_genObject->band() == _lighting->band());
     int vertexnumber = _genObject->_vertices.size() / 3;
     int band = _genObject->band();
-    int band2 = band * band;
 
     // Generate color buffer.
     _colorBuffer.clear();
     _colorBuffer.resize(_genObject->_vertices.size());
 
-    //std::cout << "viewDir"  << viewDir.x << ' '<< viewDir.y << ' ' << viewDir.z << std::endl;
-    int validNumber = 0;
 #pragma omp parallel for
     for (int i = 0; i < vertexnumber; ++i)
     {
         int offset = 3 * i;
-        glm::vec3 position(_genObject->_vertices[offset], _genObject->_vertices[offset + 1],
-                           _genObject->_vertices[offset + 2]);
         glm::vec3 normal(_genObject->_normals[offset], _genObject->_normals[offset + 1],
                          _genObject->_normals[offset + 2]);
-
 
         float color[3];
         //float lightcoeff[3];
 
         Eigen::VectorXf transferedLight[3];
-        if (type == 0)
-        {
-            transferedLight[0] = _genObject->_TransferMatrix[0][i] * _lighting->_Vcoeffs[0];
-            transferedLight[1] = _genObject->_TransferMatrix[0][i] * _lighting->_Vcoeffs[1];
-            transferedLight[2] = _genObject->_TransferMatrix[0][i] * _lighting->_Vcoeffs[2];
-        }
-        else
-        {
-            transferedLight[0] = _genObject->_TransferMatrix[1][i] * _lighting->_Vcoeffs[0];
-            transferedLight[1] = _genObject->_TransferMatrix[1][i] * _lighting->_Vcoeffs[1];
-            transferedLight[2] = _genObject->_TransferMatrix[1][i] * _lighting->_Vcoeffs[2];
-        }
-
+        transferedLight[0] = _genObject->_TransferMatrix[type][i] * _lighting->_Vcoeffs[0];
+        transferedLight[1] = _genObject->_TransferMatrix[type][i] * _lighting->_Vcoeffs[1];
+        transferedLight[2] = _genObject->_TransferMatrix[type][i] * _lighting->_Vcoeffs[2];
 
         Lighting lightingtemp(band, transferedLight);
 
         float rotateMatrix[3][3];
         glm::vec3 tangent(_genObject->_tangent[i].x, _genObject->_tangent[i].y, _genObject->_tangent[i].z);
         glm::vec3 binormal = glm::cross(normal, tangent) * _genObject->_tangent[i].w;
-        //vec3 binormal = glm::cross(normal,tangent);
-
-        //TEST DATA 1 PASSED
-        /*tangent = vec3(0.0f,0.0f,1.0f);
-        normal = vec3(0.0f,1.0f,0.0f);
-        binormal = glm::cross(normal,tangent) ;*/
-
-
-        //TEST DATA 2 PASSED
-        /*tangent = vec3(0.0,-1.0f,0.0f);
-        normal = vec3(0.0f,0.0f,1.0f);
-        binormal = glm::cross(normal,tangent);
-
-        //TEST DATA 3  PASSED
-        tangent = vec3(1.0f,0.0f,0.0f);
-        normal = vec3(0.0f,1.0f,0.0f);
-        binormal = glm::cross(normal,tangent) ;
-
-        //TEST DATA 4 PASSED
-        tangent = vec3(0.0f,-1.0f,0.0f);
-        normal = vec3(1.0,0.0,0.0);
-        binormal = glm::cross(normal,tangent);*/
-
-        //TEST DATA5
-        /*tangent = vec3(0.0f,0.0f,1.0f);
-        normal = vec3(-1.0f,0.0f,0.0f);
-        binormal = glm::cross(normal,tangent);*/
-
-        /*	if(fabs(normal.x + 1.0f) < 0.02f)
-            {
-                std::cout << "local coord check" << std::endl;
-    
-                std::cout << "normal " << normal.x << ' ' << normal.y << ' ' << normal.z<< std::endl;
-                std::cout << "tangent " << tangent.x << ' ' << tangent.y << ' ' << tangent.z<< std::endl;
-                std::cout << "binormal " << binormal.x << ' ' << binormal.y << ' ' << binormal.z<< std::endl;
-    
-                system("pause");
-    
-    
-    
-            }*/
-
-        //std::cout << binormal.x << ' '<< binormal.y << ' '<< binormal.z << std::endl;
-
-
-        mat3 changeCoord;
-
-
-        /*tangent = vec3(1.0f,0.0f,0.0f);
-        normal = vec3(0.0f,0.0f,1.0f);
-        binormal = glm::cross(normal,tangent) ;*/
 
         //yzx(OpenGL) to zxy(not OpenGL)
         glm::vec3 mattangent(normal.z, normal.x, normal.y);
@@ -278,9 +195,12 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
         glm::vec3 matbinormal(binormal.z, binormal.x, binormal.y);
 
         //rotate matrix in zxy
-        for (int m = 0; m < 3; ++m)rotateMatrix[m][0] = mattangent[m];
-        for (int m = 0; m < 3; ++m)rotateMatrix[m][1] = matbinormal[m];
-        for (int m = 0; m < 3; ++m)rotateMatrix[m][2] = matnormal[m];
+        for (int m = 0; m < 3; m++)
+            rotateMatrix[m][0] = mattangent[m];
+        for (int m = 0; m < 3; m++)
+            rotateMatrix[m][1] = matbinormal[m];
+        for (int m = 0; m < 3; m++)
+            rotateMatrix[m][2] = matnormal[m];
 
         float alpha, beta, gamma;
 
@@ -290,10 +210,9 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
         paraResult.push_back(glm::vec2(gamma, beta));
         paraResult.push_back(glm::vec2(alpha, 0.0f));
 
-
         lightingtemp.rotateZYZ(paraResult);
 
-        //CONVOLUTION wih BRDF
+        // CONVOLUTION wih BRDF.
         for (int l = 0; l < band; ++l)
         {
             float alpha_l_0 = sqrt((4.0f * M_PI) / (2 * l + 1));
@@ -309,10 +228,7 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
             }
         }
 
-        glm::vec3 dir = viewDir;
-
-        dir = glm::normalize(dir);
-
+        glm::vec3 dir = glm::normalize(viewDir);
 
         float theta = 0.0f, phi = 0.0f;
 
@@ -328,7 +244,6 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
         theta = acos(glm::clamp(glm::dot(normal, dir), -1.0f, 1.0f));
         //phi = acos(glm::clamp(glm::dot(normal,dir),-1.0f,1.0f));
         //	std::cout <<"Theta" << theta << std::endl;
-        validNumber ++;
 
         for (int s = 0; s < 3; ++s)
         {
@@ -396,9 +311,6 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
 
     // Unbind.
     glBindVertexArray(0);
-
-    std::cout << validNumber << std::endl;
-    std::cout << "Color buffer done." << std::endl;
 }
 
 void Renderer::objDraw()
