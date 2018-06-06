@@ -3,7 +3,6 @@
 #include "UI.h"
 #include "resource_manager.h"
 #include "sphericalHarmonics.h"
-#include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -50,7 +49,7 @@ void Renderer::Init(const int lightNumber)
 {
     // Initialize cubemap.
     hdrTextures = new HDRTextureCube[lightNumber];
-    for (size_t i = 0; i < lightNumber; ++i)
+    for (int i = 0; i < lightNumber; i++)
     {
         hdrTextures[i].Init("lightings/cross/" + lightings[i] + "_cross" + ".hdr");
     }

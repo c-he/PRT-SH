@@ -79,8 +79,6 @@ glm::vec3 camera_up(0.0f, 1.0f, 0.0f);
 
 //Simple lighting.
 glm::vec3 light_dir(0.0f, 0.0f, 1.0f);
-float simpleLightTheta = 43.3f;
-float simpleLightPhi = 225.0f;
 
 // Rotation.
 glm::fquat g_Rotation(0.0f, 0.0f, 0.0f, 1.0f);
@@ -428,22 +426,8 @@ int mouse_callback(GLFWwindow* window, double xpos, double ypos)
         firstMouse = false;
     }
 
-    GLfloat xoffset = xpos - lastX;
-    GLfloat yoffset = lastY - ypos;
     lastX = xpos;
     lastY = ypos;
-
-    // currentcamera->ProcessMouseMovement(xoffset, yoffset, xpos, ypos);
-    if (simpleLight)
-    {
-        simpleLightTheta += 0.1f * (yoffset);
-        if (simpleLightTheta < 0.0f)
-            simpleLightTheta = 0.0f;
-        if (simpleLightTheta > 180.0f)
-            simpleLightTheta = 180.0f;
-
-        simpleLightPhi += 0.1f * (xoffset);
-    }
 
     return TwMouseMotion((int)xpos, (int)ypos);
 }
