@@ -45,11 +45,11 @@ public:
     void init(std::string path, glm::vec3 albedo, bool texture = true);
 
     // Project to SH function.
-    virtual void project2SH(int mode, int band, int sampleNumber, int bounce) =0;
+    virtual void project2SH(int mode, int band, int sampleNumber, int bounce) = 0;
     // IO functions.
-    virtual void write2Disk(std::string filename) =0;
+    virtual void write2Disk(std::string filename) = 0;
     virtual void write2Diskbin(std::string filename) = 0;
-    virtual void readFDisk(std::string filename) =0;
+    virtual void readFDisk(std::string filename) = 0;
     virtual void readFDiskbin(std::string filename) = 0;
     bool intersectTest(Ray& ray, int facenumber);
     void normVertices();

@@ -22,7 +22,7 @@
 #include "generalObject.h"
 #include "resource_manager.h"
 
-#define FULL_SCREEN
+// #define FULL_SCREEN
 
 // Window size.
 int WIDTH, HEIGHT;
@@ -482,9 +482,13 @@ void checkUIStatus()
         }
         else
         {
-            renderer.SetupColorBuffer(transferFIndex, glm::vec3(0.0f, 0.0f, 0.0f), false);
+            renderer.SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
         }
+        // @MAGIC: without this would cause lighting change error when change from environment lighitng to analytical lighting for glossy objects.
+        //         I think this may have something to do with synchronization with different threads.
+        Sleep(200);
         lastSimple = simpleLight;
+        // std::cout << "lastSimple change done: last simple = " << lastSimple << " and simpleLight = " << simpleLight << std::endl;
         drawCubemap = !simpleLight;
     }
     if (lastMaterial != materialIndex)
