@@ -331,10 +331,10 @@ void Renderer::Render()
         float angle = glfwGetTime() - g_RotateTime;
         // std::cout << "angle = " << angle << std::endl;
         glm::fquat quat = glm::angleAxis(angle, axis);
-        g_Rotation = quat * g_RotateStart;
+        g_Rotation = g_RotateStart * quat;
         b_rotate = true;
     }
-    if(g_Rotation != last_Rotation)
+    if (g_Rotation != last_Rotation)
     {
         b_rotate = true;
         last_Rotation = g_Rotation;
@@ -347,10 +347,12 @@ void Renderer::Render()
     shader.SetMatrix4("view", view);
     shader.SetMatrix4("projection", projection);
 
+    // rotate vector = [sin(theta)cos(phi), sin(theta)sin(phi), cos(theta)]
     glm::vec3 rotateVector;
     bool b_rotateLight = false;
     float thetatemp;
-    if (b_rotate)
+    float phitemp;
+    if (b_rotate || simpleLight)
     {
         glm::vec4 dir = rotateMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
         rotateVector = glm::vec3(dir.x, dir.y, dir.z);
@@ -358,11 +360,12 @@ void Renderer::Render()
         thetatemp = acos(rotateVector.z);
         if (dir.x < 0)
         {
-            thetatemp = 2 * M_PI - thetatemp;
+            thetatemp = 2.0f * M_PI - thetatemp;
         }
+        phitemp = inverseSC(rotateVector.y / sin(thetatemp), rotateVector.x / sin(thetatemp));
         b_rotateLight = true;
     }
-    if (simpleLight)
+    if (simpleLight && !b_rotate)
     {
         rotateVector = light_dir;
         b_rotateLight = true;
@@ -371,34 +374,27 @@ void Renderer::Render()
     if (b_rotateLight)
     {
         rotateVector = glm::normalize(rotateVector);
-        float theta, phi;
-
-        rotateVector[2] = glm::clamp(rotateVector[2], -1.0f, 1.0f);
-
-        theta = acos(rotateVector[2]);
-        float sintheta = sin(theta);
-        if (fabs(sintheta) < M_ZERO)
+        float theta = acos(rotateVector.z);
+        float phi;
+        if (fabs(sin(theta)) < M_ZERO)
         {
             phi = 0.0f;
         }
         else
         {
-            float cosphi = rotateVector[0] / sintheta;
-            float sinphi = rotateVector[1] / sintheta;
-            phi = inverseSC(sinphi, cosphi);
+            phi = inverseSC(rotateVector.y / sin(theta), rotateVector.x / sin(theta));
         }
         std::vector<glm::vec2> rotatePara;
         rotatePara.clear();
 
-        if (simpleLight)
+        if (simpleLight && !b_rotate)
         {
             rotatePara.emplace_back(glm::vec2(theta, phi));
             simpleL[bandIndex].rotateZYZ(rotatePara);
         }
         if (b_rotate)
         {
-            rotatePara.emplace_back(glm::vec2(0.0f, 2.0f * M_PI - thetatemp));
-            // @FIXME: simple light rotation.
+            rotatePara.emplace_back(glm::vec2(-thetatemp, -phitemp));
             if (simpleLight)
             {
                 simpleL[bandIndex].rotateZYZ(rotatePara);
@@ -408,6 +404,7 @@ void Renderer::Render()
                 lighting[lightingIndex][bandIndex].rotateZYZ(rotatePara);
             }
         }
+
         if (materialIndex == 0)
         {
             Setup(&diffObject[objectIndex][bandIndex], &lighting[lightingIndex][bandIndex]);

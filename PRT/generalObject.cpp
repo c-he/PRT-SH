@@ -158,8 +158,8 @@ void GeneralObject::computeBRDFKernel()
     {
         float value = 0.0f;
         Sample sp = stemp._samples[i];
-        float cosine = std::max(glm::dot(normal, glm::normalize(sp._cartesCoord)), 0.0f);
-        value = powf(cosine, _glossiness);
+        float specular = std::max(glm::dot(normal, glm::normalize(sp._cartesCoord)), 0.0f);
+        value = _albedo.x / M_PI + powf(specular, _glossiness);
 
         for (int j = 0; j < band2; ++j)
         {
@@ -173,7 +173,6 @@ void GeneralObject::computeBRDFKernel()
     }
 }
 
-//B = (N x T) * T_w
 void GeneralObject::computeTBN()
 {
     int vertexNumber = _vertices.size() / 3;
