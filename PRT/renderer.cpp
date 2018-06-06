@@ -180,9 +180,18 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
         float color[3];
         // Matrix multiplication.
         Eigen::VectorXf transferedLight[3];
-        transferedLight[0] = _genObject->_TransferMatrix[type][i] * _lighting->_Vcoeffs[0];
-        transferedLight[1] = _genObject->_TransferMatrix[type][i] * _lighting->_Vcoeffs[1];
-        transferedLight[2] = _genObject->_TransferMatrix[type][i] * _lighting->_Vcoeffs[2];
+        if (simpleLight)
+        {
+            transferedLight[0] = _genObject->_TransferMatrix[type][i] * simpleL[bandIndex]._Vcoeffs[0];
+            transferedLight[1] = _genObject->_TransferMatrix[type][i] * simpleL[bandIndex]._Vcoeffs[1];
+            transferedLight[2] = _genObject->_TransferMatrix[type][i] * simpleL[bandIndex]._Vcoeffs[2];
+        }
+        else
+        {
+            transferedLight[0] = _genObject->_TransferMatrix[type][i] * _lighting->_Vcoeffs[0];
+            transferedLight[1] = _genObject->_TransferMatrix[type][i] * _lighting->_Vcoeffs[1];
+            transferedLight[2] = _genObject->_TransferMatrix[type][i] * _lighting->_Vcoeffs[2];
+        }
 
         Lighting lightingtemp(band, transferedLight);
 
