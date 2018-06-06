@@ -74,8 +74,8 @@
     <LibraryPath>C:\Users\Kuroko\Documents\CG\PRT\PRT\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>E:\CG\PRT-SH\PRT\include;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\CG\PRT-SH\PRT\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Kuroko\Documents\CG\PRT\PRT\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Kuroko\Documents\CG\PRT\PRT\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>C:\Users\Kuroko\Documents\CG\PRT\PRT\include;$(IncludePath)</IncludePath>
