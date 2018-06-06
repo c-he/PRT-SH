@@ -199,7 +199,7 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
 
         float alpha, beta, gamma;
 
-        rotateMatrixtoYZY(rotateMatrix, alpha, beta, gamma);
+        rotateMatrixtoZYZ(rotateMatrix, alpha, beta, gamma);
 
         std::vector<glm::vec2> paraResult;
         paraResult.emplace_back(glm::vec2(gamma, beta));
