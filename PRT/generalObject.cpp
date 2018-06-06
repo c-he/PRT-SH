@@ -156,14 +156,14 @@ void GeneralObject::computeBRDFKernel()
 
     for (int i = 0; i < sampleNumber; ++i)
     {
-        float value = 0.0f;
         Sample sp = stemp._samples[i];
+        // Naive Phong.
         float specular = std::max(glm::dot(normal, glm::normalize(sp._cartesCoord)), 0.0f);
-        value = _albedo.x / M_PI + powf(specular, _glossiness);
+        float brdf = _albedo.x / M_PI + powf(specular, _glossiness);
 
         for (int j = 0; j < band2; ++j)
         {
-            _BRDFcoeff(j) += sp._SHvalue[j] * value;
+            _BRDFcoeff(j) += sp._SHvalue[j] * brdf;
         }
     }
 
@@ -421,7 +421,7 @@ void GeneralObject::glossyInterReflect(int size, int band2, Sampler* sampler, Tr
                     continue;
                 }
                 // The direction which is invisible is where the indirect radiance comes from.
-                float G = std::max(glm::dot(glm::normalize(normal), rtemp._dir), 0.0f);
+                float G = std::max(glm::dot(rtemp._dir, normal), 0.0f);
 
                 int triIndex = 3 * rtemp._index;
                 int voffset[3];
@@ -465,7 +465,8 @@ void GeneralObject::glossyInterReflect(int size, int band2, Sampler* sampler, Tr
 #pragma omp parallel for
         for (int i = 0; i < size; i++)
         {
-            // Normalization.
+            interReflect[k + 1][i].resize(band2, band2);
+            // Normalization and propogation.
             for (int li = 0; li < _band; li++)
             {
                 for (int mi = -li; mi <= li; mi++)
@@ -478,12 +479,12 @@ void GeneralObject::glossyInterReflect(int size, int band2, Sampler* sampler, Tr
                             int jindex = lj * (lj + 1) + mj;
 
                             zeroVector[i](iindex, jindex) *= weight;
+                            interReflect[k + 1][i](iindex, jindex) = interReflect[k][i](iindex, jindex) + zeroVector[i](
+                                iindex, jindex);
                         }
                     }
                 }
             }
-            // Propogation.
-            interReflect[k + 1][i] = interReflect[k][i] + zeroVector[i];
         }
     }
     _TransferMatrix[0] = interReflect[bounce];

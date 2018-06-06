@@ -92,7 +92,7 @@ inline void UIInit()
 
     TwBar* bar = TwNewBar("Console");
     TwDefine(" GLOBAL help='This example shows how to integrate AntTweakBar with GLFW and OpenGL.' ");
-    TwDefine(" Console size='250 440' color='96 216 224' position='3 10' ");
+    TwDefine(" Console size='250 440' color='40 40 40' position='0 0' ");
 
     {
         TwEnumVal MaterialEV[2] = {{DIFFUSE, "diffuse"}, {GLOSSY, "glossy"}};
@@ -143,7 +143,7 @@ inline void UIInit()
                " label='Simple Light' help='Change the simple light'");
 
     TwBar* info = TwNewBar("Mesh");
-    TwDefine("Mesh size='250 320' text=light  color='40 40 40' position='3 450' valueswidth=100");
+    TwDefine("Mesh size='250 100' text=light  color='40 40 40' position='0 440' valueswidth=100");
 
     TwAddVarRO(info, "FPS", TW_TYPE_UINT32, &fps, " label='FPS: ' ");
 

@@ -284,7 +284,7 @@ void DiffuseObject::diffuseInterreflect(int size, int band2, Sampler* sampler, T
         }
 
 #pragma omp parallel for
-        for (int i = 0; i < size; ++i)
+        for (int i = 0; i < size; i++)
         {
             interReflect[k + 1][i].resize(band2);
             for (int j = 0; j < band2; ++j)
