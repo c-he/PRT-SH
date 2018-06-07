@@ -207,7 +207,7 @@ inline float inverseSC(float sinV, float cosV)
 }
 
 // Decompose the desired rotation into the zyz Eluer angles alpha, beta, gamma.
-inline void rotateMatrixtoZYZ(float mat[3][3], float& alpha, float& beta, float& gamma)
+inline void rotateMatrixtoZYZ(glm::mat3 mat, float& alpha, float& beta, float& gamma)
 {
     beta = acos(glm::clamp(mat[2][2], -1.0f, 1.0f));
     float sinbeta = sin(beta);

@@ -158,7 +158,7 @@ void GeneralObject::computeBRDFKernel()
     for (int i = 0; i < sampleNumber; i++)
     {
         Sample sp = stemp._samples[i];
-        // Naive Phong.
+        // Naive cosine.
         float specular = std::max(glm::dot(normal, glm::normalize(sp._cartesCoord)), 0.0f);
         float brdf = _albedo.x / M_PI + powf(specular, _glossiness);
         // Projection.

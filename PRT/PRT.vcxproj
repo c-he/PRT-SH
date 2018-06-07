@@ -140,6 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="boundingBox.cpp" />
+    <ClCompile Include="brdf.cpp" />
     <ClCompile Include="bvhTree.cpp" />
     <ClCompile Include="diffuseObject.cpp" />
     <ClCompile Include="generalObject.cpp" />
@@ -159,6 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="boundingBox.h" />
+    <ClInclude Include="brdf.h" />
     <ClInclude Include="bvhTree.h" />
     <ClInclude Include="diffuseObject.h" />
     <ClInclude Include="generalObject.h" />

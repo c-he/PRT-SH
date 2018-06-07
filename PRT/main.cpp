@@ -16,13 +16,14 @@
 #include <AntTweakBar.h>
 
 #include "UI.h"
+#include "brdf.h"
 #include "lighting.h"
 #include "renderer.h"
 #include "diffuseObject.h"
 #include "generalObject.h"
 #include "resource_manager.h"
 
-#define FULL_SCREEN
+// #define FULL_SCREEN
 
 // Window size.
 int WIDTH, HEIGHT;
@@ -39,11 +40,13 @@ const int LightNumber = 5;
 const int ObjectNumber = 2;
 const int GeneralNumber = 2;
 const int BandNumber = 4;
+const int BRDFNumber = 1;
 
 std::string objects[] = {"buddha", "maxplanck"};
 std::string gobjects[] = {"buddha", "maxplanck"};
 std::string lightings[] = {"galileo", "grace", "rnl", "stpeters", "uffizi"};
 std::string bands[] = {"linear", "quadratic", "cubic", "quartic"};
+std::string BRDFs[] = {"phong"};
 
 glm::vec3 albedo(0.15f, 0.15f, 0.15f);
 
@@ -52,17 +55,20 @@ int lightingIndex = -1;
 int transferFIndex = -1;
 int materialIndex = 0;
 int bandIndex = 3;
+int BRDFIndex = -1;
 
 int lastObject = -1;
 int lastLighting = -1;
 int lastTransfer = -1;
 int lastMaterial = 0; // Diffuse
 int lastBand = 3; // Quartic
+int lastBRDF = -1;
 
 DiffuseObject** diffObject;
 GeneralObject* genObject;
 Lighting** lighting;
 Lighting* simpleL;
+BRDF* brdf;
 Renderer renderer;
 
 // Cubemap & Simple Light.
@@ -242,6 +248,7 @@ void dataLoading()
     diffObject = new DiffuseObject*[ObjectNumber];
     genObject = new GeneralObject[GeneralNumber];
     lighting = new Lighting*[LightNumber];
+    brdf = new BRDF[BRDFNumber];
 
     for (size_t i = 0; i < ObjectNumber; i++)
     {
@@ -295,6 +302,11 @@ void dataLoading()
                         glm::vec3(1.0f, 1.0f, 1.0f));
     }
 
+    for (size_t i = 0; i < BRDFNumber; i++)
+    {
+        brdf[i].init(5, Phong);
+    }
+
     std::cout << "Done" << std::endl;
 
     // Initialize indices.
@@ -302,6 +314,7 @@ void dataLoading()
     objectIndex = 0;
     lightingIndex = 0;
     bandIndex = 3;
+    BRDFIndex = 0;
 
     if (materialIndex == 0)
     {
@@ -320,6 +333,7 @@ void dataLoading()
     lastObject = objectIndex;
     lastLighting = lightingIndex;
     lastTransfer = transferFIndex;
+    lastBRDF = BRDFIndex;
 }
 
 void shaderLoading()

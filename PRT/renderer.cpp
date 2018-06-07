@@ -1,10 +1,11 @@
 #include <cmath>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "renderer.h"
 #include "UI.h"
 #include "resource_manager.h"
 #include "sphericalHarmonics.h"
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "brdf.h"
 
 extern bool drawCubemap;
 extern bool simpleLight;
@@ -13,6 +14,7 @@ extern std::string lightings[];
 extern int lightingIndex;
 extern int objectIndex;
 extern int bandIndex;
+extern int BRDFIndex;
 
 // Window.
 extern int WIDTH;
@@ -35,6 +37,7 @@ extern DiffuseObject** diffObject;
 extern GeneralObject* genObject;
 extern Lighting** lighting;
 extern Lighting* simpleL;
+extern BRDF* brdf;
 
 // Mesh information.
 int vertices;
@@ -165,6 +168,9 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
     int vertexnumber = _genObject->_vertices.size() / 3;
     int band = _genObject->band();
 
+    // Used for modified view vector.
+    Sampler viewSampler(64);
+
     // Generate color buffer.
     _colorBuffer.clear();
     _colorBuffer.resize(_genObject->_vertices.size());
@@ -194,10 +200,9 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
 
         Lighting lightingtemp(band, transferedLight);
 
-        float rotateMatrix[3][3];
+        glm::mat3 rotateMatrix;
         glm::vec3 tangent(_genObject->_tangent[i].x, _genObject->_tangent[i].y, _genObject->_tangent[i].z);
         glm::vec3 binormal = glm::cross(normal, tangent) * _genObject->_tangent[i].w;
-
         for (int m = 0; m < 3; m++)
             rotateMatrix[m][0] = tangent[m];
         for (int m = 0; m < 3; m++)
@@ -205,15 +210,47 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
         for (int m = 0; m < 3; m++)
             rotateMatrix[m][2] = normal[m];
 
+        // Rotate lighting coefficients to local frame.
         float alpha, beta, gamma;
-
         rotateMatrixtoZYZ(rotateMatrix, alpha, beta, gamma);
-
         std::vector<glm::vec2> paraResult;
         paraResult.emplace_back(glm::vec2(gamma, beta));
         paraResult.emplace_back(glm::vec2(alpha, 0.0f));
-
         lightingtemp.rotateZYZ(paraResult);
+        // Rotate view vector to local frame.
+        glm::vec3 view_temp = glm::normalize(viewDir);
+        view_temp = rotateMatrix * view_temp;
+        // Convert view vector to spehrical coordinates.
+        float theta = acos(view_temp.z);
+        float phi = inverseSC(view_temp.y / sin(theta), view_temp.x / sin(theta));
+        // Lookup BRDF coefficients.
+        Eigen::Vector2f v(theta, phi);
+        Eigen::Vector2f v_prime;
+        double l2 = DBL_MAX;
+        for (int j = 0; j < viewSampler._samples.size(); j++)
+        {
+            // Find the direction which has the minimal L2 norm.
+            Eigen::Vector2f temp(viewSampler._samples[j]._sphericalCoord[0],
+                                 viewSampler._samples[j]._sphericalCoord[1]);
+            Eigen::Vector2f dist = temp - v;
+            double temp_l2 = dist.norm();
+            if (temp_l2 < l2)
+            {
+                v_prime = temp;
+                l2 = temp_l2;
+            }
+        }
+        // std::cout << v << std::endl;
+        // std::cout << min << std::endl;
+        // system("pause");
+        // Convert spherical coordinates to index in BRDF lookup table.
+        int iindex = round((1 - cos(v_prime(0) / 2.0f) * cos(v_prime(0) / 2.0f)) * brdf[BRDFIndex].sampleNumber);
+        int jindex = round((v_prime(1) / (2.0f * M_PI)) * brdf[BRDFIndex].sampleNumber);
+        // std::cout << iindex << " " << jindex << std::endl;
+        // system("pause");
+        Eigen::VectorXf BRDFcoeff = brdf[BRDFIndex]._BRDFlookupTable[iindex][jindex];
+        // std::cout << BRDFcoeff << std::endl;
+        // system("pause");
 
         // CONVOLUTION wih BRDF.
         for (int l = 0; l < band; l++)
@@ -226,7 +263,7 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
                 int index = BRDFindex + m;
                 for (int k = 0; k < 3; k++)
                 {
-                    lightingtemp._Vcoeffs[k](index) *= (alpha_l_0 * _genObject->_BRDFcoeff(BRDFindex));
+                    lightingtemp._Vcoeffs[k](index) *= (alpha_l_0 * BRDFcoeff(BRDFindex));
                 }
             }
         }
@@ -236,8 +273,8 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
         glm::vec3 V = glm::normalize(viewDir);
         glm::vec3 R = 2 * glm::dot(N, V) * N - V;
         // Convert R to spherical coordinates.
-        float theta = acos(R.z);
-        float phi = inverseSC(R.y / sin(theta), R.x / sin(theta));
+        theta = acos(R.z);
+        phi = inverseSC(R.y / sin(theta), R.x / sin(theta));
         // Evaluate at the view-dependent reflection direction R.
         for (int s = 0; s < 3; s++)
         {

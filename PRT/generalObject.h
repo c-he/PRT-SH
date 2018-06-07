@@ -32,7 +32,6 @@ public:
     std::vector<Eigen::MatrixXf> _TransferMatrix[3];
 
     std::vector<glm::vec4> _tangent;
-    Eigen::VectorXf _glossyKernel[3];
     Eigen::VectorXf _BRDFcoeff;
     float _glossiness;
 
