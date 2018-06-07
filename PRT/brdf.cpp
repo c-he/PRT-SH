@@ -9,26 +9,26 @@ void BRDF::init(int band, BRDF_TYPE type)
 {
     int band2 = band * band;
     Sampler viewSampler(sampleNumber);
+    Sampler lightSampler(sampleNumber);
+    lightSampler.computeSH(band);
+    int lightSampleNumber = lightSampler._samples.size();
+    float weight = 4.0f * M_PI / lightSampleNumber;
+    _BRDFlookupTable = new Eigen::VectorXf*[sampleNumber];
 
-    if (type == Phong)
+    for (int i = 0; i < sampleNumber; i++)
     {
-        // The naive version of Phong, ignoring spatial variance.
-        Sampler lightSampler(sampleNumber);
-        lightSampler.computeSH(band);
-        int lightSampleNumber = lightSampler._samples.size();
-        float weight = 4.0f * M_PI / lightSampleNumber;
-        glm::vec3 normal(0.0f, 1.0f, 0.0f);
-        const float diffuse_albedo = 0.15f;
-        const int shininess = 4.0f;
-        _BRDFlookupTable = new Eigen::VectorXf*[sampleNumber];
-
-        for (int i = 0; i < sampleNumber; i++)
+        _BRDFlookupTable[i] = new Eigen::VectorXf[sampleNumber];
+        for (int j = 0; j < sampleNumber; j++)
         {
-            _BRDFlookupTable[i] = new Eigen::VectorXf[sampleNumber];
-            for (int j = 0; j < sampleNumber; j++)
+            _BRDFlookupTable[i][j].resize(band2);
+            _BRDFlookupTable[i][j].setZero();
+
+            if (type == Phong)
             {
-                _BRDFlookupTable[i][j].resize(band2);
-                _BRDFlookupTable[i][j].setZero();
+                // The naive version of Phong, ignoring spatial variance.
+                glm::vec3 normal(0.0f, 1.0f, 0.0f);
+                const float diffuse_albedo = 1.5f;
+                const int shininess = 4.0f;
 
                 // Monte-Carlo integration for light directions.
                 for (int k = 0; k < lightSampleNumber; k++)
@@ -43,11 +43,11 @@ void BRDF::init(int band, BRDF_TYPE type)
                         _BRDFlookupTable[i][j](l) += sp._SHvalue[l] * brdf * std::max(0.0f, sp._cartesCoord.z);
                     }
                 }
-                // Normalization.
-                for (int k = 0; k < band2; k++)
-                {
-                    _BRDFlookupTable[i][j](k) = _BRDFlookupTable[i][j](k) * weight;
-                }
+            }
+            // Normalization.
+            for (int k = 0; k < band2; k++)
+            {
+                _BRDFlookupTable[i][j](k) = _BRDFlookupTable[i][j](k) * weight;
             }
         }
     }
