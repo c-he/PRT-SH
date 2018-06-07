@@ -154,20 +154,21 @@ void GeneralObject::computeBRDFKernel()
     _BRDFcoeff.resize(band2);
     _BRDFcoeff.setZero();
 
-    for (int i = 0; i < sampleNumber; ++i)
+    // Sample.
+    for (int i = 0; i < sampleNumber; i++)
     {
         Sample sp = stemp._samples[i];
         // Naive Phong.
         float specular = std::max(glm::dot(normal, glm::normalize(sp._cartesCoord)), 0.0f);
         float brdf = _albedo.x / M_PI + powf(specular, _glossiness);
-
-        for (int j = 0; j < band2; ++j)
+        // Projection.
+        for (int j = 0; j < band2; j++)
         {
-            _BRDFcoeff(j) += sp._SHvalue[j] * brdf;
+            _BRDFcoeff(j) += sp._SHvalue[j] * brdf * std::max(0.0f, sp._cartesCoord.z);
         }
     }
-
-    for (int i = 0; i < band2; ++i)
+    // Normalization.
+    for (int i = 0; i < band2; i++)
     {
         _BRDFcoeff(i) = _BRDFcoeff(i) * weight;
     }
