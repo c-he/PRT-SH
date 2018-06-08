@@ -39,6 +39,9 @@ extern Lighting** lighting;
 extern Lighting* simpleL;
 extern BRDF* brdf;
 
+// Sampler.
+extern Sampler viewSampler;
+
 // Mesh information.
 int vertices;
 int faces;
@@ -168,9 +171,6 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
     int vertexnumber = _genObject->_vertices.size() / 3;
     int band = _genObject->band();
 
-    // Used for modified view vector.
-    Sampler viewSampler(64);
-
     // Generate color buffer.
     _colorBuffer.clear();
     _colorBuffer.resize(_genObject->_vertices.size());
@@ -246,6 +246,8 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
         // Convert spherical coordinates to index in BRDF lookup table.
         int iindex = round((1 - cos(v_prime(0) / 2.0f) * cos(v_prime(0) / 2.0f)) * brdf[BRDFIndex].sampleNumber);
         int jindex = round((v_prime(1) / (2.0f * M_PI)) * brdf[BRDFIndex].sampleNumber);
+        iindex = (iindex == SAMPLE_NUMBER) ? iindex - 1 : iindex;
+        jindex = (jindex == SAMPLE_NUMBER) ? jindex - 1 : jindex;
         // std::cout << iindex << " " << jindex << std::endl;
         // system("pause");
         Eigen::VectorXf BRDFcoeff = brdf[BRDFIndex]._BRDFlookupTable[iindex][jindex];

@@ -7,8 +7,8 @@
 
 Sampler::Sampler(unsigned n)
 {
-    // static std::default_random_engine e;
-    // static std::uniform_real_distribution<float> u(0, 1);
+    static std::default_random_engine e;
+    static std::uniform_real_distribution<float> u(0, 1);
 
     for (unsigned i = 0; i < n; i++)
     {
@@ -17,10 +17,10 @@ Sampler::Sampler(unsigned n)
             glm::vec2 spherical;
             glm::vec3 cartesian;
 
-            // float x = ((float)i + u(glm::e)) / (float)n;
-            // float y = ((float)j + u(e)) / (float)n;
-            float x = (float)i / (float)n;
-            float y = (float)j / (float)n;
+            float x = ((float)i + u(e)) / (float)n;
+            float y = ((float)j + u(e)) / (float)n;
+            // float x = (float)i / (float)n;
+            // float y = (float)j / (float)n;
             // theta
             spherical[0] = 2.0f * acos(sqrt(1 - x));
             // phi

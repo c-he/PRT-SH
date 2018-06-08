@@ -3,6 +3,9 @@
 
 #include <Eigen/Dense>
 
+#define SAMPLE_NUMBER 64
+#define SHOW_BRDF
+
 enum BRDF_TYPE
 {
     Phong,
@@ -17,7 +20,7 @@ class BRDF
 public:
     BRDF()
     {
-        sampleNumber = 64;
+        sampleNumber = SAMPLE_NUMBER;
     }
 
     void init(int band, BRDF_TYPE type);
