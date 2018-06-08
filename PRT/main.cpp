@@ -85,6 +85,7 @@ glm::vec3 camera_up(0.0f, 1.0f, 0.0f);
 
 //Simple lighting.
 glm::vec3 light_dir(0.0f, 0.0f, 1.0f);
+glm::vec3 last_light_dir(0.0f, 0.0f, 1.0f);
 
 // Rotation.
 glm::fquat g_Rotation(0.0f, 0.0f, 0.0f, 1.0f);

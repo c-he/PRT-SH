@@ -42,6 +42,10 @@ extern BRDF* brdf;
 // Sampler.
 extern Sampler viewSampler;
 
+// Lighitings.
+extern glm::vec3 light_dir;
+extern glm::vec3 last_light_dir;
+
 // Mesh information.
 int vertices;
 int faces;
@@ -400,7 +404,8 @@ void Renderer::Render()
     bool b_rotateLight = false;
     float thetatemp;
     float phitemp;
-    if (b_rotate || simpleLight)
+    // Rotate light coefficients due to the rotation of objects.
+    if (b_rotate)
     {
         glm::vec4 dir = rotateMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
         rotateVector = glm::vec3(dir.x, dir.y, dir.z);
@@ -413,12 +418,14 @@ void Renderer::Render()
         phitemp = inverseSC(rotateVector.y / sin(thetatemp), rotateVector.x / sin(thetatemp));
         b_rotateLight = true;
     }
-    if (simpleLight && !b_rotate)
+    // Rotate light coefficients due to the rotation of light direction.
+    if (!b_rotate && simpleLight && glm::any(glm::notEqual(light_dir, last_light_dir)))
     {
         rotateVector = light_dir;
         b_rotateLight = true;
+        last_light_dir = light_dir;
     }
-
+    // Rotate light coefficients.
     if (b_rotateLight)
     {
         rotateVector = glm::normalize(rotateVector);
@@ -435,12 +442,12 @@ void Renderer::Render()
         std::vector<glm::vec2> rotatePara;
         rotatePara.clear();
 
-        if (simpleLight && !b_rotate)
+        if (!b_rotate)
         {
             rotatePara.emplace_back(glm::vec2(theta, phi));
             simpleL[bandIndex].rotateZYZ(rotatePara);
         }
-        if (b_rotate)
+        else
         {
             rotatePara.emplace_back(glm::vec2(-thetatemp, -phitemp));
             if (simpleLight)
@@ -455,12 +462,10 @@ void Renderer::Render()
 
         if (materialIndex == 0)
         {
-            Setup(&diffObject[objectIndex][bandIndex], &lighting[lightingIndex][bandIndex]);
             SetupColorBuffer(transferFIndex, glm::vec3(0.0f, 0.0f, 0.0f), true);
         }
         else
         {
-            Setup(&genObject[objectIndex], &lighting[lightingIndex][bandIndex]);
             SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
         }
     }
@@ -469,7 +474,6 @@ void Renderer::Render()
     {
         if (glm::any(glm::notEqual(camera_pos, last_camera_pos)))
         {
-            Setup(&genObject[objectIndex], &lighting[lightingIndex][bandIndex]);
             SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
             last_camera_pos = camera_pos;
         }

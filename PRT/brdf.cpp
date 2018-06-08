@@ -15,8 +15,8 @@ void BRDF::init(int band, BRDF_TYPE type)
     int band2 = band * band;
     Sampler lightSampler(sampleNumber);
     lightSampler.computeSH(band);
-    int lightSampleNumber = lightSampler._samples.size();
-    float weight = 4.0f * M_PI / lightSampleNumber;
+    const int lightSampleNumber = lightSampler._samples.size();
+    const float weight = 4.0f * M_PI / lightSampleNumber;
     _BRDFlookupTable = new Eigen::VectorXf*[sampleNumber];
 
     for (int i = 0; i < sampleNumber; i++)

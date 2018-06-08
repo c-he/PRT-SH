@@ -132,7 +132,7 @@ inline void UIInit()
 
     {
         TwEnumVal brdfEV[2] = {
-            {PHONG, "phong"}, {AS, "Ashikhmin-Shirley"}
+            {PHONG, "Phong"}, {AS, "Ashikhmin-Shirley"}
         };
         TwType brdfType = TwDefineEnum("brdf", brdfEV, 2);
         TwAddVarRW(bar, "BRDF", brdfType, &BRDFIndex, " help='Change BRDF.' ");
