@@ -11,6 +11,7 @@ std::string band_name[] = {"constant", "linear", "quadratic", "cubic", "quartic"
 
 void BRDF::init(int band, BRDF_TYPE type)
 {
+    _band = band;
     int band2 = band * band;
     Sampler lightSampler(sampleNumber);
     lightSampler.computeSH(band);
@@ -26,11 +27,14 @@ void BRDF::init(int band, BRDF_TYPE type)
             _BRDFlookupTable[i][j].resize(band2);
             _BRDFlookupTable[i][j].setZero();
 
-            if (type == Phong)
+            Sample vsp = viewSampler._samples[i * sampleNumber + j];
+            glm::vec3 n(0.0f, 1.0f, 0.0f);
+            glm::vec3 v(1.0f, 0.0f, 0.0f);
+            glm::vec3 u(0.0f, 0.0f, 1.0f);
+
+            if (type == BRDF_PHONG)
             {
                 // The naive version of Phong, ignoring spatial variance.
-                Sample vsp = viewSampler._samples[i * sampleNumber + j];
-                glm::vec3 normal(0.0f, 1.0f, 0.0f);
                 const float diffuse_albedo = 1.2f;
                 const int shininess = 4.0f;
 
@@ -39,7 +43,7 @@ void BRDF::init(int band, BRDF_TYPE type)
                 {
                     Sample lsp = lightSampler._samples[k];
                     // Naive phong.
-                    glm::vec3 reflect = 2 * glm::dot(normal, lsp._cartesCoord) * normal - lsp._cartesCoord;
+                    glm::vec3 reflect = 2 * glm::dot(n, lsp._cartesCoord) * n - lsp._cartesCoord;
                     float specular = std::max(glm::dot(glm::normalize(reflect), glm::normalize(vsp._cartesCoord)),
                                               0.0f);
                     float brdf = diffuse_albedo / M_PI + powf(specular, shininess);
@@ -50,6 +54,43 @@ void BRDF::init(int band, BRDF_TYPE type)
                     }
                 }
             }
+
+            if (type == BRDF_AS)
+            {
+                const float diffuse_albedo = 1.2f;
+                const float Rs = 0.9f;
+                const int nu = 10;
+                const int nv = 100;
+                const float scalar = sqrt((nu + 1) * (nv + 1)) / (8.0f * M_PI);
+
+                for (int k = 0; k < lightSampleNumber; k++)
+                {
+                    Sample lsp = lightSampler._samples[k];
+                    glm::vec3 h = glm::normalize(vsp._cartesCoord + lsp._cartesCoord);
+                    float Fresnel = Rs + (1.0f - Rs) * powf(1 - glm::dot(lsp._cartesCoord, h), 5);
+                    float hn = glm::dot(h, n);
+                    float hk = glm::dot(h, lsp._cartesCoord);
+                    float nk1 = glm::dot(n, lsp._cartesCoord);
+                    float nk2 = glm::dot(n, vsp._cartesCoord);
+
+                    float specular;
+                    if (nk1 <= 0 || nk2 <= 0)
+                    {
+                        specular = 0.0f;
+                    }
+                    else
+                    {
+                        specular = scalar * (hn * hn) / (hk * std::max(nk1, nk2)) * Fresnel;
+                    }
+                    float brdf = diffuse_albedo / M_PI + specular;
+                    // Projection.
+                    for (int l = 0; l < band2; l++)
+                    {
+                        _BRDFlookupTable[i][j](l) += lsp._SHvalue[l] * brdf * std::max(0.0f, lsp._cartesCoord.z);
+                    }
+                }
+            }
+
             // Normalization.
             for (int k = 0; k < band2; k++)
             {
@@ -64,7 +105,8 @@ void BRDF::init(int band, BRDF_TYPE type)
     {
         for (int j = 0; j < sampleNumber * 2; j++)
         {
-            brdf.at<float>(i * sampleNumber * 2 + j) = _BRDFlookupTable[i / 2][j / 2].squaredNorm();
+            // Just parameterize the upper hemisphere.
+            brdf.at<float>(i * sampleNumber * 2 + j) = _BRDFlookupTable[i / 2][j / 4].squaredNorm();
         }
     }
     cv::Mat1b brdf_8UC1;
@@ -72,13 +114,13 @@ void BRDF::init(int band, BRDF_TYPE type)
     // cv::imshow("brdf", brdf_8UC1);
     switch (type)
     {
-    case Phong:
+    case BRDF_PHONG:
         cv::imwrite("brdf/phong_" + band_name[band - 1] + ".jpg", brdf_8UC1);
         break;
-    case AS:
+    case BRDF_AS:
         cv::imwrite("brdf/AS_" + band_name[band - 1] + ".jpg", brdf_8UC1);
         break;
-    case PF:
+    case BRDF_PF:
         cv::imwrite("brdf/PF_" + band_name[band - 1] + ".jpg", brdf_8UC1);
         break;
     default:

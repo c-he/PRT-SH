@@ -23,7 +23,7 @@
 #include "generalObject.h"
 #include "resource_manager.h"
 
-#define FULL_SCREEN
+// #define FULL_SCREEN
 
 // Window size.
 int WIDTH, HEIGHT;
@@ -40,13 +40,13 @@ const int LightNumber = 5;
 const int ObjectNumber = 2;
 const int GeneralNumber = 2;
 const int BandNumber = 4;
-const int BRDFNumber = 1;
+const int BRDFNumber = 2;
 
 std::string objects[] = {"buddha", "maxplanck"};
 std::string gobjects[] = {"buddha", "maxplanck"};
 std::string lightings[] = {"galileo", "grace", "rnl", "stpeters", "uffizi"};
 std::string bands[] = {"linear", "quadratic", "cubic", "quartic"};
-std::string BRDFs[] = {"phong"};
+BRDF_TYPE BRDFs[] = {BRDF_PHONG, BRDF_AS};
 
 glm::vec3 albedo(0.15f, 0.15f, 0.15f);
 
@@ -302,9 +302,10 @@ void dataLoading()
                         glm::vec3(1.0f, 1.0f, 1.0f));
     }
 
+    std::cout << "BRDF generating ............. " << std::endl;
     for (size_t i = 0; i < BRDFNumber; i++)
     {
-        brdf[i].init(5, Phong);
+        brdf[i].init(5, BRDFs[i]);
     }
 
     std::cout << "Done" << std::endl;
@@ -517,6 +518,16 @@ void checkUIStatus()
         changeBand(bandIndex);
         lastBand = bandIndex;
     }
+    if (lastBRDF != BRDFIndex)
+    {
+        std::cout << "Console UI: BRDF change" << std::endl;
+        // BRDF only works for glossy objects since diffuse objects use Lambertian reflection model.
+        if (materialIndex == 1)
+        {
+            renderer.SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
+        }
+        lastBRDF = BRDFIndex;
+    }
 }
 
 void changeLight(int index)
@@ -551,12 +562,10 @@ void changeTransfer(int index)
 {
     if (materialIndex == 0)
     {
-        renderer.Setup(&diffObject[objectIndex][bandIndex], &lighting[lightingIndex][bandIndex]);
         renderer.SetupColorBuffer(index, glm::vec3(0.0f, 0.0f, 0.0f), true);
     }
     else
     {
-        renderer.Setup(&genObject[objectIndex], &lighting[lightingIndex][bandIndex]);
         renderer.SetupColorBuffer(index, camera_dis * camera_pos, false);
     }
 }

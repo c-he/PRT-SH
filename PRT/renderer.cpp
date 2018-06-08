@@ -168,6 +168,7 @@ void Renderer::setupDiffuseBuffer(int type)
 void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
 {
     assert(_genObject->band() == _lighting->band());
+    assert(_lighting->band() == brdf[BRDFIndex].band());
     int vertexnumber = _genObject->_vertices.size() / 3;
     int band = _genObject->band();
 

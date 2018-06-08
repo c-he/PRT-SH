@@ -28,6 +28,7 @@ extern int lightingIndex;
 extern int transferFIndex;
 extern int materialIndex;
 extern int bandIndex;
+extern int BRDFIndex;
 
 // Window.
 extern int WIDTH;
@@ -50,6 +51,8 @@ typedef enum { LIGHT1, LIGHT2, LIGHT3, LIGHT4, LIGHT5 } LightingEUM;
 typedef enum { DIFFUSE, GLOSSY } MaterialEUM;
 
 typedef enum { LINEAR, QUADRATIC, CUBIC, QUARTIC } BandENUM;
+
+typedef enum { PHONG, AS } BRDFENUM;
 
 inline void Terminate()
 {
@@ -125,6 +128,14 @@ inline void UIInit()
         };
         TwType LightType = TwDefineEnum("Lighting", LightingEV, 5);
         TwAddVarRW(bar, "Environment Lighting", LightType, &lightingIndex, " help='Change lighting.' ");
+    }
+
+    {
+        TwEnumVal brdfEV[2] = {
+            {PHONG, "phong"}, {AS, "Ashikhmin-Shirley"}
+        };
+        TwType brdfType = TwDefineEnum("brdf", brdfEV, 2);
+        TwAddVarRW(bar, "BRDF", brdfType, &BRDFIndex, " help='Change BRDF.' ");
     }
 
     TwAddVarRW(bar, "ObjRotation", TW_TYPE_QUAT4F, &g_Rotation,

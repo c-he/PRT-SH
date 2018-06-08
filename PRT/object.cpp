@@ -107,23 +107,6 @@ void Object::init(std::string path, glm::vec3 albedo, bool texture)
     in.close();
 
     normVertices();
-
-    //colinear debug
-    /*for(int i = 0;i < _vertexes.size()/3; ++i)
-    {
-        int index = 3 *i ;
-        int offset[3];
-        vec3 p[3];
-        vec3 pc = vec3(0.0f,0.0f,0.0f);
-        float u,v,w;
-        for(int j = 0;j < 3; ++j)
-        {
-            offset[j] = 3 * _renderIndex[index + j];
-            p[j] = vec3(_vertexes[offset[j]],_vertexes[offset[j] + 1],_vertexes[offset[j] + 2]);
-        }
-
-        barycentric(pc,p,u,v,w);
-    }*/
 }
 
 
