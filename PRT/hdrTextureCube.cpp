@@ -10,48 +10,48 @@ void HDRTextureCube::Init(std::string path)
     InternalFormat = GL_RGB16F_ARB;
 
     GLfloat vertices[] = {
-            // positions
-            -1.0f, 1.0f, -1.0f,
-            -1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, 1.0f, -1.0f,
-            -1.0f, 1.0f, -1.0f,
+        // positions
+        -1.0f, 1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, 1.0f, -1.0f,
+        -1.0f, 1.0f, -1.0f,
 
-            -1.0f, -1.0f, 1.0f,
-            -1.0f, -1.0f, -1.0f,
-            -1.0f, 1.0f, -1.0f,
-            -1.0f, 1.0f, -1.0f,
-            -1.0f, 1.0f, 1.0f,
-            -1.0f, -1.0f, 1.0f,
+        -1.0f, -1.0f, 1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, 1.0f, -1.0f,
+        -1.0f, 1.0f, -1.0f,
+        -1.0f, 1.0f, 1.0f,
+        -1.0f, -1.0f, 1.0f,
 
-            1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
 
-            -1.0f, -1.0f, 1.0f,
-            -1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, -1.0f, 1.0f,
-            -1.0f, -1.0f, 1.0f,
+        -1.0f, -1.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, 1.0f,
+        -1.0f, -1.0f, 1.0f,
 
-            -1.0f, 1.0f, -1.0f,
-            1.0f, 1.0f, -1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            -1.0f, 1.0f, 1.0f,
-            -1.0f, 1.0f, -1.0f,
+        -1.0f, 1.0f, -1.0f,
+        1.0f, 1.0f, -1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f, -1.0f,
 
-            -1.0f, -1.0f, -1.0f,
-            -1.0f, -1.0f, 1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-            -1.0f, -1.0f, 1.0f,
-            1.0f, -1.0f, 1.0f
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f, 1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f, 1.0f,
+        1.0f, -1.0f, 1.0f
     };
 
     glGenVertexArrays(1, &VAO);
@@ -60,7 +60,7 @@ void HDRTextureCube::Init(std::string path)
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *) 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
     glBindVertexArray(0);
 
     // Shader configuration.
@@ -80,11 +80,11 @@ HDRTextureCube::~HDRTextureCube()
     glDeleteTextures(1, &ID);
 }
 
-void HDRTextureCube::loadHDR(std::string &path)
+void HDRTextureCube::loadHDR(std::string& path)
 {
     std::cout << "Loading HDR texture: " << path << std::endl;
 
-    FILE *file = fopen(path.c_str(), "rb");
+    FILE* file = fopen(path.c_str(), "rb");
     RGBE_ReadHeader(file, &width, &height, NULL);
     data = new float[3 * width * height];
     RGBE_ReadPixels_RLE(file, data, width, height);
@@ -123,7 +123,7 @@ void HDRTextureCube::loadFaces()
 
         for (int iFace = 0; iFace < 3; ++iFace)
         {
-            Face *face = NULL;
+            Face* face = NULL;
             int offset = 3 * (faceWidth * iFace + l * width);
 
             if (iFace == 2 && jFace == 1) face = faces[0]; // POS_Y
@@ -149,11 +149,11 @@ void HDRTextureCube::loadFaces()
     flipVertical(faces[5]);
 }
 
-void HDRTextureCube::flipHorizontal(Face *face)
+void HDRTextureCube::flipHorizontal(Face* face)
 {
     int dataSize = face->width * face->height * 3;
     int n = sizeof(float) * 3 * face->width;
-    float *newData = new float[dataSize];
+    float* newData = new float[dataSize];
 
     for (int i = 0; i < face->height; i++)
     {
@@ -167,11 +167,11 @@ void HDRTextureCube::flipHorizontal(Face *face)
     face->data = newData;
 }
 
-void HDRTextureCube::flipVertical(Face *face)
+void HDRTextureCube::flipVertical(Face* face)
 {
     int dataSize = face->width * face->height * 3;
     int n = sizeof(float) * 3;
-    float *newData = new float[dataSize];
+    float* newData = new float[dataSize];
 
     for (int i = 0; i < face->height; ++i)
     {
@@ -197,7 +197,7 @@ void HDRTextureCube::generate()
 
     for (int i = 0; i < 6; ++i)
     {
-        Face *f = faces[i];
+        Face* f = faces[i];
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F_ARB, f->width, f->height, 0, GL_RGB, GL_FLOAT,
                      f->data);
     }

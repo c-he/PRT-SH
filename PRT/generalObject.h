@@ -14,7 +14,6 @@ public:
     GeneralObject()
     {
         _difforGeneral = true;
-        _glossiness = 4.0f;
     }
 
     void project2SH(int mode, int band, int sampleNumber, int bounce) override;
@@ -23,17 +22,9 @@ public:
     void readFDisk(std::string filename) override;
     void readFDiskbin(std::string filename) override;
 
-    void setGlossiness(float glossiness)
-    {
-        _glossiness = glossiness;
-    }
-
     // _TransferMatrix[0] for read and write, the other for read.
     std::vector<Eigen::MatrixXf> _TransferMatrix[3];
-
     std::vector<glm::vec4> _tangent;
-    Eigen::VectorXf _BRDFcoeff;
-    float _glossiness;
 
 private:
     void glossyUnshadow(int size, int band2, Sampler* sampler, TransferType type, BVHTree* Inbvht = nullptr);
@@ -41,7 +32,6 @@ private:
     void glossyInterReflect(int size, int band2, Sampler* sampler, TransferType type, int bounce);
 
     void computeTBN();
-    void computeBRDFKernel();
 };
 
 #endif

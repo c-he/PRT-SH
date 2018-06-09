@@ -84,11 +84,11 @@ void Renderer::setupDiffuseBuffer(int type)
 
     // Generate color buffer.
     _colorBuffer.clear();
-    for (int i = 0; i < vertexnumber; ++i)
+    for (int i = 0; i < vertexnumber; i++)
     {
         float cr = 0.0f, cg = 0.0f, cb = 0.0f;
         glm::vec3 lightcoeff;
-        for (int j = 0; j < band2; ++j)
+        for (int j = 0; j < band2; j++)
         {
             if (simpleLight)
             {
@@ -267,7 +267,7 @@ void Renderer::setupGeneralBuffer(int type, glm::vec3 viewDir)
             int BRDFindex = l * (l + 1);
             for (int m = -l; m <= l; m++)
             {
-                int index = BRDFindex + m;
+                int index = l * (l + 1) + m;
                 for (int k = 0; k < 3; k++)
                 {
                     lightingtemp._Vcoeffs[k](index) *= (alpha_l_0 * BRDFcoeff(BRDFindex));
@@ -386,7 +386,7 @@ void Renderer::Render()
         g_Rotation = g_RotateStart * quat;
         b_rotate = true;
     }
-    if (g_Rotation != last_Rotation)
+    if (last_Rotation != g_Rotation)
     {
         b_rotate = true;
         last_Rotation = g_Rotation;
@@ -419,13 +419,15 @@ void Renderer::Render()
         b_rotateLight = true;
     }
     // Rotate light coefficients due to the rotation of light direction.
-    if (!b_rotate && simpleLight && glm::any(glm::notEqual(light_dir, last_light_dir)))
+    // @NOTE: we do not support object rotation in analytical lighting environment.
+    if (simpleLight && last_light_dir != light_dir)
     {
         rotateVector = light_dir;
         b_rotateLight = true;
         last_light_dir = light_dir;
     }
     // Rotate light coefficients.
+    bool glossyColorBufferReset = false;
     if (b_rotateLight)
     {
         rotateVector = glm::normalize(rotateVector);
@@ -442,7 +444,7 @@ void Renderer::Render()
         std::vector<glm::vec2> rotatePara;
         rotatePara.clear();
 
-        if (!b_rotate)
+        if (simpleLight)
         {
             rotatePara.emplace_back(glm::vec2(theta, phi));
             simpleL[bandIndex].rotateZYZ(rotatePara);
@@ -450,32 +452,31 @@ void Renderer::Render()
         else
         {
             rotatePara.emplace_back(glm::vec2(-thetatemp, -phitemp));
-            if (simpleLight)
-            {
-                simpleL[bandIndex].rotateZYZ(rotatePara);
-            }
-            else
-            {
-                lighting[lightingIndex][bandIndex].rotateZYZ(rotatePara);
-            }
+            lighting[lightingIndex][bandIndex].rotateZYZ(rotatePara);
         }
-
+        // Reset diffuse color buffer.
         if (materialIndex == 0)
         {
             SetupColorBuffer(transferFIndex, glm::vec3(0.0f, 0.0f, 0.0f), true);
         }
         else
         {
-            SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
+            glossyColorBufferReset = true;
         }
     }
-
+    // Reset gloosy color buffer.
     if (materialIndex == 1)
     {
-        if (glm::any(glm::notEqual(camera_pos, last_camera_pos)))
+        // View direction change.
+        if (last_camera_pos != camera_pos)
         {
             SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
             last_camera_pos = camera_pos;
+        }
+        // Light direction change.
+        if (glossyColorBufferReset)
+        {
+            SetupColorBuffer(transferFIndex, camera_dis * camera_pos, false);
         }
     }
 

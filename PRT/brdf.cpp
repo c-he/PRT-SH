@@ -73,12 +73,6 @@ void BRDF::init(int band, BRDF_TYPE type)
             if (type == BRDF_WARD_ISOTROPIC)
             {
                 // Measured BRDF using the Isotropic Gaussian Model in Ward's paper.
-                /*
-                 * White ceramic tile:
-                 * diffuse albedo             = .70
-                 * specular albedo            = .050
-                 * alpha (standard deviation) = .071
-                 */
                 const float diffuse_albedo = .70f;
                 const float specular_albedo = .050f;
                 const float alpha = .071f;
@@ -118,17 +112,10 @@ void BRDF::init(int band, BRDF_TYPE type)
             if (type == BRDF_WARD_ANISOTROPIC)
             {
                 // Measured BRDF using the Anisotropic (Elliptical) Gaussian Model.
-                /*
-                * Barnished plywood:
-                * diffuse albedo  = .33
-                * specular albedo = .025
-                * alpha x         = .04
-                * alpha y         = .11
-                */
-                const float diffuse_albedo = .33f;
-                const float specular_albedo = .025f;
-                const float alpha_x = .04f;
-                const float alpha_y = .11f;
+                const float diffuse_albedo = .70f;
+                const float specular_albedo = .050f;
+                const float alpha_x = .071f;
+                const float alpha_y = .071f;
 
                 for (int k = 0; k < lightSampleNumber; k++)
                 {

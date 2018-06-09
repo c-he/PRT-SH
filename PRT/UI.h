@@ -12,6 +12,7 @@ extern bool simpleLight;
 
 // Rotation.
 extern glm::fquat g_Rotation;
+extern glm::fquat last_Rotation;
 extern glm::fquat g_RotateStart;
 extern int g_AutoRotate;
 extern int g_RotateTime;
@@ -173,6 +174,7 @@ inline void UIInit()
     g_RotateTime = glfwGetTime();
     g_RotateStart = glm::angleAxis(glm::radians(angle), axis);
     g_Rotation = glm::angleAxis(glm::radians(angle), axis);
+    last_Rotation = g_Rotation;
 
     // Set GLFW event callbacks.
     glfwSetCursorPosCallback(window, (GLFWcursorposfun)mouse_callback);

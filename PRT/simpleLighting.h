@@ -7,7 +7,7 @@
 
 inline glm::vec3 Simplelight(float theta, float phi)
 {
-    // if (fabs(theta) <= M_PI / 8.0f)
+    // if (theta <= M_PI / 8.0f)
     // {
     //     return glm::vec3(8.0f, 8.0f, 8.0f);
     // }

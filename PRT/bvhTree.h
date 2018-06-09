@@ -82,7 +82,7 @@ public:
 
 private:
     int split(int start, int size, float pivot, int axis);
-    BVHNode * recursiveBuild(int start, int size, int axis, int& faceNumber);
+    BVHNode* recursiveBuild(int start, int size, int axis, int& faceNumber);
 
     std::vector<Triangle> _triangles;
     std::vector<Triangle> _nodeTri;

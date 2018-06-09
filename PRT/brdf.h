@@ -4,7 +4,8 @@
 #include <Eigen/Dense>
 
 #define SAMPLE_NUMBER 64
-#define SHOW_BRDF
+
+// #define SHOW_BRDF
 
 enum BRDF_TYPE
 {

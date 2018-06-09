@@ -272,7 +272,7 @@ void dataLoading()
     }
 
     glm::vec3 hdrEffect[] = {
-        glm::vec3(1.0f, 1.0f, 1.0f),
+        glm::vec3(1.2f, 1.2f, 1.2f),
         glm::vec3(2.2f, 2.2f, 2.2f),
         glm::vec3(1.2f, 1.2f, 1.2f),
         glm::vec3(1.8f, 1.8f, 1.8f),
@@ -303,7 +303,7 @@ void dataLoading()
                         glm::vec3(1.0f, 1.0f, 1.0f));
     }
 
-    std::cout << "BRDF generating ............. " << std::endl;
+    std::cout << "BRDF generating ............. ";
     for (size_t i = 0; i < BRDFNumber; i++)
     {
         brdf[i].init(5, BRDFs[i]);

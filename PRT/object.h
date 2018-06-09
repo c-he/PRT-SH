@@ -80,10 +80,6 @@ public:
     std::vector<GLuint> _indices;
     std::string _modelname;
 
-    //InterInfo ** _rayTraceResult;
-    //vector<vector<InterInfo>> _rayTraceResult;
-    //vector<int> _hitRayNumber;
-
     // Model rotation.
     float _theta;
     float _rx, _ry, _rz;

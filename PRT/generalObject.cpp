@@ -91,7 +91,6 @@ void GeneralObject::readFDisk(std::string filename)
         in.close();
     }
 
-    computeBRDFKernel();
     computeTBN();
 };
 
@@ -136,43 +135,8 @@ void GeneralObject::readFDiskbin(std::string filename)
         in.close();
     }
 
-    computeBRDFKernel();
     computeTBN();
 };
-
-void GeneralObject::computeBRDFKernel()
-{
-    glm::vec3 normal(0.0f, 1.0f, 0.0f);
-
-    Sampler stemp(64);
-    stemp.computeSH(_band);
-    int band2 = _band * _band;
-    int sampleNumber = stemp._samples.size();
-
-    float weight = 4.0f * M_PI / sampleNumber;
-
-    _BRDFcoeff.resize(band2);
-    _BRDFcoeff.setZero();
-
-    // Sample.
-    for (int i = 0; i < sampleNumber; i++)
-    {
-        Sample sp = stemp._samples[i];
-        // Naive cosine.
-        float specular = std::max(glm::dot(normal, glm::normalize(sp._cartesCoord)), 0.0f);
-        float brdf = _albedo.x / M_PI + powf(specular, _glossiness);
-        // Projection.
-        for (int j = 0; j < band2; j++)
-        {
-            _BRDFcoeff(j) += sp._SHvalue[j] * brdf * std::max(0.0f, sp._cartesCoord.z);
-        }
-    }
-    // Normalization.
-    for (int i = 0; i < band2; i++)
-    {
-        _BRDFcoeff(i) = _BRDFcoeff(i) * weight;
-    }
-}
 
 void GeneralObject::computeTBN()
 {
@@ -187,16 +151,16 @@ void GeneralObject::computeTBN()
 
     for (int i = 0; i < faceNumber; i++)
     {
-        int renderIndexoffset = 3 * i;
+        int offset = 3 * i;
         int vindex[3];
         int tindex[3];
         glm::vec3 p[3];
         glm::vec2 w[3];
 
-        for (int j = 0; j < 3; ++j)
+        for (int j = 0; j < 3; j++)
         {
-            vindex[j] = 3 * _indices[renderIndexoffset + j];
-            tindex[j] = 2 * _indices[renderIndexoffset + j];
+            vindex[j] = 3 * _indices[offset + j];
+            tindex[j] = 2 * _indices[offset + j];
             p[j] = glm::vec3(_vertices[vindex[j]], _vertices[vindex[j] + 1], _vertices[vindex[j] + 2]);
             w[j] = glm::vec2(_texcoords[tindex[j]], _texcoords[tindex[j] + 1]);
 
@@ -240,7 +204,7 @@ void GeneralObject::computeTBN()
         tan2[tindex[2]] += tan2Temp;
     }
     _tangent.resize(vertexNumber, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
-    for (int i = 0; i < vertexNumber; ++i)
+    for (int i = 0; i < vertexNumber; i++)
     {
         int offset = 3 * i;
         glm::vec3 t = tan1[i];
