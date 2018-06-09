@@ -52,7 +52,7 @@ typedef enum { DIFFUSE, GLOSSY } MaterialEUM;
 
 typedef enum { LINEAR, QUADRATIC, CUBIC, QUARTIC } BandENUM;
 
-typedef enum { PHONG, AS } BRDFENUM;
+typedef enum { PHONG, WARD_ISOTROPIC, WARD_ANISOTROPIC } BRDFENUM;
 
 inline void Terminate()
 {
@@ -131,10 +131,10 @@ inline void UIInit()
     }
 
     {
-        TwEnumVal brdfEV[2] = {
-            {PHONG, "Phong"}, {AS, "Ashikhmin-Shirley"}
+        TwEnumVal brdfEV[3] = {
+            {PHONG, "Phong"}, {WARD_ISOTROPIC, "Ward(isotropic)"}, {WARD_ANISOTROPIC, "Ward(anisotropic)"}
         };
-        TwType brdfType = TwDefineEnum("brdf", brdfEV, 2);
+        TwType brdfType = TwDefineEnum("brdf", brdfEV, 3);
         TwAddVarRW(bar, "BRDF", brdfType, &BRDFIndex, " help='Change BRDF.' ");
     }
 

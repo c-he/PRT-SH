@@ -4,15 +4,13 @@
 #include <Eigen/Dense>
 
 #define SAMPLE_NUMBER 64
-// #define SHOW_BRDF
+#define SHOW_BRDF
 
 enum BRDF_TYPE
 {
     BRDF_PHONG,
-    BRDF_AS,
-    BRDF_PF,
-    BRDF_vinyl,
-    BRDF_alum
+    BRDF_WARD_ISOTROPIC,
+    BRDF_WARD_ANISOTROPIC
 };
 
 class BRDF

@@ -40,13 +40,13 @@ const int LightNumber = 5;
 const int ObjectNumber = 2;
 const int GeneralNumber = 2;
 const int BandNumber = 4;
-const int BRDFNumber = 2;
+const int BRDFNumber = 3;
 
 std::string objects[] = {"buddha", "maxplanck"};
 std::string gobjects[] = {"buddha", "maxplanck"};
 std::string lightings[] = {"galileo", "grace", "rnl", "stpeters", "uffizi"};
 std::string bands[] = {"linear", "quadratic", "cubic", "quartic"};
-BRDF_TYPE BRDFs[] = {BRDF_PHONG, BRDF_AS};
+BRDF_TYPE BRDFs[] = {BRDF_PHONG, BRDF_WARD_ISOTROPIC, BRDF_WARD_ANISOTROPIC};
 
 glm::vec3 albedo(0.15f, 0.15f, 0.15f);
 

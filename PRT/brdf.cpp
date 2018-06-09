@@ -42,11 +42,26 @@ void BRDF::init(int band, BRDF_TYPE type)
                 for (int k = 0; k < lightSampleNumber; k++)
                 {
                     Sample lsp = lightSampler._samples[k];
-                    // Naive phong.
-                    glm::vec3 reflect = 2 * glm::dot(n, lsp._cartesCoord) * n - lsp._cartesCoord;
-                    float specular = std::max(glm::dot(glm::normalize(reflect), glm::normalize(vsp._cartesCoord)),
-                                              0.0f);
-                    float brdf = diffuse_albedo / M_PI + powf(specular, shininess);
+                    float brdf;
+                    if (vsp._sphericalCoord[0] >= M_PI / 2.0f || lsp._sphericalCoord[0] >= M_PI / 2.0f)
+                    {
+                        // The samping of BRDF is done for the upper hemisphere.
+                        brdf = 0.0f;
+                    }
+                    else
+                    {
+                        // Naive phong.
+                        glm::vec3 reflect = 2 * glm::dot(n, lsp._cartesCoord) * n - lsp._cartesCoord;
+                        float specular = std::max(glm::dot(glm::normalize(reflect), glm::normalize(vsp._cartesCoord)),
+                                                  0.0f);
+                        brdf = diffuse_albedo / M_PI + powf(specular, shininess);
+
+                        if (_isnan(brdf))
+                        {
+                            std::cout << "Phong: " << brdf << std::endl;
+                            system("pause");
+                        }
+                    }
                     // Projection.
                     for (int l = 0; l < band2; l++)
                     {
@@ -55,34 +70,95 @@ void BRDF::init(int band, BRDF_TYPE type)
                 }
             }
 
-            if (type == BRDF_AS)
+            if (type == BRDF_WARD_ISOTROPIC)
             {
-                const float diffuse_albedo = 1.2f;
-                const float Rs = 0.9f;
-                const int nu = 10;
-                const int nv = 100;
-                const float scalar = sqrt((nu + 1) * (nv + 1)) / (8.0f * M_PI);
+                // Measured BRDF using the Isotropic Gaussian Model in Ward's paper.
+                /*
+                 * White ceramic tile:
+                 * diffuse albedo             = .70
+                 * specular albedo            = .050
+                 * alpha (standard deviation) = .071
+                 */
+                const float diffuse_albedo = .70f;
+                const float specular_albedo = .050f;
+                const float alpha = .071f;
 
                 for (int k = 0; k < lightSampleNumber; k++)
                 {
                     Sample lsp = lightSampler._samples[k];
                     glm::vec3 h = glm::normalize(vsp._cartesCoord + lsp._cartesCoord);
-                    float Fresnel = Rs + (1.0f - Rs) * powf(1 - glm::dot(lsp._cartesCoord, h), 5);
-                    float hn = glm::dot(h, n);
-                    float hk = glm::dot(h, lsp._cartesCoord);
-                    float nk1 = glm::dot(n, lsp._cartesCoord);
-                    float nk2 = glm::dot(n, vsp._cartesCoord);
+                    float delta = acos(glm::dot(h, n));
 
-                    float specular;
-                    if (nk1 <= 0 || nk2 <= 0)
+                    float brdf;
+                    if (vsp._sphericalCoord[0] >= M_PI / 2.0f || lsp._sphericalCoord[0] >= M_PI / 2.0f)
                     {
-                        specular = 0.0f;
+                        // The samping of BRDF is done for the upper hemisphere.
+                        brdf = 0.0f;
                     }
                     else
                     {
-                        specular = scalar * (hn * hn) / (hk * std::max(nk1, nk2)) * Fresnel;
+                        float factor1 = 1.0f / sqrt(cos(lsp._sphericalCoord[0]) * cos(vsp._sphericalCoord[0]));
+                        float factor2 = exp(-pow(tan(delta), 2) / pow(alpha, 2)) / (4.0f * M_PI * pow(alpha, 2));
+                        brdf = diffuse_albedo / M_PI + specular_albedo * factor1 * factor2;
+
+                        if (_isnan(brdf))
+                        {
+                            std::cout << "Ward Isotropic: " << brdf << std::endl;
+                            system("pause");
+                        }
                     }
-                    float brdf = diffuse_albedo / M_PI + specular;
+                    // Projection.
+                    for (int l = 0; l < band2; l++)
+                    {
+                        _BRDFlookupTable[i][j](l) += lsp._SHvalue[l] * brdf * std::max(0.0f, lsp._cartesCoord.z);
+                    }
+                }
+            }
+
+            if (type == BRDF_WARD_ANISOTROPIC)
+            {
+                // Measured BRDF using the Anisotropic (Elliptical) Gaussian Model.
+                /*
+                * Barnished plywood:
+                * diffuse albedo  = .33
+                * specular albedo = .025
+                * alpha x         = .04
+                * alpha y         = .11
+                */
+                const float diffuse_albedo = .33f;
+                const float specular_albedo = .025f;
+                const float alpha_x = .04f;
+                const float alpha_y = .11f;
+
+                for (int k = 0; k < lightSampleNumber; k++)
+                {
+                    Sample lsp = lightSampler._samples[k];
+                    glm::vec3 h = glm::normalize(vsp._cartesCoord + lsp._cartesCoord);
+                    glm::vec3 h_proj = glm::normalize(h - glm::dot(h, n) * n);
+                    float delta = acos(glm::dot(h, n));
+                    float cosine2_phi = powf(glm::dot(v, h_proj), 2);
+                    float sine2_phi = 1.0f - cosine2_phi;
+
+                    float brdf;
+                    if (vsp._sphericalCoord[0] >= M_PI / 2.0f || lsp._sphericalCoord[0] >= M_PI / 2.0f)
+                    {
+                        // The samping of BRDF is done for the upper hemisphere.
+                        brdf = 0.0f;
+                    }
+                    else
+                    {
+                        float factor1 = 1.0f / sqrt(cos(lsp._sphericalCoord[0]) * cos(vsp._sphericalCoord[0]));
+                        float factor2 = exp(
+                            -pow(tan(delta), 2) * (cosine2_phi / powf(alpha_x, 2) + sine2_phi / pow(alpha_y, 2))) / (
+                            4.0f * M_PI * alpha_x * alpha_y);
+                        brdf = diffuse_albedo / M_PI + specular_albedo * factor1 * factor2;
+
+                        if (_isnan(brdf))
+                        {
+                            std::cout << "Ward Anisotropic: " << brdf << std::endl;
+                            system("pause");
+                        }
+                    }
                     // Projection.
                     for (int l = 0; l < band2; l++)
                     {
@@ -106,22 +182,22 @@ void BRDF::init(int band, BRDF_TYPE type)
         for (int j = 0; j < sampleNumber * 2; j++)
         {
             // Just parameterize the upper hemisphere.
-            brdf.at<float>(i * sampleNumber * 2 + j) = _BRDFlookupTable[i / 2][j / 4].squaredNorm();
+            brdf.at<float>(i * sampleNumber * 2 + j) = _BRDFlookupTable[i / 4][j / 2].squaredNorm();
         }
     }
     cv::Mat1b brdf_8UC1;
     brdf.convertTo(brdf_8UC1, CV_8UC1, 255);
-    // cv::imshow("brdf", brdf_8UC1);
+    // cv::imshow("brdf", brdf);
     switch (type)
     {
     case BRDF_PHONG:
-        cv::imwrite("brdf/phong_" + band_name[band - 1] + ".jpg", brdf_8UC1);
+        cv::imwrite("brdf/PHONG_" + band_name[band - 1] + ".jpg", brdf_8UC1);
         break;
-    case BRDF_AS:
-        cv::imwrite("brdf/AS_" + band_name[band - 1] + ".jpg", brdf_8UC1);
+    case BRDF_WARD_ISOTROPIC:
+        cv::imwrite("brdf/WARD_ISOTROPIC_" + band_name[band - 1] + ".jpg", brdf_8UC1);
         break;
-    case BRDF_PF:
-        cv::imwrite("brdf/PF_" + band_name[band - 1] + ".jpg", brdf_8UC1);
+    case BRDF_WARD_ANISOTROPIC:
+        cv::imwrite("brdf/WARD_ANISOTROPIC_" + band_name[band - 1] + ".jpg", brdf_8UC1);
         break;
     default:
         break;
