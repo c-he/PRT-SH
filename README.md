@@ -4,27 +4,7 @@
 
 ### Paper Information
 
-```
-@article{Sloan:2002:PRT:566654.566612,
- author = {Sloan, Peter-Pike and Kautz, Jan and Snyder, John},
- title = {Precomputed Radiance Transfer for Real-time Rendering in Dynamic, Low-frequency Lighting Environments},
- journal = {ACM Trans. Graph.},
- issue_date = {July 2002},
- volume = {21},
- number = {3},
- month = jul,
- year = {2002},
- issn = {0730-0301},
- pages = {527--536},
- numpages = {10},
- url = {http://doi.acm.org/10.1145/566654.566612},
- doi = {10.1145/566654.566612},
- acmid = {566612},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {Monte Carlo techniques, graphics hardware, illumination, rendering, shadow algorithms},
-} 
-```
+Sloan P P, Kautz J, Snyder J. Precomputed radiance transfer for real-time rendering in dynamic, low-frequency lighting environments[C]//ACM Transactions on Graphics (TOG). ACM, 2002, 21(3): 527-536. 
 
 
 
@@ -61,6 +41,17 @@
 ![](https://github.com/Fairyland0902/PRT-SH/raw/master/screenshots/glossy.png)
 
 > From left to right: glossy, unshadowed; glossy, shadowed; glossy, interreflected (bounce = 1)
+
+
+
+### Resources
+
+1. Slomp M P B, Oliveira Neto M M, Patrício D I. A gentle introduction to precomputed radiance transfer[J]. Revista de informática teórica e aplicada. Porto Alegre. Vol. 13, n. 2 (2006), p. 131-160, 2006. 
+2. Green R. Spherical harmonic lighting: The gritty details[C]//Archives of the Game Developers Conference. 2003, 56: 4. 
+3. Kautz J, Snyder J, Sloan P P J. Fast Arbitrary BRDF Shading for Low-Frequency Lighting Using Spherical Harmonics[J]. Rendering Techniques, 2002, 2(291-296): 1. 
+4. [Learn OpenGL Tutorial](https://learnopengl.com/)
+
+
 
 ### Notes
 
