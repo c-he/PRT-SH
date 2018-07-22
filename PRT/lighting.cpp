@@ -228,7 +228,6 @@ void Lighting::rotateZYZ(std::vector<glm::vec2>& para)
         transfer(_band, X90, _Vcoeffs[1]);
         transfer(_band, X90, _Vcoeffs[2]);
 
-
         std::vector<Eigen::MatrixXf> Zalpha;
         ZRotateMatrix(_band, theta, Zalpha);
         transfer(_band, Zalpha, _Vcoeffs[0]);

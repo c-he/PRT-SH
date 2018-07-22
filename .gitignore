@@ -268,4 +268,3 @@ __pycache__/
 
 # These files are too large
 /PRT/processedData/objects/quartic/*G*.dat
-/PRT/processedData/objects/quartic/*DI2.dat

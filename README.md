@@ -24,24 +24,6 @@
  address = {New York, NY, USA},
  keywords = {Monte Carlo techniques, graphics hardware, illumination, rendering, shadow algorithms},
 } 
-
-@inproceedings{Sloan:2002:PRT:566570.566612,
- author = {Sloan, Peter-Pike and Kautz, Jan and Snyder, John},
- title = {Precomputed Radiance Transfer for Real-time Rendering in Dynamic, Low-frequency Lighting Environments},
- booktitle = {Proceedings of the 29th Annual Conference on Computer Graphics and Interactive Techniques},
- series = {SIGGRAPH '02},
- year = {2002},
- isbn = {1-58113-521-1},
- location = {San Antonio, Texas},
- pages = {527--536},
- numpages = {10},
- url = {http://doi.acm.org/10.1145/566570.566612},
- doi = {10.1145/566570.566612},
- acmid = {566612},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {Monte Carlo techniques, graphics hardware, illumination, rendering, shadow algorithms},
-} 
 ```
 
 
@@ -84,3 +66,4 @@
 
 1. It is highly recommended to compile this project in **Release** mode. BTW, you can choose either x86 or x64, but personally I prefer **x64**.
 2. Because the data files for glossy objects are too large (**300MB**), we ignore them from git and you may need to generate them manually.
+3. Since GLM version 0.9.9, GLM default initializes matrix types to a 0-initialized matrix, instead of the identity matrix. From that version it is required to initialize matrix types as: `glm::mat4 mat=glm::mat4(1.0f)`.

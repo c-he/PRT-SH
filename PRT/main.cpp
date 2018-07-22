@@ -188,7 +188,7 @@ int main(int argc, char** argv)
         glDepthFunc(GL_LESS);
         // Anti-aliasing.
         glEnable(GL_MULTISAMPLE);
-        glfwSwapInterval(1);
+        glfwSwapInterval(0);
 
         // Do some initialization (including loading data, shaders, models, etc.)
         dataLoading();
